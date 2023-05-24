@@ -1,0 +1,36 @@
+Package: NestTool
+Title: Detect nesting and outcome from tracking data
+Version: 1.0
+Authors@R: 
+    person("Steffen", "Oppel", , "steffen.oppel@vogelwarte.ch", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-8220-3789"))
+    person("Ursin", "Beeli", , "ursinmaurus.beeli@uzh.ch", role = c("aut", "cre"))
+Description: The NestTool package is an informal collection of R functions created by the Swiss Ornithological Institute
+    to extract demographic information from the tracking data of birds. The functions prepare movement metrics,
+    and predict whether a nesting attempt occurred and whether the attempt was successful.
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports: 
+    amt,
+    caret,
+    data.table,
+    devtools,
+    dplyr,
+    geosphere,
+    ggplot2,
+    ggpubr,
+    ggspatial,
+    here,
+    lubridate,
+    mapview,
+    randomForest,
+    ranger,
+    recurse,
+    sf
+Depends: 
+    R (>= 2.10),
+    tidyverse
+LazyData: true

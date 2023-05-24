@@ -1,0 +1,2 @@
+# NestTool
+This R package is an informal collection of R functions created by the [Swiss Ornithological Institute](https://www.vogelwarte.ch) to extract demographic information from the tracking data of birds. The functions were developed in the framework of a Red Kite project, and tested and validated mainly for Red Kites. The functions read in tracking data, extract movement and nest visitation metrics, and emply RandomForest models to predict whether individuals had a territory, a nest, and bred successfully in a given season based on the tracking data. 
