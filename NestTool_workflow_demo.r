@@ -19,11 +19,11 @@ indseasondata <- NestTool::kite.nesting
 #### STEP 1: prepare data - this takes approximately 15 minutes
 nest_data_input<-data_prep(trackingdata=trackingdata,
                       indseasondata=indseasondata,
-                      latboundary=47,
-                      longboundary=6,
+                      latboundary=45,
+                      longboundary=4,
                       broodstart= yday(ymd("2023-05-01")),
                       broodend<- yday(ymd("2023-06-01")),
-                      minlocs=500,
+                      minlocs=800,
                       nestradius=50,
                       homeradius=2000,
                       startseason=70,
@@ -39,17 +39,17 @@ names(nest_data_input$summary)
 
 #### STEP 2: identify home ranges
 hr_model<-NestTool::hr_model
-pred_hr<-predict_ranging(trackingsummary=nest_data_input$summary) # uses the model trained with our data (automatically loaded in the function)
+pred_hr<-predict_ranging(model=hr_model$model,trackingsummary=nest_data_input$summary) # uses the model trained with our data (automatically loaded in the function)
 
 
 #### STEP 3: identify nests
 nest_model<-NestTool::nest_model
-pred_nest<-predict_nesting(trackingsummary=nest_data_input$summary) # uses the model trained with our data (automatically loaded in the function)
+pred_nest<-predict_nesting(model=nest_model$model,trackingsummary=nest_data_input$summary) # uses the model trained with our data (automatically loaded in the function)
 
 
 #### STEP 4: determine outcome
 succ_model<-NestTool::succ_model
-pred_succ<-predict_success(nestingsummary=pred_nest) # uses the model trained with our data (automatically loaded in the function)
+pred_succ<-predict_success(model=succ_model$model,nestingsummary=pred_nest, nest_cutoff=succ_model$nest_cutoff) # uses the model trained with our data (automatically loaded in the function)
 
 #### STEP 5: extract weekly movement metrics for manual classification
 move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
@@ -60,10 +60,11 @@ move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
                                      startseason=70,endseason=175)
 
 #### STEP 6: use ShinyApp to inspect all questionable individuals
-movement_visualisation(pred_succ = pred_succ,
-                       movementtrack = nest_data_input$movementtrack,
-                       pot_nests = nest_data_input$pot_nests,
-                       milvus_5d_move_metrics = move_metrics,
-                       uncertainty_success = 0.25,
-                       uncertainty_nest = 0.3,
-                       output_path="output/05_full_run_THU/nest_success_output.csv")
+?movement_visualisation
+movement_visualisation(trackingdata=nest_data_input$movementtrack,
+                       nest_locs=nest_data_input$pot_nests, 
+                       inddata=pred_succ,
+                       move_metrics = move_metrics,
+                       uncertainty = 0.25,
+                       output_path=here("NestTool_example_nest_success_output.csv"))
+
