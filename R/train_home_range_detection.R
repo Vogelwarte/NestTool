@@ -17,7 +17,6 @@
 #'
 #'
 #' @export
-#' @importFrom base as.data.frame as.factor c expand.grid factor length list max min names paste print return round sample seq suppressWarnings unique
 #' @importFrom dplyr filter select bind_rows case_when arrange rename mutate bind_cols desc
 #' @importFrom ggplot2 ggplot aes element_rect element_text theme annotate coord_flip element_blank geom_bar scale_x_discrete scale_y_continuous xlab ylab
 #' @importFrom caret confusionMatrix

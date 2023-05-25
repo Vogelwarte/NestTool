@@ -14,7 +14,6 @@
 #' @return Returns a data.frame with predicted probabilities of a home range, including all input data for further use in \code{\link{predict_success}}.
 #'
 #' @export
-#' @importFrom base names readRDS return
 #' @importFrom here here
 #' @importFrom dplyr bind_cols rename
 #' @importFrom stats predict

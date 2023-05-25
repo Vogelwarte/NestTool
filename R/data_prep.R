@@ -48,7 +48,6 @@
 #'
 #'
 #' @export
-#' @importFrom base as.data.frame as.Date as.integer as.numeric as.POSIXct c data.frame dim format ifelse is.na lapply length list max mean names paste paste0 print return seq split sprintf sum suppressWarnings unique which
 #' @importFrom dplyr filter select first bind_rows arrange ungroup rename group_by mutate summarise left_join n
 #' @importFrom amt hr_mcp mk_track hr_area time_of_day
 #' @importFrom lubridate yday ymd

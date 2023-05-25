@@ -17,7 +17,6 @@
 #' @return Returns a data.frame with predicted probabilities of nest success.
 #'
 #' @export
-#' @importFrom base c factor ifelse names readRDS return
 #' @importFrom here here
 #' @importFrom dplyr bind_cols mutate rename
 #' @importFrom stats predict vat

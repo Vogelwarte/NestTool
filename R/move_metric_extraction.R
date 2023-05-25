@@ -30,7 +30,6 @@
 #'
 #'
 #' @export 
-#' @importFrom base as.data.frame as.numeric data.frame dim format ifelse lapply length max print return seq split sprintf sum suppressWarnings unique
 #' @importFrom dplyr filter select bind_rows arrange ungroup rename group_by mutate summarise bind_cols left_join
 #' @importFrom amt hr_mcp mk_track step_lengths
 #' @importFrom lubridate yday parse_date_time

@@ -19,7 +19,6 @@
 #' \code{nest_cutoff} numeric value indicating the minimum of 'nest_prob' that the training data contained. This can be used as cutoff in \code{\link{predict_success}} to set success predictions to "no" for those seasons where a nesting attempt was very unlikely.
 #'
 #' @export
-#' @importFrom base as.data.frame as.factor c expand.grid factor length list max min names paste print return round sample seq suppressWarnings unique
 #' @importFrom dplyr filter select bind_rows case_when arrange rename mutate bind_cols desc
 #' @importFrom ggplot2 ggplot aes element_rect element_text theme annotate coord_flip element_blank geom_bar scale_x_discrete scale_y_continuous xlab ylab
 #' @importFrom caret confusionMatrix

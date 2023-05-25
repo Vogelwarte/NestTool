@@ -46,10 +46,9 @@ roxygen2::roxygenize()
 kites <- fread(here("output/02_preprocessing/04_milvus_thuringia.csv"))
 usethis::use_data(kites)
 
-
 devtools::document()
 devtools::load_all()
-devtools::install()
+
 
 ### add all the libraries we need to import
 # use_package('dplyr',type = "Imports")
@@ -77,5 +76,11 @@ devtools::install()
 
 
 ### CREATING A VIGNETTE
-library(usethis)
 # usethis::use_vignette(name="NestTool")
+
+
+
+### INSTALLING THE PACKAGE
+devtools::load_all()
+devtools::install()
+devtools::install_github('NestTool','steffenoppel')
