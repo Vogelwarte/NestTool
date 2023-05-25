@@ -43,8 +43,8 @@ setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
 roxygen2::roxygenize()
 
 ### ADD DATA
-kites <- fread(here("output/02_preprocessing/04_milvus_thuringia.csv"))
-usethis::use_data(kites)
+#kites <- fread(here("output/02_preprocessing/04_milvus_thuringia.csv"))
+#usethis::use_data(kites)
 
 devtools::document()
 devtools::load_all()
