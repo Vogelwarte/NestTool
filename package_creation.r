@@ -44,6 +44,9 @@ setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
 # license
 # Encoding: UTF-8
 
+### creates a utility function for the pipe operator
+#usethis::use_pipe()
+
 ### CREATING DOCUMENTATION
 devtools::load_all()
 #prefixer()
@@ -60,14 +63,14 @@ makeOxygen(predict_nesting)
 makeOxygen(predict_ranging)
 makeOxygen(train_home_range_detection)
 
-
-roxygen2::roxygenize()
+compileAttributes()
+roxygen2::roxygenize(package.dir = "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
 
 ### ADD DATA
-kite.tracks <- fread(here("output/06_example_individuals/example_individuals_trackingdata.csv"))
-kite.nesting  <- fread(here("output/06_example_individuals/example_individuals_validation.csv"))
-usethis::use_data(kite.tracks)
-usethis::use_data(kite.nesting)
+# kite.tracks <- fread(here("output/06_example_individuals/example_individuals_trackingdata.csv"))
+# kite.nesting  <- fread(here("output/06_example_individuals/example_individuals_validation.csv"))
+# usethis::use_data(kite.tracks)
+# usethis::use_data(kite.nesting)
 
 devtools::document()
 

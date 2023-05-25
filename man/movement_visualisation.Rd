@@ -14,11 +14,13 @@ movement_visualisation(
 )
 }
 \arguments{
-\item{trackingdata}{filename for data.frame with tracking data derived from \code{\link{data_prep}} as \code{nest_data_input$movementtrack}. This data.frame is used to visualise the GPS locations and the movement trajectory on the map.}
+\item{trackingdata}{data.frame with tracking data derived from \code{\link{data_prep}} as \code{nest_data_input$movementtrack}. This data.frame is used to visualise the GPS locations and the movement trajectory on the map.}
 
-\item{inddata}{filename for data.frame with predictions for breeding success derived from \code{\link{predict_success}} as \code{pred_succ}. This data.frame is used to visualise brood relevant metrics as table.}
+\item{nest_locs}{data.frame with coordinates of potential nest locations for every individual derived from \code{\link{data_prep}} as \code{nest_data_input$pot_nests}. This data.frame is used to visualise the potential nest location on the map.}
 
-\item{move_metrics}{filename for data.frame with seasonal movement metrics during breeding season derived from \code{\link{move_metric_extraction}} as \code{milvus_5d_move_metrics}. This data.frame is used to plot the move metrics.}
+\item{inddata}{data.frame with predictions for breeding success derived from \code{\link{predict_success}} as \code{pred_succ}. This data.frame is used to visualise brood relevant metrics as table.}
+
+\item{move_metrics}{data.frame with seasonal movement metrics during breeding season derived from \code{\link{move_metric_extraction}} as \code{milvus_5d_move_metrics}. This data.frame is used to plot the move metrics.}
 
 \item{uncertainty}{numeric value between 0 and 0.5. Individuals for which the nest success classification resulted in a probability <\code{uncertainty}. This value should match the value of \code{uncertainty} used in \code{\link{move_metric_extraction}} to ensure that data is available for all visualised individuals.}
 

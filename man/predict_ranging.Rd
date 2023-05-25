@@ -5,7 +5,7 @@
 \title{Predict whether ranging occurred based on movement summary metrics.}
 \usage{
 predict_ranging(
-  model = readRDS(here::here("R/hr_model.rds"))$model,
+  model = readRDS(here::here("data/hr_model.rds"))$model,
   trackingsummary
 )
 }

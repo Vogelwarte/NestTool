@@ -55,9 +55,6 @@
 #' @importFrom recurse getRecursions getRecursionsAtLocations
 #' @importFrom sf st_as_sf st_distance st_drop_geometry st_transform st_buffer st_within
 #' @importFrom stats quantile median
-#' @importFrom tidyr replace_na spread gather
-#' @importFrom magrittr "%>%"
-#' 
 
 data_prep <- function(trackingdata,
                       indseasondata,
@@ -84,10 +81,6 @@ data_prep <- function(trackingdata,
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~###########
 
 # created on 16 May 2023 to provide diagnostic outputs over time
-# needs to include MCP, daily travel distance, and time in nest vicinity
-# precursor script copied from nest_detection_data_prep as focal nest needs to be identified first
-# ONLY DO THIS FOR THOSE BIRDS WITH UNSURE CLASSIFICATION to reduce time burden of processing
-
 
   
   # LOADING DATA -----------------------------------------------------------------
