@@ -30,7 +30,7 @@
 #' @importFrom shiny actionButton column fluidPage fluidRow htmlOutput mainPanel observe observeEvent reactive reactiveValues renderText selectInput shinyApp sidebarLayout sidebarPanel sliderInput titlePanel updateSelectInput
 #' @importFrom shinyWidgets chooseSliderSkin materialSwitch prettyRadioButtons
 #' @importFrom shinythemes shinytheme
-#' @importFrom leaflet addCircleMarkers addLayersControl addLegend addMeasure addPolylines addProviderTiles addScaleBar clearMarkers clearShapes clearTiles colorFactor colorNumeric fitBounds hideGroup labelFormat layersControlOptions leaflet leafletOutput leafletProxy providerTileOptions removeControl renderLeaflet scaleBarOptions
+#' @importFrom leaflet addCircleMarkers addLayersControl addLegend addMeasure addPolylines addProviderTiles addScaleBar clearMarkers clearShapes clearTiles colorFactor colorNumeric fitBounds hideGroup labelFormat layersControlOptions leaflet leafletOutput leafletProxy providerTileOptions providers removeControl renderLeaflet scaleBarOptions
 #' @importFrom htmltools HTML div h3 tags
 #' @importFrom DT dataTableOutput renderDataTable datatable dataTableProxy formatStyle selectPage styleEqual
 #' @importFrom plotly plotlyOutput renderPlotly style
@@ -385,10 +385,10 @@ movement_visualisation <- function(trackingdata,
     shiny::observe({
       leafletProxy("map") %>%
         clearTiles() %>%
-        addProviderTiles(providers$OpenTopoMap, group = "Topo",
+        addProviderTiles(leaflet::providers$OpenTopoMap, group = "Topo",
                          options = providerTileOptions(opacity = input_map_opacity())
         ) %>%
-        addProviderTiles(providers$Esri.WorldImagery, group = "Satellite",
+        addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Satellite",
                          options = providerTileOptions(opacity = input_map_opacity())
         )
     })
