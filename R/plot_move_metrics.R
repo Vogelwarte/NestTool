@@ -19,6 +19,7 @@
 #'   
 #' @export 
 #' @importFrom dplyr filter rename mutate ungroup
+#' @importFrom tidyr gather
 #' @importFrom lubridate dmy
 #' @importFrom ggplot2 ggplot geom_point aes geom_line facet_wrap labs scale_x_date theme element_text element_rect element_line ggsave
 #' @importFrom plotly ggplotly

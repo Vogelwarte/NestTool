@@ -26,8 +26,9 @@ The **NestTool** package is an informal collection of R functions created by the
 This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/) with the following command:
 
 ``` {r, eval = FALSE}
-install.packages("devtools", dependencies = TRUE) 
+library(devtools)
 devtools::install_github("steffenoppel/NestTool", dependencies=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed it up 
+library(NestTools)
 ```
 
 
@@ -43,38 +44,6 @@ First, you will need to prepare the tracking data. This step is not included in 
 After loading all the required packages and functions of `NestTool` you can read in your data:
 
 ```{r dataload, eval= FALSE, message=FALSE, warning = FALSE, include=T}
-### LOAD ALL LIBRARIES AND FUNCTIONS
-library(here)
-library(data.table)
-library(tidyverse)
-library(devtools)
-library(dplyr, warn.conflicts = FALSE)
-options(dplyr.summarise.inform = FALSE)
-library(amt)
-library(sf)
-library(mapview)
-library(recurse)
-library(ggplot2)
-library(ggspatial)
-library(ggpubr)
-library(lubridate)
-select<-dplyr::select
-filter<-dplyr::filter
-library(randomForest)
-library(ranger)
-library(caret)
-
-source(here("R//data_prep.r"))
-source(here("R//train_home_range_detection.r"))
-source(here("R//predict_ranging.r"))
-source(here("R//train_nest_detection.r"))
-source(here("R//predict_nesting.r"))
-source(here("R//train_nest_success.r"))
-source(here("R//predict_success.r"))
-source(here("R//move_metric_extraction.r"))
-source(here("R//plot_move_metrics.r"))
-source(here("R//movement_visualisation.r"))
-
 
 ### LOAD THE TRACKING DATA AND INDIVIDUAL SEASON SUMMARIES 
 trackingdata <- fread(here("output/02_preprocessing/03_milvus_combined.csv"))
@@ -235,7 +204,7 @@ knitr::include_graphics(here("plots/move_metrics.png"), dpi = 100)
 
 ### Annotating nesting outcomes
 
-The final function is `movement_visualisation` which will open a Shiny App that allows the user to visually inspect the tracks and movement metric graphs for each of the individual seasons that fall below the thresholds of uncertainty. We use the data.frames `movementtrack` and `pot_nests` created by `data_prep`, the data.frame created by `predict_success` and the data.frame created by `move_metric_extraction`. Also, `uncertainty_success` must be specified so that only those individuals are considered for which the automated classification has been highly uncertain. This value should be the same as for `uncertainty` in `move_metric_extraction` to ensure that the same individuals for which movement metrics were calculated can be inspected. Furthermore, `uncertainty_nest` must be defined to filter out individuals with a low probability that a nest is present. It makes sense to choose this value the same as the `nest_cutoff` in `predict_success` to filter out the data at the same threshold. Finally, a path must be defined in which a data.frame containing the most important move metrics and the decisions entered by the user is stored.
+The final function is `movement_visualisation` which will open a Shiny App that allows the user to visually inspect the tracks and movement metric graphs for each of the individual seasons that fall below the thresholds of uncertainty. We use the data.frames `movementtrack` and `pot_nests` created by `data_prep`, the data.frame created by `predict_success` and the data.frame created by `move_metric_extraction`. Furthermore, `uncertainty` must be specified so that only those individuals are considered for which the automated classification has been highly uncertain. This value should be the same as for `uncertainty` in `move_metric_extraction` to ensure that the same individuals for which movement metrics were calculated can be inspected. Finally, a path must be defined in which a data.frame containing the most important move metrics and the decisions entered by the user is stored.
 
 
 ```{r movement_visualisation, message=FALSE, eval= FALSE, include=T}
@@ -244,8 +213,7 @@ movement_visualisation(trackingdata = nest_data_input$movementtrack,
                        nest_locs = nest_data_input$pot_nests,
                        inddata = pred_succ,
                        move_metrics = move_metrics,
-                       uncertainty_success = 0.25,
-                       uncertainty_nest = succ_model$nest_cutoff,
+                       uncertainty = 0.25,
                        output_path="output/nest_success_output.csv")
 ```
 

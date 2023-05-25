@@ -55,6 +55,7 @@
 #' @importFrom recurse getRecursions getRecursionsAtLocations
 #' @importFrom sf st_as_sf st_distance st_drop_geometry st_transform st_buffer st_within
 #' @importFrom stats quantile median
+#' @importFrom tidyr replace_na spread gather
 
 data_prep <- function(trackingdata,
                       indseasondata,
