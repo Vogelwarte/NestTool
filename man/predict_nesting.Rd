@@ -5,7 +5,7 @@
 \title{Predict whether nesting occurred based on movement summary metrics.}
 \usage{
 predict_nesting(
-  model = readRDS(here("R/nest_model.rds"))$model,
+  model = readRDS(here::here("R/nest_model.rds"))$model,
   trackingsummary
 )
 }

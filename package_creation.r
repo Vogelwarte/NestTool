@@ -7,12 +7,15 @@
 library(devtools)
 library(usethis)
 library(roxygen2)
-install.packages("sinew") 
+#install.packages("sinew") 
 library(sinew)
+#remotes::install_github("dreamRs/prefixer")
 
 ### CREATING PACKAGE BACKBONE
 
 setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
+#setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI")
+
 #devtools::create("NestTool")
 #cat("Package: NestTool\n", file = "DESCRIPTION")
 #cat("Version: 1.0.0\n", file = "DESCRIPTION", append = TRUE)
@@ -42,19 +45,37 @@ setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
 # Encoding: UTF-8
 
 ### CREATING DOCUMENTATION
+devtools::load_all()
+#prefixer()
+
+makeOxygen(data_prep)
+makeOxygen(move_metric_extraction)
+makeOxygen(train_nest_detection)
+makeOxygen(movement_visualisation)
+makeOxygen(train_nest_success)
+makeOxygen(predict_success)
+makeOxygen(plot_move_metrics)
+makeOxygen(train_nest_detection)
+makeOxygen(predict_nesting)
+makeOxygen(predict_ranging)
+makeOxygen(train_home_range_detection)
+
+
 roxygen2::roxygenize()
 
 ### ADD DATA
-#kites <- fread(here("output/02_preprocessing/04_milvus_thuringia.csv"))
-#usethis::use_data(kites)
+kite.tracks <- fread(here("output/06_example_individuals/example_individuals_trackingdata.csv"))
+kite.nesting  <- fread(here("output/06_example_individuals/example_individuals_validation.csv"))
+usethis::use_data(kite.tracks)
+usethis::use_data(kite.nesting)
 
 devtools::document()
-devtools::load_all()
+
 
 
 ### add all the libraries we need to import
-usethis::use_tidy_dependencies() 
-1
+#usethis::use_tidy_dependencies() 
+
 # use_package('dplyr',type = "Imports")
 # use_package('data.table',type = "Imports")
 # use_package('geosphere',type = "Imports")

@@ -9,8 +9,7 @@ movement_visualisation(
   nest_locs,
   inddata,
   move_metrics,
-  uncertainty_success = 0.25,
-  uncertainty_nest = 0.25,
+  uncertainty = 0.25,
   output_path = "output/05_full_run_CH/nest_success_output.csv"
 )
 }
@@ -21,9 +20,9 @@ movement_visualisation(
 
 \item{move_metrics}{filename for data.frame with seasonal movement metrics during breeding season derived from \code{\link{move_metric_extraction}} as \code{milvus_5d_move_metrics}. This data.frame is used to plot the move metrics.}
 
-\item{output_path}{path for the data.frame with the stored decisions about the examined individuals, whether they have had a nest and a successful brood.}
-
 \item{uncertainty}{numeric value between 0 and 0.5. Individuals for which the nest success classification resulted in a probability <\code{uncertainty}. This value should match the value of \code{uncertainty} used in \code{\link{move_metric_extraction}} to ensure that data is available for all visualised individuals.}
+
+\item{output_path}{path for the data.frame with the stored decisions about the examined individuals, whether they have had a nest and a successful brood.}
 }
 \value{
 Returns an interactive shiny app that shows a map, a table and a plot for every analysed individual.

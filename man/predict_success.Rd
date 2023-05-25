@@ -5,9 +5,9 @@
 \title{Predict whether nesting was successful based on movement summary metrics.}
 \usage{
 predict_success(
-  model = readRDS(here("R/succ_model.rds"))$model,
+  model = readRDS(here::here("R/succ_model.rds"))$model,
   nestingsummary,
-  nest_cutoff = readRDS(here("R/succ_model.rds"))$nest_cutoff
+  nest_cutoff = readRDS(here::here("R/succ_model.rds"))$nest_cutoff
 )
 }
 \arguments{

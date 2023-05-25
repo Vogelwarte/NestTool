@@ -13,13 +13,13 @@
 #' If this file results from the output of \code{\link{predict_ranging}}, then no further prediction will be performed as the prediction is already contained in the file.
 #' @return Returns a data.frame with predicted probabilities of a home range, including all input data for further use in \code{\link{predict_success}}.
 #'
-#' @export
+#' @export 
 #' @importFrom here here
-#' @importFrom dplyr bind_cols rename
+#' @importFrom dplyr rename bind_cols
 #' @importFrom stats predict
 #'
 
-predict_ranging <- function(model = readRDS(here("R/hr_model.rds"))$model,
+predict_ranging <- function(model = readRDS(here::here("data/hr_model.rds"))$model,
                             trackingsummary) {
   
 ###### IDENTIFYING HOME RANGES OF RED KITES BASED ON GPS TRACKING DATA ################
@@ -35,12 +35,12 @@ predict_ranging <- function(model = readRDS(here("R/hr_model.rds"))$model,
   } else{
     
     if("HR" %in% names(trackingsummary)){
-      trackingsummary <- trackingsummary %>% rename(hr_observed = HR)
+      trackingsummary <- trackingsummary %>% dplyr::rename(hr_observed = HR)
     }
-    PRED<-predict(model,data=trackingsummary, type = "response")
+    PRED<-stats::predict(model,data=trackingsummary, type = "response")
     OUT<-trackingsummary %>%
-      bind_cols(PRED$predictions) %>%
-      rename(no_hr_prob = no, hr_prob = yes)}
+      dplyr::bind_cols(PRED$predictions) %>%
+      dplyr::rename(no_hr_prob = no, hr_prob = yes)}
 
 return(OUT)
 

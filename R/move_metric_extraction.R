@@ -29,14 +29,12 @@
 #' @return Returns a data.frame with movement metrics for each individual season and 5-day window, including age and sex information.
 #'
 #'
-#' @export 
-#' @importFrom dplyr filter select bind_rows arrange ungroup rename group_by mutate summarise bind_cols left_join
-#' @importFrom amt hr_mcp mk_track step_lengths
-#' @importFrom lubridate yday parse_date_time
-#' @importFrom purrr pluck
+#' @export
+#' @importFrom dplyr filter left_join rename select mutate group_by summarise ungroup bind_rows
+#' @importFrom amt mk_track arrange step_lengths hr_mcp
 #' @importFrom recurse getRecursionsAtLocations
-#' @importFrom stats median
-#' @importFrom utils head
+#' @importFrom purrr pluck
+#' @importFrom lubridate yday parse_date_time
 #'
 
 move_metric_extraction <- function(trackingdata,
@@ -52,7 +50,7 @@ move_metric_extraction <- function(trackingdata,
 # LOADING DATA -----------------------------------------------------------------
 # nest success classification data to select which individuals plots are needed for
 unsure<-inddata %>%
-  filter(succ_prob>uncertainty & succ_prob <(1-uncertainty))
+  dplyr::filter(succ_prob>=uncertainty & succ_prob <=(1-uncertainty))
 check_inds<-unique(unsure$year_id)  ## the individuals that need to be checked and for which manual classification will be necessary
  
 # # DATA PREPARATION -------------------------------------------------------------
@@ -60,7 +58,7 @@ check_inds<-unique(unsure$year_id)  ## the individuals that need to be checked a
 # Creating a track and calculating step lengths
 # 3 mins
 milvus_track_amt <- trackingdata %>%
-  mk_track(
+  amt::mk_track(
     .x = x_,
     .y = y_,
     .t = t_,
@@ -70,15 +68,14 @@ milvus_track_amt <- trackingdata %>%
     tod_,
     crs = 3035
   ) %>%
-  arrange(id, t_)
-milvus_track_amt$step_dist<-step_lengths(milvus_track_amt)
+  amt::arrange(id, t_)
+milvus_track_amt$step_dist<-amt::step_lengths(milvus_track_amt)
 
 
 ### ADD THE MOST VISITED LOCATION TO THE TRACK TO GET RECURSIONS TO THIS LOCATION
 
-milvus_track <- as.data.frame(milvus_track_amt) %>% left_join(nest_locs, by = "id") %>%
-  rename(nest_long=x,nest_lat=y)
-head(milvus_track)
+milvus_track <- as.data.frame(milvus_track_amt) %>% dplyr::left_join(nest_locs, by = "id") %>%
+  dplyr::rename(nest_long=x,nest_lat=y)
 
 
 ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
@@ -89,7 +86,7 @@ head(milvus_track)
 # calculating recursions to potential nest site
 milvus_track_list <- split(milvus_track, milvus_track$id)
 nest_revisits <- lapply(milvus_track_list, function(x)
-  getRecursionsAtLocations(x = as.data.frame(x[1:4]), locations = as.data.frame(x %>% dplyr::select(nest_long,nest_lat))[1,],
+  recurse::getRecursionsAtLocations(x = as.data.frame(x[1:4]), locations = as.data.frame(x %>% dplyr::select(nest_long,nest_lat))[1,],
                            radius = nestradius, timeunits = "hours"))
 
 # writing the distances into the track data frame
@@ -97,7 +94,6 @@ for (i in 1:length(nest_revisits)) {
   milvus_track$nest_dist[milvus_track$id == unique(milvus_track$id)[i]] <-
     nest_revisits[[i]]$dists
 }
-head(milvus_track)
 
 #### max absence time during key brood phase 15 May to 15 June
 absence_times <- lapply(nest_revisits, function(x)
@@ -123,59 +119,59 @@ milvus_5d_move_metrics<-data.frame()
   
  for (i in check_inds) {
 
-   ind_track<-milvus_track %>% filter(id==i)
-   ind_times<-absence_times %>% filter(id==i)
-   ind_track_amt<-milvus_track_amt %>% filter(id==i)
+   ind_track<-milvus_track %>% dplyr::filter(id==i)
+   ind_times<-absence_times %>% dplyr::filter(id==i)
+   ind_track_amt<-milvus_track_amt %>% dplyr::filter(id==i)
    
    for (w in wincentres) {
      window<-seq(w-2,w+2,1)  ## create a 5 day moving window
-     win_track<-ind_track %>% mutate(yday=yday(t_)) %>% filter(yday %in% window)
+     win_track<-ind_track %>% dplyr::mutate(yday=lubridate::yday(t_)) %>% dplyr::filter(yday %in% window)
      
      if(dim(win_track)[1]>1){
        
-       win_times<-ind_times %>% mutate(yday=yday(entranceTime)) %>% filter(yday %in% window)
-       win_track_amt<-ind_track_amt %>% mutate(yday=yday(t_)) %>% filter(yday %in% window)
+       win_times<-ind_times %>% dplyr::mutate(yday=lubridate::yday(entranceTime)) %>% dplyr::filter(yday %in% window)
+       win_track_amt<-ind_track_amt %>% dplyr::mutate(yday=lubridate::yday(t_)) %>% dplyr::filter(yday %in% window)
        
        ### calculate mean daily travel distance and distance from nest
-       day_sum<-win_track %>% group_by(id,yday) %>%
-         summarise(daydist=sum(step_dist,na.rm=T), nestdist=max(nest_dist,na.rm=T)) %>%
-         ungroup() %>%
-         group_by(id) %>%
-         summarise(median_daydist=median(daydist,na.rm=T), median_nestdist=median(nestdist,na.rm=T))
+       day_sum<-win_track %>% dplyr::group_by(id,yday) %>%
+         dplyr::summarise(daydist=sum(step_dist,na.rm=T), nestdist=max(nest_dist,na.rm=T)) %>%
+         dplyr::ungroup() %>%
+         dplyr::group_by(id) %>%
+         dplyr::summarise(median_daydist=median(daydist,na.rm=T), median_nestdist=median(nestdist,na.rm=T))
        
        ### calculate MCP95
-        day_sum$MCP<-as.numeric(hr_mcp(win_track_amt, levels=0.95)$mcp$area)/10000  ## convert home range area to hectares
+        day_sum$MCP<-as.numeric(amt::hr_mcp(win_track_amt, levels=0.95)$mcp$area)/10000  ## convert home range area to hectares
        
        ### calculate time at nest and max time away from nest
         if(dim(win_times)[1]>0){
-          day_sum<-win_times %>% group_by(id,yday) %>%
-            summarise(time=sum(timeInside)) %>%
-            ungroup() %>%
-            group_by(id) %>%
-            summarise(median_time_at_nest=median(time,na.rm=T)) %>%
-            mutate(median_time_at_nest=ifelse(median_time_at_nest>24,24,median_time_at_nest)) %>% ## time at nest cannot exceed hrs in the day, but can occur mathematically because recursions are calculated not daily
-            left_join(day_sum, by="id")        ## calculate median daily time at nest
-          suppressWarnings({day_sum<-win_times %>% summarise(max_time_away_from_nest=max(timeSinceLastVisit,na.rm=T)) %>% bind_cols(day_sum)}) ## calculate max time away from nest
+          day_sum<-win_times %>% dplyr::group_by(id,yday) %>%
+            dplyr::summarise(time=sum(timeInside)) %>%
+            dplyr::ungroup() %>%
+            dplyr::group_by(id) %>%
+            dplyr::summarise(median_time_at_nest=median(time,na.rm=T)) %>%
+            dplyr::mutate(median_time_at_nest=ifelse(median_time_at_nest>24,24,median_time_at_nest)) %>% ## time at nest cannot exceed hrs in the day, but can occur mathematically because recursions are calculated not daily
+            dplyr::left_join(day_sum, by="id")        ## calculate median daily time at nest
+          suppressWarnings({day_sum<-win_times %>% dplyr::summarise(max_time_away_from_nest=max(timeSinceLastVisit,na.rm=T)) %>% bind_cols(day_sum)}) ## calculate max time away from nest
         }else{
           day_sum$median_time_at_nest<-ifelse(day_sum$median_nestdist>150,0,24)         ## if there are no locations near the nest the bird spent all time away
           day_sum$max_time_away_from_nest<-ifelse(day_sum$median_nestdist>150,5*24,0)   ## if there are no locations near the nest then the bird was away all 5 days
         }
       
       ## summarise the output and write into data.frame
-      milvus_5d_move_metrics<- day_sum %>% mutate(week=format(parse_date_time(x = w, orders = "j"), format="%d %b")) %>%
-                                  select(id,week,MCP,median_daydist,median_nestdist,median_time_at_nest,max_time_away_from_nest) %>%
-                                  bind_rows(milvus_5d_move_metrics)
+      milvus_5d_move_metrics<- day_sum %>% dplyr::mutate(week=format(parse_date_time(x = w, orders = "j"), format="%d %b")) %>%
+        dplyr::select(id,week,MCP,median_daydist,median_nestdist,median_time_at_nest,max_time_away_from_nest) %>%
+        dplyr::bind_rows(milvus_5d_move_metrics)
 
-     }else{print(sprintf("no data for %s in week %s",i,format(parse_date_time(x = w, orders = "j"), format="%d %b")))}
+     }else{print(sprintf("no data for %s in week %s",i,format(lubridate::parse_date_time(x = w, orders = "j"), format="%d %b")))}
 
    }
  }
 
  ##### end of loop across all individuals and weeks ##############################################################################################
  
-milvus_5d_move_metrics <- milvus_5d_move_metrics %>% left_join(
-  (inddata %>% select(year_id,sex,age_cy) %>%
-    rename(id=year_id)),by ="id")
+milvus_5d_move_metrics <- milvus_5d_move_metrics %>% dplyr::left_join(
+  (inddata %>% dplyr::select(year_id,sex,age_cy) %>%
+     dplyr::rename(id=year_id)),by ="id")
 
 return(milvus_5d_move_metrics)
 }

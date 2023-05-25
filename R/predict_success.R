@@ -16,15 +16,15 @@
 #' 
 #' @return Returns a data.frame with predicted probabilities of nest success.
 #'
-#' @export
+#' @export 
 #' @importFrom here here
-#' @importFrom dplyr bind_cols mutate rename
-#' @importFrom stats predict vat
+#' @importFrom dplyr rename mutate rowwise bind_cols
+#' @importFrom stats var predict
 #' 
 
-predict_success <- function(model = readRDS(here("R/succ_model.rds"))$model,
+predict_success <- function(model = readRDS(here::here("data/succ_model.rds"))$model,
                             nestingsummary,
-                            nest_cutoff = readRDS(here("R/succ_model.rds"))$nest_cutoff) {
+                            nest_cutoff = readRDS(here::here("data/succ_model.rds"))$nest_cutoff) {
   
 ###### PREDICTING NEST OUTCOME OF RED KITES BASED ON GPS TRACKING DATA ################
 # original script and data prepared by Ursin Beeli 6 May 2023
@@ -38,29 +38,29 @@ predict_success <- function(model = readRDS(here("R/succ_model.rds"))$model,
 
 #### classification success of training data
 if("success" %in% names(nestingsummary)){
-  nestingsummary <- nestingsummary %>% rename(success_observed = success)
+  nestingsummary <- nestingsummary %>% dplyr::rename(success_observed = success)
 }
 
 if("succ_prob" %in% names(nestingsummary)){
   OUT<-nestingsummary %>%   ### there is no need to predict nesting success again if it is already in the data frame
-    mutate(succ_prob=ifelse(nest_prob<nest_cutoff,0,succ_prob))
+    dplyr::mutate(succ_prob=ifelse(nest_prob<nest_cutoff,0,succ_prob))
 } else{
   nestingsummary<-nestingsummary %>%
-    rowwise %>%
-    mutate(DistDiffChick2=Dist95Chick2-Dist95Incu2,
+    dplyr::rowwise() %>%
+    dplyr::mutate(DistDiffChick2=Dist95Chick2-Dist95Incu2,
            DistDiffChick1=Dist95Chick2-Dist95Incu2,
            DistDiffIncu2=Dist95Incu2-Dist95Incu1,
            MCPDiffChick2=MCP95Chick2-MCP95Incu2,
            MCPDiffChick1=MCP95Chick2-MCP95Incu2,
            MCPDiffIncu2=MCP95Incu2-MCP95Incu1,
-           VarMCP=var(c(MCP95Incu1,MCP95Incu2,MCP95Chick1,MCP95Chick2)),
-           VarDist=var(c(Dist95Incu1,Dist95Incu2,Dist95Chick1,Dist95Chick2)))
+           VarMCP=stats::var(c(MCP95Incu1,MCP95Incu2,MCP95Chick1,MCP95Chick2)),
+           VarDist=stats::var(c(Dist95Incu1,Dist95Incu2,Dist95Chick1,Dist95Chick2)))
   nestingsummary$sex <- factor(nestingsummary$sex, levels = c("m","f"))
-  PRED<-predict(model,data=nestingsummary, type = "response")
+  PRED<-stats::predict(model,data=nestingsummary, type = "response")
   OUT<-nestingsummary %>%
-    bind_cols(PRED$predictions) %>%
-    rename(no_succ_prob = no, succ_prob = yes) %>%
-    mutate(succ_prob=ifelse(nest_prob<nest_cutoff,0,succ_prob)) ### manual adjustment of success = 0 when there was below-threshold probability of a nesting attempt occurring
+    dplyr::bind_cols(PRED$predictions) %>%
+    dplyr::rename(no_succ_prob = no, succ_prob = yes) %>%
+    dplyr::mutate(succ_prob=ifelse(nest_prob<nest_cutoff,0,succ_prob)) ### manual adjustment of success = 0 when there was below-threshold probability of a nesting attempt occurring
 }
 return(OUT)
 

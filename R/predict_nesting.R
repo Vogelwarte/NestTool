@@ -15,11 +15,11 @@
 #'
 #' @export
 #' @importFrom here here
-#' @importFrom dplyr bind_cols rename
+#' @importFrom dplyr rename bind_cols
 #' @importFrom stats predict
 #'
 
-predict_nesting <- function(model = readRDS(here("R/nest_model.rds"))$model,
+predict_nesting <- function(model = readRDS(here::here("data/nest_model.rds"))$model,
                             trackingsummary) {
   
 ###### IDENTIFYING NESTS OF RED KITES BASED ON GPS TRACKING DATA ################
@@ -35,12 +35,12 @@ predict_nesting <- function(model = readRDS(here("R/nest_model.rds"))$model,
   } else{
     
     if("nest" %in% names(trackingsummary)){
-      trackingsummary <- trackingsummary %>% rename(nest_observed = nest)
+      trackingsummary <- trackingsummary %>% dplyr::rename(nest_observed = nest)
     }
-    PRED<-predict(model,data=trackingsummary, type = "response")
+    PRED<-stats::predict(model,data=trackingsummary, type = "response")
     OUT<-trackingsummary %>%
-      bind_cols(PRED$predictions) %>%
-      rename(no_nest_prob = `no nest`, nest_prob = nest)}
+      dplyr::bind_cols(PRED$predictions) %>%
+      dplyr::rename(no_nest_prob = `no nest`, nest_prob = nest)}
 
 return(OUT)
 

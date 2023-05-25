@@ -22,16 +22,16 @@
 #' @return Returns an interactive shiny app that shows a map, a table and a plot for every analysed individual.
 #'
 #' @export
+#' @importFrom dplyr filter mutate select arrange case_when
+#' @importFrom data.table fwrite fread
 #' @importFrom here here
-#' @importFrom dplyr select filter mutate arrange case_when
-#' @importFrom data.table fread fwrite
 #' @importFrom lubridate yday
+#' @importFrom sf st_as_sf st_transform st_coordinates
 #' @importFrom shiny actionButton column fluidPage fluidRow htmlOutput mainPanel observe observeEvent reactive reactiveValues renderText selectInput shinyApp sidebarLayout sidebarPanel sliderInput titlePanel updateSelectInput
 #' @importFrom shinyWidgets chooseSliderSkin materialSwitch prettyRadioButtons
 #' @importFrom shinythemes shinytheme
 #' @importFrom leaflet addCircleMarkers addLayersControl addLegend addMeasure addPolylines addProviderTiles addScaleBar clearMarkers clearShapes clearTiles colorFactor colorNumeric fitBounds hideGroup labelFormat layersControlOptions leaflet leafletOutput leafletProxy providerTileOptions removeControl renderLeaflet scaleBarOptions
-#' @importFrom sf st_as_sf st_coordinates st_transform
-#' @importFrom htmltools HTML div h3
+#' @importFrom htmltools HTML div h3 tags
 #' @importFrom DT dataTableOutput renderDataTable datatable dataTableProxy formatStyle selectPage styleEqual
 #' @importFrom plotly plotlyOutput renderPlotly style
 
@@ -39,8 +39,7 @@ movement_visualisation <- function(trackingdata,
                                    nest_locs,
                                    inddata,
                                    move_metrics,
-                                   uncertainty_success = 0.25,
-                                   uncertainty_nest = 0.25,
+                                   uncertainty = 0.25,
                                    output_path = "output/05_full_run_CH/nest_success_output.csv"
 ) {
   
@@ -52,9 +51,8 @@ movement_visualisation <- function(trackingdata,
   
   # Brood metrics for success prediction
   milvus_metrics <- inddata %>%
-    dplyr::filter(succ_prob > uncertainty_success & succ_prob < (1-uncertainty_success) &
-                    nest_prob > uncertainty_nest) %>%
-    mutate(ID = year_id,
+    dplyr::filter(succ_prob >= uncertainty & succ_prob <= (1-uncertainty)) %>%
+    dplyr::mutate(ID = year_id,
            "LDay" = lastvisitDay,
            "TCh2" = round(timeChick2),
            "VCh2" = revisitsChick2,
@@ -65,34 +63,34 @@ movement_visualisation <- function(trackingdata,
            Nest = NA, Success = NA) %>%
     dplyr::select(ID, LDay, TCh2, VCh2, TDay, TotT, VDay, PNest,
                   Nest, Success) %>%
-    arrange(ID)
+    dplyr::arrange(ID)
   # saves table as template to fill in data on nests based on user input
-  fwrite(milvus_metrics, here(output_path), row.names = F)
+  data.table::fwrite(milvus_metrics, here::here(output_path), row.names = F)
   
   # Movement data
   milvus_track <- trackingdata %>%
     dplyr::filter(id %in% milvus_metrics$ID) %>%
-    mutate(t_ = as.POSIXct(t_, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
+    dplyr::mutate(t_ = as.POSIXct(t_, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
            t_ = format(t_, format = "%Y-%m-%d %H:%M", tz = "UTC"),
            date = as.Date(t_, tz = "UTC"),
            month = as.integer(format(date, format = "%m")),
-           year_day = yday(t_), # allows to use a numeric color palette
-           tod_ = case_when(tod_ == "day" ~ "day",
+           year_day = lubridate::yday(t_), # allows to use a numeric color palette
+           tod_ = dplyr::case_when(tod_ == "day" ~ "day",
                             tod_ == "dusk" ~ "twilight",
                             tod_ == "night" ~ "night",
                             tod_ == "dawn" ~ "twilight")) %>% # changes dusk and dawn to night
-    st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
-    st_transform(crs = 4326) %>%
-    mutate(long = st_coordinates(.)[,1],
-           lat = st_coordinates(.)[,2])
+    sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
+    sf::st_transform(crs = 4326) %>%
+    mutate(long = sf::st_coordinates(.)[,1],
+           lat = sf::st_coordinates(.)[,2])
   
   # Predicted nest locations
   milvus_nest <- nest_locs %>%
     dplyr::filter(id %in% milvus_metrics$ID) %>%
-    st_as_sf(coords = c("x", "y"), crs = 3035) %>%
-    st_transform(crs = 4326) %>%
-    mutate(long = st_coordinates(.)[,1],
-           lat = st_coordinates(.)[,2])
+    sf::st_as_sf(coords = c("x", "y"), crs = 3035) %>%
+    sf::st_transform(crs = 4326) %>%
+    mutate(long = sf::st_coordinates(.)[,1],
+           lat = sf::st_coordinates(.)[,2])
   
   # Function for move metrics plot
   source(here("R//plot_move_metrics.r"))
@@ -104,9 +102,9 @@ movement_visualisation <- function(trackingdata,
   
   
   # USER INTERFACE -------------------------------------------------------------
-  ui <- fluidPage(theme = shinytheme("flatly"),
+  ui <- shiny::fluidPage(theme = shinytheme("flatly"),
                   # layout of the action buttons
-                  tags$style(
+                  htmltools::tags$style(
                     HTML('#save_decision, #zoom{
                        height:65px; width:110px; margin-top:50px;}')
                   ),
@@ -244,63 +242,63 @@ movement_visualisation <- function(trackingdata,
   # SERVER ---------------------------------------------------------------------
   server <- function(input, output, session){
     # Number of the input for the period to inspect
-    input_period <- reactive({input$data_period})
+    input_period <- shiny::reactive({input$data_period})
     # ID of the bird/year
-    input_id <- reactive({input$ID})
+    input_id <- shiny::reactive({input$ID})
     # Should data be displayed in day-night mode
-    input_day_night <- reactive({if(input$day_night == T){1} else{0}})
+    input_day_night <- shiny::reactive({if(input$day_night == T){1} else{0}})
     # Defines map opacity
-    input_map_opacity <- reactive({input$map_slider})
+    input_map_opacity <- shiny::reactive({input$map_slider})
     # Defines data size
-    input_size <- reactive({input$size_slider})
+    input_size <- shiny::reactive({input$size_slider})
     
     # Creates reactiveValues to store the metrics data frame (empty)
-    values <- reactiveValues(milvus_metrics = NULL)
+    values <- shiny::reactiveValues(milvus_metrics = NULL)
     # loads the latest metrics data frame
-    values$milvus_metrics <- fread(here(output_path))
+    values$milvus_metrics <- data.table::fread(here::here(output_path))
     # Observes the action button (nest & brood decisions)
-    observeEvent(input$save_decision, {
+    shiny::observeEvent(input$save_decision, {
       # loads the latest metrics data frame
-      values$milvus_metrics <- fread(here(output_path))
+      values$milvus_metrics <- data.table::fread(here::here(output_path))
       # if "yes" is chosen, "yes" is assigned to the selected bird for Nest
       if (input$nest_decision == 1) {
         values$milvus_metrics <- values$milvus_metrics %>%
-          mutate(Nest = case_when(ID == input_id() ~ "Yes",
+          dplyr::mutate(Nest = dplyr::case_when(ID == input_id() ~ "Yes",
                                   Nest == "Yes" ~ "Yes",
                                   Nest == "No" ~ "No"))
         # if "no" is chosen, "no" is assigned to the selected bird for Nest
       } else if (input$nest_decision == 0) {
         values$milvus_metrics <- values$milvus_metrics %>%
-          mutate(Nest = case_when(ID == input_id() ~ "No",
+          dplyr::mutate(Nest = dplyr::case_when(ID == input_id() ~ "No",
                                   Nest == "Yes" ~ "Yes",
                                   Nest == "No" ~ "No"))
       }
       # if "yes" is chosen, "yes" is assigned to the selected bird for Success
       if (input$brood_decision == 1) {
         values$milvus_metrics <- values$milvus_metrics %>%
-          mutate(Success = case_when(ID == input_id() ~ "Yes",
+          dplyr::mutate(Success = dplyr::case_when(ID == input_id() ~ "Yes",
                                      Success == "Yes" ~ "Yes",
                                      Success == "No" ~ "No"))
         # if "no" is chosen, "no" is assigned to the selected bird for Success
       } else if (input$brood_decision == 0) {
         values$milvus_metrics <- values$milvus_metrics %>%
-          mutate(Success = case_when(ID == input_id() ~ "No",
+          dplyr::mutate(Success = dplyr::case_when(ID == input_id() ~ "No",
                                      Success == "Yes" ~ "Yes",
                                      Success == "No" ~ "No"))
       }
       # saves the data frame with the information if bird has a nest
-      fwrite(values$milvus_metrics, here(output_path), row.names = F)
+      data.table::fwrite(values$milvus_metrics, here::here(output_path), row.names = F)
     })
     
     # Updates input selection (ID): Completed birds are grouped at the bottom
-    observe({
+    shiny::observe({
       # The if else is only necessary to avoid the following case:
       # Two groups are shown in the selection. When a group consists of only one
       # item, the group name is shown instead of the item.
       if (length(unique(values$milvus_metrics[!is.na(values$milvus_metrics$Nest) &
                                               !is.na(values$milvus_metrics$Success),]$ID)) == 1) {
         # covers the case when there is only one item in the "Complete" group
-        updateSelectInput(inputId = "ID", label = "Red Kite",
+        shiny::updateSelectInput(inputId = "ID", label = "Red Kite",
                           choices = list(
                             Incomplete = sort(as.character(unique(values$milvus_metrics[is.na(values$milvus_metrics$Nest) |
                                                                                           is.na(values$milvus_metrics$Success),]$ID))),
@@ -311,7 +309,7 @@ movement_visualisation <- function(trackingdata,
       } else if (length(unique(values$milvus_metrics[is.na(values$milvus_metrics$Nest) |
                                                      is.na(values$milvus_metrics$Success),]$ID)) == 1) {
         # covers the case when there is only one item in the "Incomplete" group
-        updateSelectInput(inputId = "ID", label = "Red Kite",
+        shiny::updateSelectInput(inputId = "ID", label = "Red Kite",
                           choices = list(
                             Incomplete = list(sort(as.character(unique(values$milvus_metrics[is.na(values$milvus_metrics$Nest) |
                                                                                                is.na(values$milvus_metrics$Success),]$ID)))),
@@ -320,7 +318,7 @@ movement_visualisation <- function(trackingdata,
                           )
         )
       } else {
-        updateSelectInput(inputId = "ID", label = "Red Kite",
+        shiny::updateSelectInput(inputId = "ID", label = "Red Kite",
                           choices = list(
                             Incomplete = sort(as.character(unique(values$milvus_metrics[is.na(values$milvus_metrics$Nest) |
                                                                                           is.na(values$milvus_metrics$Success),]$ID))),
@@ -332,7 +330,7 @@ movement_visualisation <- function(trackingdata,
     })
     
     # Creates subset of locations by chosen ID and period
-    milvus_track_subset <- reactive({
+    milvus_track_subset <- shiny::reactive({
       if(input_period() == 1){ # whole period
         milvus_track %>%
           dplyr::filter(id == input_id())}
@@ -342,7 +340,7 @@ movement_visualisation <- function(trackingdata,
     })
     
     # Creates subset of nest by chosen ID and period
-    milvus_nest_subset <- reactive({
+    milvus_nest_subset <- shiny::reactive({
       milvus_nest %>%
         dplyr::filter(id == input_id())})
     
@@ -370,21 +368,21 @@ movement_visualisation <- function(trackingdata,
     
     # Changes zoom extent to chosen bird
     # (only when new bird is chosen, but not when period selection etc. changes)
-    observe({
+    shiny::observe({
       leafletProxy("map") %>%
         fitBounds(min(milvus_track[milvus_track$id == input_id(),]$long), min(milvus_track[milvus_track$id == input_id(),]$lat),
                   max(milvus_track[milvus_track$id == input_id(),]$long), max(milvus_track[milvus_track$id == input_id(),]$lat))
     })
     
     # Changes zoom extent when zoom button is clicked
-    observeEvent(input$zoom, {
+    shiny::observeEvent(input$zoom, {
       leafletProxy("map") %>%
         fitBounds(min(milvus_track_subset()$long), min(milvus_track_subset()$lat),
                   max(milvus_track_subset()$long), max(milvus_track_subset()$lat))
     })
     
     # Changes base map according to selection
-    observe({
+    shiny::observe({
       leafletProxy("map") %>%
         clearTiles() %>%
         addProviderTiles(providers$OpenTopoMap, group = "Topo",
@@ -396,7 +394,7 @@ movement_visualisation <- function(trackingdata,
     })
     
     # Changes Palette, Labels, Points, Lines & Legend according to input
-    observe({
+    shiny::observe({
       # Creates a palette that adapts to the range of dates
       pal <- colorNumeric(palette = "BrBG", domain = milvus_track_subset()$year_day)
       # Creates a palette for time of day (tod)
@@ -575,5 +573,5 @@ movement_visualisation <- function(trackingdata,
   
   
   # START SHINY APP ------------------------------------------------------------
-  shinyApp(ui = ui, server = server)
+  shiny::shinyApp(ui = ui, server = server)
 }

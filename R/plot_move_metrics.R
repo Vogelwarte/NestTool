@@ -17,13 +17,13 @@
 #' @return Returns a ggplotly plot and writes a pdf version of the plot into a directory.
 #'
 #'   
-#' @export
-#' @importFrom dplyr filter ungroup rename mutate
-#' @importFrom here here
-#' @importFrom ggplot2 ggplot aes element_line element_rect element_text facet_wrap geom_line geom_point ggsave labs scale_x_date theme
-#' @importFrom lubridate dmy
-#' @importFrom plotly ggplotly
+#' @export 
+#' @importFrom dplyr filter rename mutate ungroup
 #' @importFrom tidyr gather
+#' @importFrom lubridate dmy
+#' @importFrom ggplot2 ggplot geom_point aes geom_line facet_wrap labs scale_x_date theme element_text element_rect element_line ggsave
+#' @importFrom plotly ggplotly
+#' @importFrom here here
 #' 
 
 plot_move_metrics <- function(movemetrics, individual) {
@@ -52,25 +52,25 @@ plot_move_metrics <- function(movemetrics, individual) {
 # plotting
 
 plot_df<-movemetrics %>% 
-  filter(id==individual) %>%  ## select a single animal at a time
-  rename(`Home range size (95% MCP, ha)`= MCP,
+  dplyr::filter(id==individual) %>%  ## select a single animal at a time
+  dplyr::rename(`Home range size (95% MCP, ha)`= MCP,
          `Median daily travel distance (m)`= median_daydist,
          `Median max distance from nest (m)`= median_nestdist,
          `Median daily time at nest (hrs)`= median_time_at_nest,
          `Max time away from nest (hrs)`= max_time_away_from_nest
   ) %>%
-  gather(key="MoveMetric",value="Value",-id,-week,-age_cy,-sex) %>%
-  filter(!is.na(Value)) %>%
-  mutate(Date=dmy(paste0(week, substr(id,1,4)))) %>%
-  ungroup()
+  tidyr::gather(key="MoveMetric",value="Value",-id,-week,-age_cy,-sex) %>%
+  dplyr::filter(!is.na(Value)) %>%
+  dplyr::mutate(Date=lubridate::dmy(paste0(week, substr(id,1,4)))) %>%
+  dplyr::ungroup()
   
   
-plot<-ggplot(plot_df) +
-  geom_point(aes(x = Date, y=Value, color=MoveMetric), size = 2) +
-  geom_line(aes(x = Date, y=Value, color=MoveMetric, group=MoveMetric), linewidth = 1) +
-  facet_wrap(~MoveMetric, scales="free_y",ncol=1) + 
+plot<-ggplot2::ggplot(plot_df) +
+  ggplot2::geom_point(ggplot2::aes(x = Date, y=Value, color=MoveMetric), size = 2) +
+  ggplot2::geom_line(ggplot2::aes(x = Date, y=Value, color=MoveMetric, group=MoveMetric), linewidth = 1) +
+  ggplot2::facet_wrap(~MoveMetric, scales="free_y",ncol=1) + 
 
-  labs(y = "", x = "5 day moving window over season",
+  ggplot2::labs(y = "", x = "5 day moving window over season",
        title = paste0("ID: ",
                       plot_df$id[1],
                       " - ",
@@ -78,30 +78,30 @@ plot<-ggplot(plot_df) +
                       " - ",
                       plot_df$age_cy[1],
                       " years")) +
-  scale_x_date(date_breaks="2 weeks",date_labels=format("%d %b")) +
-  theme(plot.title = element_text(colour = "darkolivegreen",
+  ggplot2::scale_x_date(date_breaks="2 weeks",date_labels=format("%d %b")) +
+  ggplot2::theme(plot.title = ggplot2::element_text(colour = "darkolivegreen",
                                   size = 12,hjust = 0.5),
-        panel.background=element_rect(fill="#ecf0f1", colour="black"),
-        plot.background=element_rect(fill="#ecf0f1"),
+        panel.background=ggplot2::element_rect(fill="#ecf0f1", colour="black"),
+        plot.background=ggplot2::element_rect(fill="#ecf0f1"),
         legend.position="none",
         # plot.margin = margin(t = 20,  # Top margin
         #                      r = 5,  # Right margin
         #                      b = 20,  # Bottom margin
         #                      l = 20), # Left margin
-        panel.grid.major = element_line(colour = "gray70", size = .05),
-        panel.grid.minor = element_line(colour = "gray70"),
-        axis.text=element_text(size=10, color="black"),
+        panel.grid.major = ggplot2::element_line(colour = "gray70", size = .05),
+        panel.grid.minor = ggplot2::element_line(colour = "gray70"),
+        axis.text=ggplot2::element_text(size=10, color="black"),
         # axis.title.y=element_text(margin=margin(0,12,0,0)),
         # axis.title.x=element_text(margin=margin(3,0,0,0)),
-        axis.title=element_text(size=10), 
-        strip.text=element_text(size=10, color="black"), 
-        strip.background=element_rect(fill="#ecf0f1", colour="black")
+        axis.title=ggplot2::element_text(size=10), 
+        strip.text=ggplot2::element_text(size=10, color="black"), 
+        strip.background=ggplot2::element_rect(fill="#ecf0f1", colour="black")
   )
 
-return(ggplotly(plot))
+return(plotly::ggplotly(plot))
 
 # saving plot
-ggsave(here(sprintf("plots/%s_movement_metrics_season_plot.pdf",i)), width = 2500, height = 4500, units = "px", limitsize = F)
+ggplot2::ggsave(here::here(sprintf("plots/%s_movement_metrics_season_plot.pdf",i)), width = 2500, height = 4500, units = "px", limitsize = F)
 
 
 } # end of function call

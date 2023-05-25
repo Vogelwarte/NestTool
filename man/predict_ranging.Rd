@@ -4,7 +4,10 @@
 \alias{predict_ranging}
 \title{Predict whether ranging occurred based on movement summary metrics.}
 \usage{
-predict_ranging(model = readRDS(here("R/hr_model.rds"))$model, trackingsummary)
+predict_ranging(
+  model = readRDS(here::here("R/hr_model.rds"))$model,
+  trackingsummary
+)
 }
 \arguments{
 \item{model}{RandomForest model object created with \code{\link{train_home_range_detection}}. If none is provided, a model trained for red kites in Switzerland is used.}

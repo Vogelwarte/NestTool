@@ -47,16 +47,16 @@
 #' \code{daylocs} contains all diurnal locations for all individuals, including the number of revisits to within \code{nestradius} and the residence time within \code{nestradius} at that location.
 #'
 #'
-#' @export
-#' @importFrom dplyr filter select first bind_rows arrange ungroup rename group_by mutate summarise left_join n
-#' @importFrom amt hr_mcp mk_track hr_area time_of_day
+#' @export 
 #' @importFrom lubridate yday ymd
-#' @importFrom purrr pluck reduce
+#' @importFrom dplyr mutate filter intersect left_join group_by summarise n select first rename bind_rows ungroup
+#' @importFrom purrr reduce pluck
+#' @importFrom amt mk_track time_of_day arrange hr_mcp hr_area
 #' @importFrom recurse getRecursions getRecursionsAtLocations
-#' @importFrom tidyr gather spread replace_na
-#' @importFrom sf st_as_sf st_buffer st_distance st_drop_geometry st_transform st_within
-#' @importFrom stats median quantile
-#' @importFrom tidyverse
+#' @importFrom sf st_as_sf st_distance st_drop_geometry st_transform st_buffer st_within
+#' @importFrom stats quantile median
+#' @importFrom tidyr replace_na spread gather
+#' @importFrom magrittr "%>%"
 #' 
 
 data_prep <- function(trackingdata,
@@ -93,13 +93,13 @@ data_prep <- function(trackingdata,
   # LOADING DATA -----------------------------------------------------------------
   # movement data
   milvus <- trackingdata %>%
-    dplyr::mutate(timestamp = as.POSIXct(utils::timestamp, format ="%Y-%m-%d %H:%M:%S", tz = "UTC"),
-           date = as.Date(utils::timestamp, tz = "UTC"),
+    dplyr::mutate(timestamp = as.POSIXct(timestamp, format ="%Y-%m-%d %H:%M:%S", tz = "UTC"),
+           date = as.Date(timestamp, tz = "UTC"),
            week = as.integer(format(date, format = "%W")),
            year_week = format(date, format = "%Y-%W"),
            year_week_id = paste0(format(date, format = "%Y_%W"), "_", bird_id),
            date_id = paste0(date, "_", bird_id),
-           year_day = lubridate::yday(utils::timestamp)) %>%
+           year_day = lubridate::yday(timestamp)) %>%
     dplyr::filter(long_wgs>longboundary &  lat_wgs>latboundary)   ## remove all locations from Spain and southern France
  
    
@@ -126,8 +126,18 @@ data_prep <- function(trackingdata,
   ### joining of data must consider whether column names are already present in tracking data
   
   join.cols <- purrr::reduce(list(names(indseasondata), names(milvus), c("year_id","sex","age_cy","nest","fledged","HR","year","bird_id")), dplyr::intersect)
-  milvus <- dplyr::left_join(milvus, indseasondata, by = join.cols)
   
+  ## insert error message when people try to join numeric and factors
+  checkTypes<- data.frame(Column = join.cols,
+               df1 = sapply(as.data.frame(milvus)[,join.cols], class),
+               df2 = sapply(as.data.frame(indseasondata)[,join.cols], class)) %>%
+    dplyr::mutate(Diff=ifelse(df1== df2, "Same", "Different")) %>%
+    dplyr::filter(Diff=="Different")
+                    
+  if(dim(checkTypes)[1]>0){
+    print(sprintf("Stopped because columns %s are not of the same type in trackingdata and indseasondata. This will cause a problem when data are joined.", paste(checkTypes$Column,sep=", ")))
+    break
+  }
 
   #### ELIMINATING INDIVIDUALS WITH INSUFFICIENT DATA
 
@@ -328,8 +338,9 @@ data_prep <- function(trackingdata,
     summarise(revisits=revisits[which(residence_time == max(residence_time))],
               x = x_[which(residence_time == max(residence_time))],
               y = y_[which(residence_time == max(residence_time))]) %>%
-    dplyr::summarise(id) %>%
-    dplyr::group_by(x = mean(x),
+    dplyr::ungroup() %>%
+    dplyr::group_by(id) %>%
+    dplyr::summarise(x = mean(x),
               y = mean(y))
   })
   
@@ -340,7 +351,7 @@ data_prep <- function(trackingdata,
   # 
   milvus_pot_nest_sf <- milvus_pot_nests %>%
     #data.table::fread("output/04_nest/09_predicted_nest_coordinates.csv") %>%
-    dplyr::summarise(year_id=id) %>%
+    dplyr::rename(year_id=id) %>%
     sf::st_as_sf(coords = c("x", "y"), crs = 3035)
 
   

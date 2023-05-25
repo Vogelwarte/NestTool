@@ -19,12 +19,12 @@
 #' \code{nest_cutoff} numeric value indicating the minimum of 'nest_prob' that the training data contained. This can be used as cutoff in \code{\link{predict_success}} to set success predictions to "no" for those seasons where a nesting attempt was very unlikely.
 #'
 #' @export
-#' @importFrom dplyr filter select bind_rows case_when arrange rename mutate bind_cols desc
-#' @importFrom ggplot2 ggplot aes element_rect element_text theme annotate coord_flip element_blank geom_bar scale_x_discrete scale_y_continuous xlab ylab
-#' @importFrom caret confusionMatrix
+#' @importFrom dplyr filter rowwise mutate arrange rename desc select bind_cols case_when bind_rows
+#' @importFrom stats var predict
 #' @importFrom ranger ranger
+#' @importFrom caret confusionMatrix
 #' @importFrom forcats fct_relevel
-#' @importFrom stats predict var
+#' @importFrom ggplot2 ggplot aes geom_bar coord_flip ylab xlab scale_y_continuous annotate theme element_rect element_text element_blank
 #' 
 
 
@@ -50,15 +50,15 @@ if(!("success" %in% names(nestingsummary))){
 
 nestingsummary <- nestingsummary %>%
   dplyr::filter(success %in% c("yes","no"))  %>%     ### filter out all data that are not useful for training purposes
-  rowwise %>%
-  mutate(DistDiffChick2=Dist95Chick2-Dist95Incu2,
+  dplyr::rowwise %>%
+  dplyr::mutate(DistDiffChick2=Dist95Chick2-Dist95Incu2,
          DistDiffChick1=Dist95Chick2-Dist95Incu2,
          DistDiffIncu2=Dist95Incu2-Dist95Incu1,
          MCPDiffChick2=MCP95Chick2-MCP95Incu2,
          MCPDiffChick1=MCP95Chick2-MCP95Incu2,
          MCPDiffIncu2=MCP95Incu2-MCP95Incu1,
-         VarMCP=var(c(MCP95Incu1,MCP95Incu2,MCP95Chick1,MCP95Chick2)),
-         VarDist=var(c(Dist95Incu1,Dist95Incu2,Dist95Chick1,Dist95Chick2)))
+         VarMCP=stats::var(c(MCP95Incu1,MCP95Incu2,MCP95Chick1,MCP95Chick2)),
+         VarDist=stats::var(c(Dist95Incu1,Dist95Incu2,Dist95Chick1,Dist95Chick2)))
 
 # cast dependent variable and sex to factor
 nestingsummary$success <- factor(nestingsummary$success, levels = c("yes", "no"))
@@ -70,17 +70,17 @@ milvus_id <- unique(nestingsummary$year_id)
 training_ids <- sample(milvus_id, round(length(milvus_id)*.7))
 
 nestingsummary_train <- nestingsummary %>%
-  filter(year_id %in% training_ids)
+  dplyr::filter(year_id %in% training_ids)
 nestingsummary_test <- nestingsummary %>%
-  filter(!year_id %in% training_ids)
+  dplyr::filter(!year_id %in% training_ids)
 names(nestingsummary_train)
 
 ############### LOOP OVER TUNING SETTINGS TO IMPROVE PERFORMANCE ##################
 tuning.out<-expand.grid(m=seq(1:30),t=c(500,750,100,1500,2000,2500,5000)) %>%
-  mutate(oob.error=0)
+  dplyr::mutate(oob.error=0)
 for (m in seq(1:30)) {
   for(t in c(500,750,100,1500,2000,2500,5000)){
-    RFtest<-ranger(success ~ sex + revisits_day + residence_time_day + age_cy +
+    RFtest<-ranger::ranger(success ~ sex + revisits_day + residence_time_day + age_cy +
                      revisits_night + residence_time_night +
                      dist_max_day_to_max_night + median_day_dist_to_max_night +
                      relative_dist_max_day_to_max_night+nest_prob+
@@ -94,12 +94,12 @@ for (m in seq(1:30)) {
   }
 }
 
-tuning.out<-tuning.out %>% arrange(oob.error)
+tuning.out<-tuning.out %>% dplyr::arrange(oob.error)
 
 
 ##### RUN MODEL ##########
 
-RF4 <- ranger(success ~ sex + revisits_day + residence_time_day + age_cy +
+RF4 <- ranger::ranger(success ~ sex + revisits_day + residence_time_day + age_cy +
                 revisits_night + residence_time_night + 
                 dist_max_day_to_max_night + median_day_dist_to_max_night +
                 relative_dist_max_day_to_max_night+nest_prob+
@@ -111,64 +111,64 @@ RF4 <- ranger(success ~ sex + revisits_day + residence_time_day + age_cy +
               data = nestingsummary_train, mtry=tuning.out$m[1], num.trees=tuning.out$t[1], replace=T, importance="permutation", oob.error=T, write.forest=T, probability=T)
 
 IMP<-as.data.frame(RF4$variable.importance) %>%
-  mutate(variable=names(RF4$variable.importance)) %>%
-  rename(red.accuracy=`RF4$variable.importance`) %>%
-  arrange(desc(red.accuracy)) %>%
-  mutate(rel.imp=(red.accuracy/max(red.accuracy))*100) %>%
-  select(variable,red.accuracy,rel.imp)
+  dplyr::mutate(variable=names(RF4$variable.importance)) %>%
+  dplyr::rename(red.accuracy=`RF4$variable.importance`) %>%
+  dplyr::arrange(dplyr::desc(red.accuracy)) %>%
+  dplyr::mutate(rel.imp=(red.accuracy/max(red.accuracy))*100) %>%
+  dplyr::select(variable,red.accuracy,rel.imp)
 
 
 #### classification success of training data
 
-PRED<-predict(RF4,data=nestingsummary_train, type = "response")
+PRED<-stats::predict(RF4,data=nestingsummary_train, type = "response")
 
 nestingsummary_train <- nestingsummary_train %>%
-  rename(success_observed = success) %>%
-  bind_cols(PRED$predictions) %>%
-  rename(no_succ_prob = no, succ_prob = yes) %>%
-  mutate(success_predicted = as.factor(case_when(succ_prob > no_succ_prob ~ "yes",
+  dplyr::rename(success_observed = success) %>%
+  dplyr::bind_cols(PRED$predictions) %>%
+  dplyr::rename(no_succ_prob = no, succ_prob = yes) %>%
+  dplyr::mutate(success_predicted = as.factor(dplyr::case_when(succ_prob > no_succ_prob ~ "yes",
                                               succ_prob < no_succ_prob ~ "no")))
 
-suppressWarnings({eval_train<-confusionMatrix(data = nestingsummary_train$success_observed, reference = nestingsummary_train$success_predicted)})
+suppressWarnings({eval_train<-caret::confusionMatrix(data = nestingsummary_train$success_observed, reference = nestingsummary_train$success_predicted)})
 
 
 
 #### classification success of test data
 
-PRED<-predict(RF4,data=nestingsummary_test, type = "response")
+PRED<-stats::predict(RF4,data=nestingsummary_test, type = "response")
 
 nestingsummary_test <- nestingsummary_test %>%
-  rename(success_observed = success) %>%
-  bind_cols(PRED$predictions) %>%
-  rename(no_succ_prob = no, succ_prob = yes) %>%
-  mutate(success_predicted = as.factor(case_when(succ_prob > no_succ_prob ~ "yes",
+  dplyr::rename(success_observed = success) %>%
+  dplyr::bind_cols(PRED$predictions) %>%
+  dplyr::rename(no_succ_prob = no, succ_prob = yes) %>%
+  dplyr::mutate(success_predicted = as.factor(dplyr::case_when(succ_prob > no_succ_prob ~ "yes",
                                                  succ_prob < no_succ_prob ~ "no")))
 
-suppressWarnings({eval_test<-confusionMatrix(data = nestingsummary_test$success_observed, reference = nestingsummary_test$success_predicted)})
+suppressWarnings({eval_test<-caret::confusionMatrix(data = nestingsummary_test$success_observed, reference = nestingsummary_test$success_predicted)})
 
 
 ## export data for further test and validations
-OUT<-bind_rows(nestingsummary_train, nestingsummary_test)
+OUT<-dplyr::bind_rows(nestingsummary_train, nestingsummary_test)
 
 #### CREATE PLOT FOR VARIABLE IMPORTANCE
 if(plot==T){
 mylevels<-IMP$variable[10:1]
 impplot<-IMP[10:1,] %>%
-  mutate(variable=fct_relevel(variable,mylevels)) %>%
-  ggplot(aes(x=variable, y=rel.imp)) +
-  geom_bar(stat='identity', fill='lightblue') +
-  coord_flip()+
-  ylab("Variable importance (%)") +
-  xlab("Explanatory variable") +
-  scale_y_continuous(limits=c(-5,105), breaks=seq(0,100,20), labels=seq(0,100,20))+
-  annotate("text",x=2,y=80,label=paste("Accuracy = ",round(eval_test$overall[1],3)),size=8) +
-  theme(panel.background=element_rect(fill="white", colour="black"), 
-        axis.text.x=element_text(size=18, color="black"),
-        axis.text.y=element_text(size=16, color="black"), 
-        axis.title=element_text(size=20), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), 
-        panel.border = element_blank())
+  dplyr::mutate(variable=forcats::fct_relevel(variable,mylevels)) %>%
+  ggplot2::ggplot(ggplot2::aes(x=variable, y=rel.imp)) +
+  ggplot2::geom_bar(stat='identity', fill='lightblue') +
+  ggplot2::coord_flip()+
+  ggplot2::ylab("Variable importance (%)") +
+  ggplot2::xlab("Explanatory variable") +
+  ggplot2::scale_y_continuous(limits=c(-5,105), breaks=seq(0,100,20), labels=seq(0,100,20))+
+  ggplot2::annotate("text",x=2,y=80,label=paste("Accuracy = ",round(eval_test$overall[1],3)),size=8) +
+  ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
+        axis.text.x=ggplot2::element_text(size=18, color="black"),
+        axis.text.y=ggplot2::element_text(size=16, color="black"), 
+        axis.title=ggplot2::element_text(size=20), 
+        panel.grid.major = ggplot2::element_blank(), 
+        panel.grid.minor = ggplot2::element_blank(), 
+        panel.border = ggplot2::element_blank())
 print(impplot)
 }
 
