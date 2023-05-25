@@ -10,7 +10,7 @@ movement_visualisation(
   inddata,
   move_metrics,
   uncertainty = 0.25,
-  output_path = "output/05_full_run_CH/nest_success_output.csv"
+  output_path = "NestTool_nest_success_output.csv"
 )
 }
 \arguments{

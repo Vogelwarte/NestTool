@@ -66,5 +66,5 @@ movement_visualisation(trackingdata=nest_data_input$movementtrack,
                        inddata=pred_succ,
                        move_metrics = move_metrics,
                        uncertainty = 0.25,
-                       output_path=here("NestTool_example_nest_success_output.csv"))
+                       output_path="NestTool_example_nest_success_output.csv")
 
