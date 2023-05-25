@@ -33,6 +33,7 @@ Imports:
     recurse,
     rlang,
     sf,
+    stats,
     withr
 Depends: 
     R (>= 2.10),
