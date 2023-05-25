@@ -40,14 +40,14 @@ movement_visualisation <- function(trackingdata,
                                    inddata,
                                    move_metrics,
                                    uncertainty = 0.25,
-                                   output_path = "output/05_full_run_CH/nest_success_output.csv"
+                                   output_path = "NestTool_nest_success_output.csv"
 ) {
   
   
   
   # DATA PREPARATION -----------------------------------------------------------
-  # Define a path where to save user decisions on nests
-  output_path <- "output/05_full_run_CH/nest_success_output.csv"
+  # Define a path where to save user decisions on nests - this must be done by user!
+  ##output_path <- "output/05_full_run_CH/nest_success_output.csv"
   
   # Brood metrics for success prediction
   milvus_metrics <- inddata %>%
@@ -93,7 +93,7 @@ movement_visualisation <- function(trackingdata,
            lat = sf::st_coordinates(.)[,2])
   
   # Function for move metrics plot
-  source(here("R//plot_move_metrics.r"))
+  ##source(here("R//plot_move_metrics.r"))  ### should be loaded with package
   
   
   
@@ -565,7 +565,7 @@ movement_visualisation <- function(trackingdata,
     # Creates an interactive plot with all brood relevant metrics
     output$metrics_plot <-renderPlotly({
       suppressWarnings({
-        plot_move_metrics(movemetrics = move_metrics, individual = input_id())
+        NestTool::plot_move_metrics(movemetrics = move_metrics, individual = input_id())
       })
     })
   }
