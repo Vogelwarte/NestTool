@@ -4,14 +4,10 @@
 \alias{predict_success}
 \title{Predict whether nesting was successful based on movement summary metrics.}
 \usage{
-predict_success(
-  model = readRDS(here::here("data/succ_model.rds"))$model,
-  nestingsummary,
-  nest_cutoff = readRDS(here::here("data/succ_model.rds"))$nest_cutoff
-)
+predict_success(model, nestingsummary, nest_cutoff)
 }
 \arguments{
-\item{model}{RandomForest model object created with \code{\link{train_nest_success}}. If none is provided, a model trained for red kites in Switzerland is used.}
+\item{model}{RandomForest model object created with \code{\link{train_nest_success}}. If none is provided, a model trained for red kites in Switzerland can be used with \code{NestTool::succ_model}.}
 
 \item{nestingsummary}{data.frame created by \code{\link{predict_nesting}} with information on individual identity, age, sex, seasonal movement metrics, and probability of nesting.
 If this file results from the output of \code{\link{train_nest_success}}, then no further prediction will be performed as the prediction is already contained in the file.}

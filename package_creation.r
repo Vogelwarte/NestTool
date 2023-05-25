@@ -63,7 +63,6 @@ makeOxygen(predict_nesting)
 makeOxygen(predict_ranging)
 makeOxygen(train_home_range_detection)
 
-compileAttributes()
 roxygen2::roxygenize(package.dir = "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
 
 ### ADD DATA

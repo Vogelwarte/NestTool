@@ -4,13 +4,10 @@
 \alias{predict_ranging}
 \title{Predict whether ranging occurred based on movement summary metrics.}
 \usage{
-predict_ranging(
-  model = readRDS(here::here("data/hr_model.rds"))$model,
-  trackingsummary
-)
+predict_ranging(model, trackingsummary)
 }
 \arguments{
-\item{model}{RandomForest model object created with \code{\link{train_home_range_detection}}. If none is provided, a model trained for red kites in Switzerland is used.}
+\item{model}{RandomForest model object created with \code{\link{train_home_range_detection}}. If none is provided, a model trained for red kites in Switzerland can be used with \code{NestTool::HR_model}.}
 
 \item{trackingsummary}{data.frame created by \code{\link{data_prep}} with information on individual identity, age, sex, and seasonal movement metrics.
 If this file results from the output of \code{\link{predict_ranging}}, then no further prediction will be performed as the prediction is already contained in the file.}

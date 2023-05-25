@@ -4,13 +4,10 @@
 \alias{predict_nesting}
 \title{Predict whether nesting occurred based on movement summary metrics.}
 \usage{
-predict_nesting(
-  model = readRDS(here::here("data/nest_model.rds"))$model,
-  trackingsummary
-)
+predict_nesting(model, trackingsummary)
 }
 \arguments{
-\item{model}{RandomForest model object created with \code{\link{train_nest_detection}}. If none is provided, a model trained for red kites in Switzerland is used.}
+\item{model}{RandomForest model object created with \code{\link{train_nest_detection}}. If none is provided, a model trained for red kites in Switzerland can be used with \code{NestTool::nest_model}.}
 
 \item{trackingsummary}{data.frame created by \code{\link{data_prep}} with information on individual identity, age, sex, and seasonal movement metrics.
 If this file results from the output of \code{\link{predict_nesting}}, then no further prediction will be performed as the prediction is already contained in the file.}
