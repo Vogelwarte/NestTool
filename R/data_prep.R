@@ -57,8 +57,6 @@
 #' @importFrom sf st_as_sf st_buffer st_distance st_drop_geometry st_transform st_within
 #' @importFrom stats median quantile
 #' @importFrom tidyverse
-#' @importFrom maptools
-#' @importFrom geosphere
 #' 
 
 data_prep <- function(trackingdata,
