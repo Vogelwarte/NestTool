@@ -8,7 +8,7 @@
 #' The Random Forest model either created by \code{\link{train_home_range_detection}} or contained in the package will be used to predict the probability that a given individual in the season showed ranging behaviour or not. 
 #'
 
-#' @param model RandomForest model object created with \code{\link{train_home_range_detection}}. If none is provided, a model trained for red kites in Switzerland is used.
+#' @param model RandomForest model object created with \code{\link{train_home_range_detection}}. If none is provided, a model trained for red kites in Switzerland can be used with \code{NestTool::HR_model}.
 #' @param trackingsummary data.frame created by \code{\link{data_prep}} with information on individual identity, age, sex, and seasonal movement metrics.
 #' If this file results from the output of \code{\link{predict_ranging}}, then no further prediction will be performed as the prediction is already contained in the file.
 #' @return Returns a data.frame with predicted probabilities of a home range, including all input data for further use in \code{\link{predict_success}}.

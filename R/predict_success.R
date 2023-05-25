@@ -8,7 +8,7 @@
 #' The Random Forest model either created by \code{\link{train_nest_success}} or contained in the package will be used to predict the probability that a given individual in the season successfully bred or not. 
 #'
 #'
-#' @param model RandomForest model object created with \code{\link{train_nest_success}}. If none is provided, a model trained for red kites in Switzerland is used.
+#' @param model RandomForest model object created with \code{\link{train_nest_success}}. If none is provided, a model trained for red kites in Switzerland can be used with \code{NestTool::succ_model}.
 #' @param nestingsummary data.frame created by \code{\link{predict_nesting}} with information on individual identity, age, sex, seasonal movement metrics, and probability of nesting.
 #' If this file results from the output of \code{\link{train_nest_success}}, then no further prediction will be performed as the prediction is already contained in the file.
 #' @param nest_cutoff numeric between 0 and 1. Created by \code{\link{train_nest_success}} to indicate the minimum probability of a nesting attempt occurring in the training data for \code{model}
