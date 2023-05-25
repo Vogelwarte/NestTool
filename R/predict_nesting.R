@@ -19,7 +19,7 @@
 #' @importFrom stats predict
 #'
 
-predict_nesting <- function(model = readRDS(here::here("data/nest_model.rds"))$model,
+predict_nesting <- function(model,
                             trackingsummary) {
   
 ###### IDENTIFYING NESTS OF RED KITES BASED ON GPS TRACKING DATA ################

@@ -109,6 +109,9 @@ devtools::document()
 
 
 ### INSTALLING THE PACKAGE
+
+### THIS WILL ONLY WORK IF YOU MANUALLY REMOVE THE importFrom(tidyr,ALL) lines in the NAMESPACE
+
 devtools::load_all()
 devtools::install()
-devtools::install_github('NestTool','steffenoppel')
+

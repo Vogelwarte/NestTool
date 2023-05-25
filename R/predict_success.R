@@ -22,9 +22,9 @@
 #' @importFrom stats var predict
 #' 
 
-predict_success <- function(model = readRDS(here::here("data/succ_model.rds"))$model,
+predict_success <- function(model,
                             nestingsummary,
-                            nest_cutoff = readRDS(here::here("data/succ_model.rds"))$nest_cutoff) {
+                            nest_cutoff) {
   
 ###### PREDICTING NEST OUTCOME OF RED KITES BASED ON GPS TRACKING DATA ################
 # original script and data prepared by Ursin Beeli 6 May 2023

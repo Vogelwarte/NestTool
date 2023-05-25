@@ -19,7 +19,7 @@
 #' @importFrom stats predict
 #'
 
-predict_ranging <- function(model = readRDS(here::here("data/hr_model.rds"))$model,
+predict_ranging <- function(model,
                             trackingsummary) {
   
 ###### IDENTIFYING HOME RANGES OF RED KITES BASED ON GPS TRACKING DATA ################

@@ -131,8 +131,10 @@ data_prep <- function(trackingdata,
   if(dim(checkTypes)[1]>0){
     print(sprintf("Stopped because columns %s are not of the same type in trackingdata and indseasondata. This will cause a problem when data are joined.", paste(checkTypes$Column,sep=", ")))
     break
+  }else{
+    milvus <- dplyr::left_join(milvus, indseasondata, by = join.cols)
   }
-
+  
   #### ELIMINATING INDIVIDUALS WITH INSUFFICIENT DATA
 
   ## counting the gps fixes per individual
