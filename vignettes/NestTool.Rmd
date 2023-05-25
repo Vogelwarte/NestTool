@@ -28,7 +28,7 @@ This package is not available on CRAN and must therefore be installed from [GitH
 ``` {r, eval = FALSE}
 library(devtools)
 devtools::install_github("steffenoppel/NestTool", dependencies=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed it up 
-library(NestTools)
+library(NestTool)
 ```
 
 
@@ -109,6 +109,7 @@ hr_model <- train_home_range_detection(trackingsummary = nest_data_input$summary
 
 ### predict home range behaviour for tracked birds
 ## if no model has been trained, the model statement can be omitted and the Red Kite model from Switzerland will be used
+hr_model<-NestTool::hr_model  ## loads the model from the package
 pred_hr <- predict_ranging(model = hr_model$model, trackingsummary = nest_data_input$summary) 
 
 ```
@@ -133,6 +134,7 @@ nest_model <- train_nest_detection(trackingsummary = nest_data_input$summary[!is
 
 ### predict nesting attempts for tracked birds
 ## if no model has been trained, the model statement can be omitted and the Red Kite model from Switzerland will be used
+nest_model<-NestTool::nest_model  ## loads the model from the package
 pred_nest <- predict_nesting(model = nest_model$model, trackingsummary = nest_data_input$summary) # note that you can predict to all data, including those without information on whether a nest existed or not
 
 ```
@@ -157,6 +159,7 @@ succ_model <- train_nest_success(nestingsummary = pred_nest, plot = T)
 
 ### predict nesting success for tracked birds
 ## if no model has been trained, the model statement can be omitted and the Red Kite model from Switzerland will be used
+succ_model<-NestTool::succ_model  ## loads the model from the package
 pred_succ <- predict_success(model = succ_model$model, nestingsummary = pred_nest, nest_cutoff = succ_model$nest_cutoff)
 
 ```
