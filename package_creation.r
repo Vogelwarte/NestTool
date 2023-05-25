@@ -7,6 +7,8 @@
 library(devtools)
 library(usethis)
 library(roxygen2)
+install.packages("sinew") 
+library(sinew)
 
 ### CREATING PACKAGE BACKBONE
 
@@ -51,6 +53,8 @@ devtools::load_all()
 
 
 ### add all the libraries we need to import
+usethis::use_tidy_dependencies() 
+1
 # use_package('dplyr',type = "Imports")
 # use_package('data.table',type = "Imports")
 # use_package('geosphere',type = "Imports")

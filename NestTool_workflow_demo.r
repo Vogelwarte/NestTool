@@ -3,7 +3,7 @@
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~###########
 install.packages("devtools", dependencies = TRUE) 
 library(devtools)
-devtools::install_github("steffenoppel/REKI", dependencies=TRUE) # development version - add argument 'build_vignettes = FALSE' to 
+devtools::install_github("steffenoppel/NestTool", dependencies=TRUE) # development version - add argument 'build_vignettes = FALSE' to 
 
 ## set root folder for project
 setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI")
@@ -20,8 +20,8 @@ setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI")
 #   mutate(HR = case_when(home_range_id > 0 ~ "yes",
 #                         home_range_id == 0 ~ "no"))
 
-# THURINGIAN BIRDS
-trackingdata<-fread(here("output/02_preprocessing/04_milvus_thuringia.csv"))
+# EXAMPLE BIRDS
+trackingdata<-NestTool::kites
 # make up indseasondata as input is now mandatory
 indseasondata <- trackingdata %>% group_by(year_id) %>%
  summarise(sex=first(sex))
