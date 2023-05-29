@@ -44,7 +44,7 @@ pred_hr<-predict_ranging(model=hr_model$model,trackingsummary=nest_data_input$su
 
 #### STEP 3: identify nests
 nest_model<-NestTool::nest_model
-pred_nest<-predict_nesting(model=nest_model$model,trackingsummary=nest_data_input$summary) # uses the model trained with our data (automatically loaded in the function)
+pred_nest<-predict_nesting(model=nest_model$model,trackingsummary=pred_hr) # uses the model trained with our data (automatically loaded in the function)
 
 
 #### STEP 4: determine outcome
@@ -67,4 +67,26 @@ movement_visualisation(trackingdata=nest_data_input$movementtrack,
                        move_metrics = move_metrics,
                        uncertainty = 0.25,
                        output_path="NestTool_example_nest_success_output.csv")
+
+
+#### STEP 7: summarise the demographic parameters for the population
+
+## READ IN AND COMBINE DATA OF MANUALLY CLASSIFIED AND AUTOMATICALLY CLASSIFIED DATA
+MANUAL<-fread("NestTool_example_nest_success_output.csv") %>%
+  rename(ManNest=Nest,ManSuccess=Success) %>%
+  select(year_id,ManNest,ManSuccess)
+ALL<-pred_succ %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
+  left_join(MANUAL, by='year_id') %>%
+  mutate(nest_prob=ifelse((!is.na(ManNest) & ManNest=="Yes"),1,nest_prob), succ_prob=ifelse((!is.na(ManSuccess) & ManSuccess=="Yes"),1,succ_prob)) %>%
+  mutate(nest_prob=ifelse((!is.na(ManNest) & ManNest=="No"),0,nest_prob), succ_prob=ifelse((!is.na(ManSuccess) & ManSuccess=="No"),0,succ_prob)) %>%
+  mutate(HR=ifelse(hr_prob>0.5,1,0),Nest=ifelse(nest_prob>0.5,1,0),Success=ifelse(succ_prob>0.5,1,0))
+
+## breeding propensity - what proportion of birds with a homerange have a nesting attempt?
+ALL %>% filter(HR==1) %>% ungroup() %>%
+  summarise(Propensity=mean(Nest))
+
+## breeding success - what proportion of birds with a nesting attempt are successful?
+ALL %>% filter(Nest==1) %>% ungroup() %>%
+  summarise(Success=mean(Success))
+
 
