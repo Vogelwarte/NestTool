@@ -3,6 +3,8 @@
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~###########
 install.packages("devtools", dependencies = TRUE) 
 library(devtools)
+library(data.table)
+library(tidyverse)
 devtools::install_github("steffenoppel/NestTool", dependencies=TRUE) # development version - add argument 'build_vignettes = FALSE' to 
 
 library(NestTool)
