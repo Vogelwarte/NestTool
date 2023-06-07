@@ -478,7 +478,7 @@ data_prep <- function(trackingdata,
     if(milvus_max_res_time$maxtimeawayBrood2km[i]<0){
       focal_nest<-milvus_pot_nest_sf %>% dplyr::filter(year_id==milvus_max_res_time$year_id[i]) %>%
         sf::st_transform(crs = 3035) %>%
-        sf::st_buffer(dist=2000)
+        sf::st_buffer(dist=homeradius)
       locs_brood<-milvus_track_amt %>% dplyr::filter(id==names(nest_revisits)[i]) %>% dplyr::mutate(yday=lubridate::yday(t_)) %>%
         dplyr::filter(yday >= broodstart  & yday <= broodend) %>% 
         sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
