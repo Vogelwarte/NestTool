@@ -86,8 +86,8 @@ for (m in seq(1:30)) {
                      relative_dist_max_day_to_max_night+nest_prob+
                      revisitsSettle+revisitsIncu1+revisitsIncu2+revisitsChick1+revisitsChick2+timeSettle+
                      timeIncu1+timeIncu2+timeChick1+ timeChick2+meandayrevisitsBrood+lastvisitDay+maxtimeawayBrood2km+tottime100m+
-                     Dist99Chick2+Dist99Settle+Dist99Incu1+
-                     MCP95Chick2+MCP95Chick1+MCP95Incu1+
+                     Dist99Chick2+Dist99Settle+Dist99Incu1+Dist99Incu2+Dist99Chick1+
+                     MCP95Chick2+MCP95Chick1+MCP95Incu1+MCP95Incu2+MCP95Settle+
                      DistDiffChick2+DistDiffChick1+DistDiffIncu2+MCPDiffChick2+MCPDiffChick1+MCPDiffIncu2+VarMCP+VarDist,
                    data = nestingsummary_train, mtry = m, num.trees = t, replace = T, importance = "permutation", oob.error=T, write.forest=F)
     tuning.out[tuning.out$t==t & tuning.out$m==m,3] <-RFtest$prediction.error
