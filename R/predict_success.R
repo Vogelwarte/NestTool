@@ -47,12 +47,12 @@ if("succ_prob" %in% names(nestingsummary)){
 } else{
   nestingsummary<-nestingsummary %>%
     dplyr::rowwise() %>%
-    dplyr::mutate(DistDiffChick2=Dist95Chick2-Dist95Incu2,
-           DistDiffChick1=Dist95Chick2-Dist95Incu2,
-           DistDiffIncu2=Dist95Incu2-Dist95Incu1,
-           MCPDiffChick2=MCP95Chick2-MCP95Incu2,
-           MCPDiffChick1=MCP95Chick2-MCP95Incu2,
-           MCPDiffIncu2=MCP95Incu2-MCP95Incu1,
+    dplyr::mutate(DistDiffChick2=Dist95Chick2-Dist95Chick1,
+                  DistDiffChick1=Dist95Chick1-Dist95Incu2,
+                  DistDiffIncu2=Dist95Incu2-Dist95Incu1,
+                  MCPDiffChick2=MCP95Chick2-MCP95Chick1,
+                  MCPDiffChick1=MCP95Chick1-MCP95Incu2,
+                  MCPDiffIncu2=MCP95Incu2-MCP95Incu1,
            VarMCP=stats::var(c(MCP95Incu1,MCP95Incu2,MCP95Chick1,MCP95Chick2)),
            VarDist=stats::var(c(Dist95Incu1,Dist95Incu2,Dist95Chick1,Dist95Chick2)))
   nestingsummary$sex <- factor(nestingsummary$sex, levels = c("m","f"))
