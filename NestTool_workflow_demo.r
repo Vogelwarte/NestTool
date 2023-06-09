@@ -5,14 +5,14 @@ install.packages("devtools", dependencies = TRUE)
 library(devtools)
 library(data.table)
 library(tidyverse)
-devtools::install_github("steffenoppel/NestTool", dependencies=TRUE) # development version - add argument 'build_vignettes = FALSE' to 
+devtools::install_github("steffenoppel/NestTool", dependencies=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
 
 library(NestTool)
 
 
 ## check that the help files load - this does not work in RStudio!!
 ?data_prep
-
+?movement_visualisation
 
 # LOAD EXAMPLE TRACKING DATA
 trackingdata<-NestTool::kite.tracks
