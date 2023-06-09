@@ -70,8 +70,8 @@ for (m in seq(1:10)) {
                              relative_dist_max_day_to_max_night+
                              revisitsSettle+revisitsIncu1+revisitsIncu2+revisitsChick1+revisitsChick2+timeSettle+
                              timeIncu1+timeIncu2+timeChick1+ timeChick2+meandayrevisitsBrood+lastvisitDay+maxtimeawayBrood2km+maxtimeawayBrood+tottime100m+
-                             Dist99Chick2+Dist99Settle+Dist99Incu1+
-                             MCP95Chick2+MCP95Chick1+MCP95Incu1,
+                             Dist99Chick2+Dist99Settle+Dist99Incu1+Dist99Incu2+Dist99Chick1+
+                             MCP95Chick2+MCP95Chick1+MCP95Incu1+MCP95Settle+MCP95Incu2,
                    data = milvus_train, mtry = m, num.trees = t, replace = T, importance = "permutation", oob.error=T, write.forest=F)
     tuning.out[tuning.out$t==t & tuning.out$m==m,3] <-RFtest$prediction.error
   }
@@ -89,8 +89,8 @@ RF2 <- ranger::ranger(HR ~ sex + revisits_day + residence_time_day + age_cy +
                         relative_dist_max_day_to_max_night+
                         revisitsSettle+revisitsIncu1+revisitsIncu2+revisitsChick1+revisitsChick2+timeSettle+
                         timeIncu1+timeIncu2+timeChick1+ timeChick2+meandayrevisitsBrood+lastvisitDay+maxtimeawayBrood2km+maxtimeawayBrood+tottime100m+
-                        Dist99Chick2+Dist99Settle+Dist99Incu1+
-                        MCP95Chick2+MCP95Chick1+MCP95Incu1,
+                        Dist99Chick2+Dist99Settle+Dist99Incu1+Dist99Incu2+Dist99Chick1+
+                        MCP95Chick2+MCP95Chick1+MCP95Incu1+MCP95Settle+MCP95Incu2,
               data=milvus_train, mtry=tuning.out$m[1], num.trees=tuning.out$t[1], replace=T, importance="permutation", oob.error=T, write.forest=T, probability=T)
 
 IMP<-as.data.frame(RF2$variable.importance) %>%
