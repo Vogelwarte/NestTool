@@ -70,8 +70,7 @@ for (m in seq(1:10)) {
                              revisitsSettle+revisitsIncu1+revisitsIncu2+revisitsChick1+revisitsChick2+timeSettle+
                              timeIncu1+timeIncu2+timeChick1+ timeChick2+meandayrevisitsBrood+lastvisitDay+maxtimeawayBrood2km+maxtimeawayBrood+tottime100m+
                              Dist99Chick2+Dist99Settle+Dist99Incu1+
-                             MCP95Chick2+MCP95Chick1+MCP95Incu1+
-                             DistDiffChick2+DistDiffChick1+DistDiffIncu2+MCPDiffChick2+MCPDiffChick1+MCPDiffIncu2+VarMCP+VarDist,
+                             MCP95Chick2+MCP95Chick1+MCP95Incu1,
                    data = milvus_train, mtry = m, num.trees = t, replace = T, importance = "permutation", oob.error=T, write.forest=F)
     tuning.out[tuning.out$t==t & tuning.out$m==m,3] <-RFtest$prediction.error
   }
@@ -90,8 +89,7 @@ RF2 <- ranger::ranger(nest ~ sex + revisits_day + residence_time_day + age_cy +
                         revisitsSettle+revisitsIncu1+revisitsIncu2+revisitsChick1+revisitsChick2+timeSettle+
                         timeIncu1+timeIncu2+timeChick1+ timeChick2+meandayrevisitsBrood+lastvisitDay+maxtimeawayBrood2km+maxtimeawayBrood+tottime100m+
                         Dist99Chick2+Dist99Settle+Dist99Incu1+
-                        MCP95Chick2+MCP95Chick1+MCP95Incu1+
-                        DistDiffChick2+DistDiffChick1+DistDiffIncu2+MCPDiffChick2+MCPDiffChick1+MCPDiffIncu2+VarMCP+VarDist,
+                        MCP95Chick2+MCP95Chick1+MCP95Incu1,
               data=milvus_train, mtry=tuning.out$m[1], num.trees=tuning.out$t[1], replace=T, importance="permutation", oob.error=T, write.forest=T, probability=T)
 
 IMP<-as.data.frame(RF2$variable.importance) %>%
@@ -134,31 +132,26 @@ OUT<-dplyr::bind_rows(milvus_train, milvus_test)
 
 #### CREATE PLOT FOR VARIABLE IMPORTANCE
 if(plot==T){
-  impplot<-ggplot2::ggplot(IMP, ggplot2::aes(x=variable, y=rel.imp)) +
-  ggplot2::geom_bar(stat='identity', fill='lightblue') +
-  ggplot2::coord_flip()+
-  ggplot2::ylab("Variable importance (%)") +
-  ggplot2::xlab("Explanatory variable") +
-  ggplot2::scale_y_continuous(limits=c(-5,105), breaks=seq(0,100,20), labels=seq(0,100,20))+
-  ggplot2::scale_x_discrete(name="",limit = c("maxtimeawayBrood","revisits_night","dist_max_day_to_max_night","revisits_day","residence_time_night","residence_time_day","median_day_dist_to_max_night","tottime100m"),
-                   labels = c("max time away from nest",
-                              "n nighttime visits",
-                              "night time in nestradius",
-                              "dist nest to night roost",
-                              "n daytime visits",
-                              "day time in nestradius", 
-                              "median dist to night roost",
-                              "total time in nestradius"))  +
-  ggplot2::annotate("text",x=2,y=80,label=paste("Accuracy = ",round(testmat$overall[1],3)),size=8) +
-  ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
-        axis.text.x=ggplot2::element_text(size=18, color="black"),
-        axis.text.y=ggplot2::element_text(size=16, color="black"), 
-        axis.title=ggplot2::element_text(size=20), 
-        panel.grid.major = ggplot2::element_blank(), 
-        panel.grid.minor = ggplot2::element_blank(), 
-        panel.border = ggplot2::element_blank())
+  mylevels<-IMP$variable[10:1]
+  impplot<-IMP[10:1,] %>%
+    dplyr::mutate(variable=forcats::fct_relevel(variable,mylevels)) %>%
+    ggplot2::ggplot(ggplot2::aes(x=variable, y=rel.imp)) +
+    ggplot2::geom_bar(stat='identity', fill='lightblue') +
+    ggplot2::coord_flip()+
+    ggplot2::ylab("Variable importance (%)") +
+    ggplot2::xlab("Explanatory variable") +
+    ggplot2::scale_y_continuous(limits=c(-5,105), breaks=seq(0,100,20), labels=seq(0,100,20))+
+    ggplot2::annotate("text",x=2,y=80,label=paste("Accuracy = ",round(testmat$overall[1],3)),size=8) +
+    ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
+                   axis.text.x=ggplot2::element_text(size=18, color="black"),
+                   axis.text.y=ggplot2::element_text(size=16, color="black"), 
+                   axis.title=ggplot2::element_text(size=20), 
+                   panel.grid.major = ggplot2::element_blank(), 
+                   panel.grid.minor = ggplot2::element_blank(), 
+                   panel.border = ggplot2::element_blank())
   print(impplot)
 }
+
 
 return(list(model=RF2,eval_train=trainmat,eval_test=testmat, summary=OUT))
 
