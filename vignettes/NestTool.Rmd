@@ -45,8 +45,8 @@ This is how you could read in your data:
 
 ```{r dataload, eval= FALSE, message=FALSE, warning = FALSE, include=T}
 ### LOAD THE TRACKING DATA AND INDIVIDUAL SEASON SUMMARIES 
-trackingdata <- fread(here("output/02_preprocessing/03_milvus_combined.csv"))
-indseasondata <- fread(here("output/01_validation/03_validation_combined.csv")) %>%
+trackingdata <- fread("03_milvus_combined.csv")
+indseasondata <- fread("03_validation_combined.csv") %>%
   mutate(nest = case_when(nest_id > 0 ~ "nest",
                         nest_id == 0 ~ "no nest"))
 
@@ -62,6 +62,8 @@ There are 6 further parameters that specify certain phases of the breeding seaso
 The next set of parameters concern the radius around locations over which recursions and residence times are calculated to identify a plausible nest location. `nestradius` is the radius in m around all locations that will be used to quantify times spent within that radius and how often a bird returned to that radius. The location with the greatest time spent within `nestradius` will be selected as the potential nest site. The `homeradius` is the distance in m which indicates the basic home range of the species, and is only used to calculate the time that birds spent outside that radius during the brood phase, when successfully breeding birds would be very unlikely to spend much time outside the `homeradius`.
 
 `age` is a parameter in calendar years that will be ignored if either the tracking data or the `indseasondata` already contain a column (`age_cy`) that specifies the age in calendar years. If no data are submitted then the value entered here will be used. Note that because the prediction of nesting behaviour and success from movement depends on the age of the bird, filling in missing data with a generic value will lead to lower accuracy in predictions.
+
+The function `data_prep` calculates many values for each individual season and will take on average 2-5 seconds per individual season. For data sets with >100 individual seasons it will therefore take a few minutes for the function to complete.
 
 
 ```{r data_prep, eval= FALSE, message=FALSE, warning = FALSE, include=T}
