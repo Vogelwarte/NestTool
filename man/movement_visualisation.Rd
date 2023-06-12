@@ -20,14 +20,14 @@ movement_visualisation(
 
 \item{inddata}{data.frame with predictions for breeding success derived from \code{\link{predict_success}} as \code{pred_succ}. This data.frame is used to visualise brood relevant metrics as table.}
 
-\item{move_metrics}{data.frame with seasonal movement metrics during breeding season derived from \code{\link{move_metric_extraction}} as \code{milvus_5d_move_metrics}. This data.frame is used to plot the move metrics.}
+\item{move_metrics}{data.frame with seasonal movement metrics during breeding season derived from \code{\link{move_metric_extraction}}. This data.frame is used to plot the move metrics.}
 
 \item{uncertainty}{numeric value between 0 and 0.5. Individuals for which the nest success classification resulted in a probability <\code{uncertainty}. This value should match the value of \code{uncertainty} used in \code{\link{move_metric_extraction}} to ensure that data is available for all visualised individuals.}
 
 \item{output_path}{path for the data.frame with the stored decisions about the examined individuals, whether they have had a nest and a successful brood.}
 }
 \value{
-Returns an interactive shiny app that shows a map, a table and a plot for every analysed individual.
+Returns an interactive shiny app that shows a map, a table and a plot for every individual that falls above the absolute value of \code{uncertainty}. The user can then manually assign whether individuals initiated nesting and bred successfully. When the shiny app is closed, the manually annotated values will be saved in a csv file stored at \code{output_path}
 }
 \description{
 \code{movement_visualisation} visualises tracking data of individuals on an interactive map
@@ -39,5 +39,5 @@ a series of plots of movement metrics summarised over a moving time window for t
 }
 \details{
 Input data for this function must be derived from \code{\link{data_prep}} (\code{nest_data_input$movementtrack} and \code{nest_data_input$pot_nests}),
-\code{\link{predict_success}} (\code{pred_succ}) and \code{\link{move_metric_extraction}} (\code{milvus_5d_move_metrics})
+\code{\link{predict_success}} (\code{pred_succ}) and \code{\link{move_metric_extraction}}.
 }

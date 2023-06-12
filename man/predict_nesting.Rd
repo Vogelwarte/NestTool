@@ -13,7 +13,7 @@ predict_nesting(model, trackingsummary)
 If this file results from the output of \code{\link{predict_nesting}}, then no further prediction will be performed as the prediction is already contained in the file.}
 }
 \value{
-Returns a data.frame with predicted probabilities of a nest, including all input data for further use in \code{\link{predict_success}}.
+Returns a data.frame with predicted probabilities of a nest (called \code{nest_prob}), including all input data for further use in \code{\link{predict_success}}. The first five columns of this data.frame are the year_id, sex, age_cy, and nest probabilities, the remaining columns consist of input data.
 }
 \description{
 \code{predict_nesting} uses temporally varying summary information from tracking data of individuals

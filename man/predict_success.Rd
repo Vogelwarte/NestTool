@@ -16,7 +16,7 @@ If this file results from the output of \code{\link{train_nest_success}}, then n
 All nesting attempts that have a 'nest_prob' below this threshold will automatically be classified as unsuccessful.}
 }
 \value{
-Returns a data.frame with predicted probabilities of nest success.
+Returns a data.frame with predicted probabilities of nest success (called \code{succ_prob}). The first five columns of this data.frame are the year_id, sex, age_cy, and success probabilities, the remaining columns consist of input data.
 }
 \description{
 \code{predict_success} uses temporally varying summary information from tracking data of individuals

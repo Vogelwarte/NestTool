@@ -13,7 +13,7 @@ predict_ranging(model, trackingsummary)
 If this file results from the output of \code{\link{predict_ranging}}, then no further prediction will be performed as the prediction is already contained in the file.}
 }
 \value{
-Returns a data.frame with predicted probabilities of a home range, including all input data for further use in \code{\link{predict_success}}.
+Returns a data.frame with predicted probabilities of a home range (called \code{hr_prob}), including all input data for further use in \code{\link{predict_success}}. The first five columns of this data.frame are the year_id, sex, age_cy, and HR probabilities, the remaining columns consist of input data.
 }
 \description{
 \code{predict_ranging} uses temporally varying summary information from tracking data of individuals
