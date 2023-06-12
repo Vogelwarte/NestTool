@@ -11,11 +11,11 @@
 #' @param model RandomForest model object created with \code{\link{train_home_range_detection}}. If none is provided, a model trained for red kites in Switzerland can be used with \code{NestTool::HR_model}.
 #' @param trackingsummary data.frame created by \code{\link{data_prep}} with information on individual identity, age, sex, and seasonal movement metrics.
 #' If this file results from the output of \code{\link{predict_ranging}}, then no further prediction will be performed as the prediction is already contained in the file.
-#' @return Returns a data.frame with predicted probabilities of a home range, including all input data for further use in \code{\link{predict_success}}.
+#' @return Returns a data.frame with predicted probabilities of a home range (called \code{hr_prob}), including all input data for further use in \code{\link{predict_success}}. The first five columns of this data.frame are the year_id, sex, age_cy, and HR probabilities, the remaining columns consist of input data.
 #'
 #' @export 
 #' @importFrom here here
-#' @importFrom dplyr rename bind_cols
+#' @importFrom dplyr rename bind_cols relocate
 #' @importFrom stats predict
 #'
 
@@ -40,7 +40,8 @@ predict_ranging <- function(model,
     PRED<-stats::predict(model,data=trackingsummary, type = "response")
     OUT<-trackingsummary %>%
       dplyr::bind_cols(PRED$predictions) %>%
-      dplyr::rename(no_hr_prob = no, hr_prob = yes)}
+      dplyr::rename(no_hr_prob = no, hr_prob = yes) %>%
+      dplyr::relocate(sex,age_cy,hr_prob,no_hr_prob,.after = year_id)}
 
 return(OUT)
 

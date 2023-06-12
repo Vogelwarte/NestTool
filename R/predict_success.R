@@ -14,11 +14,11 @@
 #' @param nest_cutoff numeric between 0 and 1. Created by \code{\link{train_nest_success}} to indicate the minimum probability of a nesting attempt occurring in the training data for \code{model}
 #' All nesting attempts that have a 'nest_prob' below this threshold will automatically be classified as unsuccessful.
 #' 
-#' @return Returns a data.frame with predicted probabilities of nest success.
+#' @return Returns a data.frame with predicted probabilities of nest success (called \code{succ_prob}). The first five columns of this data.frame are the year_id, sex, age_cy, and success probabilities, the remaining columns consist of input data.
 #'
 #' @export 
 #' @importFrom here here
-#' @importFrom dplyr rename mutate rowwise bind_cols
+#' @importFrom dplyr rename mutate rowwise bind_cols relocate
 #' @importFrom stats var predict
 #' 
 
@@ -60,7 +60,8 @@ if("succ_prob" %in% names(nestingsummary)){
   OUT<-nestingsummary %>%
     dplyr::bind_cols(PRED$predictions) %>%
     dplyr::rename(no_succ_prob = no, succ_prob = yes) %>%
-    dplyr::mutate(succ_prob=ifelse(nest_prob<nest_cutoff,0,succ_prob)) ### manual adjustment of success = 0 when there was below-threshold probability of a nesting attempt occurring
+    dplyr::mutate(succ_prob=ifelse(nest_prob<nest_cutoff,0,succ_prob)) %>% ### manual adjustment of success = 0 when there was below-threshold probability of a nesting attempt occurring
+    dplyr::relocate(sex,age_cy,succ_prob,no_succ_prob,.after = year_id)
 }
 return(OUT)
 
