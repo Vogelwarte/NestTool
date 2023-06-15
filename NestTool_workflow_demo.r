@@ -5,7 +5,7 @@ install.packages("devtools", dependencies = TRUE)
 library(devtools)
 library(data.table)
 library(tidyverse)
-devtools::install_github("steffenoppel/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
+devtools::install_github("Vogelwarte/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
 
 library(NestTool)
 
