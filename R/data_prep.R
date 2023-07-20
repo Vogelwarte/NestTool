@@ -147,6 +147,9 @@ data_prep <- function(trackingdata,
     milvus <- milvus %>%
       dplyr::filter(year_id %in% sufficient_data$year_id)
     print(sprintf("%i individuals had more than %i locations and have been retained for further analysis",dim(sufficient_data)[1],minlocs))
+  }else{
+    print("Stopped because not enough data remain. Check the minlocs, startseason and endseason parameters as they may be too restrictive.")
+    break
   }  
   
   
