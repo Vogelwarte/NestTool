@@ -14,28 +14,48 @@ library(sf)
 #devtools::install_github("Vogelwarte/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
 library(NestTool)
 
-
-## check that the help files load - this does not work in RStudio!!
 ?data_prep
 ?movement_visualisation
 
 # LOAD AND FORMAT EXAMPLE TRACKING DATA
+setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis")
+
+indseasondata <- read_excel("NestTool2/data/REKI_NestTool_ValidationDataTemplate_RMZ.xlsx") %>%
+  rename(bird_id=Bird_ID) %>%
+  mutate(sex=ifelse(Sex=="?","m",Sex)) %>% ### randomly assign all unknowns to male
+  mutate(age_cy=ifelse(Age_when_tagged==">3",Year-Tag_year+6,Year-Tag_year+as.numeric(Age_when_tagged))) %>% ### assume that adult birds were 5 years old when tagged
+  mutate(year_id=paste(Year,bird_id,sep="_")) %>%
+  select(year_id,bird_id,sex,age_cy,Homerange,Nest,Nest_lat,Nest_long,n_fledglings)
+
 trackingdata<-readRDS("NestTool2/data/REKI_validation_tracks.rds") %>%
-  rename(lat_wgs=y_, long_wgs=y_, year_id=id)
-indseasondata <- NestTool::kite.nesting
+  mutate(lat_wgs=x_, long_wgs=y_) %>%
+  mutate(timestamp=as.POSIXct(t_)) %>%
+  rename(year_id=id) %>%
+  mutate(bird_id=str_split_i(year_id,pattern="_",i=2)) %>%
+  filter(!is.na(x_)) %>%
+  st_as_sf(coords = c("x_", "y_"), crs=4326) %>%
+  st_transform(3035) %>%
+  dplyr::mutate(long_eea = sf::st_coordinates(.)[,1],
+                lat_eea = sf::st_coordinates(.)[,2]) %>%
+  st_drop_geometry() %>%
+  select(year_id,bird_id,timestamp,long_wgs,lat_wgs,long_eea,lat_eea) %>%
+  arrange(year_id,timestamp)
+head(trackingdata)
+
+
 
 #### STEP 1: prepare data - this takes approximately 15 minutes
-nest_data_input<-data_prep(trackingdata=trackingdata,
+nest_data_input<-data_prep(trackingdata=as.data.frame(trackingdata),
                       indseasondata=indseasondata,
-                      latboundary=45,
+                      latboundary=40,
                       longboundary=4,
                       broodstart= yday(ymd("2023-05-01")),
                       broodend<- yday(ymd("2023-06-01")),
-                      minlocs=800,
+                      minlocs=500,
                       nestradius=50,
                       homeradius=2000,
-                      startseason=70,
-                      endseason=175,
+                      startseason=20,
+                      endseason=200,
                       settleEnd = 97,  # end of the settlement period in yday
                       Incu1End = 113,   # end of the first incubation phase in yday
                       Incu2End = 129,  # end of the second incubation phase in yday
