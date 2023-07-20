@@ -93,6 +93,7 @@ data_prep <- function(trackingdata,
            year_week = format(date, format = "%Y-%W"),
            year_week_id = paste0(format(date, format = "%Y_%W"), "_", bird_id),
            date_id = paste0(date, "_", bird_id),
+           event_id=seq_along(t_),
            year_day = lubridate::yday(timestamp)) %>%
     dplyr::filter(long_wgs>longboundary &  lat_wgs>latboundary)   ## remove all locations from Spain and southern France
  
