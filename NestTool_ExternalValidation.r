@@ -5,9 +5,9 @@
 ### VALIDATION DATA PROVIDED BY MARTIN KOLBE AT ROTMILANZENTRUM (GER)
 
 
-#install.packages("devtools", dependencies = TRUE) 
-#library(devtools)
-#devtools::install_github("steffenoppel/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
+install.packages("devtools", dependencies = TRUE)
+library(devtools)
+devtools::install_github("steffenoppel/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
 
 library(data.table)
 library(tidyverse)
@@ -40,7 +40,7 @@ trackingdata<-readRDS("NestTool2/data/REKI_validation_tracks.rds") %>%
   dplyr::mutate(long_eea = sf::st_coordinates(.)[,1],
                 lat_eea = sf::st_coordinates(.)[,2]) %>%
   st_drop_geometry() %>%
-  select(year_id,bird_id,event_id,timestamp,long_wgs,lat_wgs,long_eea,lat_eea) %>%
+  select(year_id,bird_id,timestamp,long_wgs,lat_wgs,long_eea,lat_eea) %>%
   arrange(year_id,timestamp)
 head(trackingdata)
 
@@ -53,7 +53,7 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
                       longboundary=6,
                       broodstart= yday(ymd("2023-05-01")),
                       broodend<- yday(ymd("2023-06-01")),
-                      minlocs=500,
+                      minlocs=800,
                       nestradius=50,
                       homeradius=2000,
                       startseason=70,
@@ -65,7 +65,8 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
                       age =10)         # age of individuals for which no age is provided with data 
 
 names(nest_data_input$summary)
-
+nest_data_input$summary %>% dplyr::filter(is.na(age_cy)) %>% select(year_id,bird_id,sex,age_cy)
+indseasondata  %>% select(year_id,bird_id,sex,age_cy)
 
 #### STEP 2: identify home ranges
 hr_model<-NestTool::hr_model
@@ -96,7 +97,7 @@ movement_visualisation(trackingdata=nest_data_input$movementtrack,
                        inddata=pred_succ,
                        move_metrics = move_metrics,
                        uncertainty = 0.25,
-                       output_path="NestTool_example_nest_success_output.csv")
+                       output_path="NestTool_VALIDATION_GER_nest_success_output.csv")
 
 
 #### STEP 7: summarise the demographic parameters for the population
