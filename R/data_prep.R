@@ -49,7 +49,7 @@
 #'
 #' @export 
 #' @importFrom lubridate yday ymd
-#' @importFrom dplyr mutate filter intersect left_join group_by summarise n select first rename bind_rows ungroup
+#' @importFrom dplyr mutate filter intersect left_join group_by summarise n select first rename bind_rows ungroup if_else
 #' @importFrom purrr reduce pluck
 #' @importFrom amt mk_track time_of_day arrange hr_mcp hr_area
 #' @importFrom recurse getRecursions getRecursionsAtLocations
@@ -107,15 +107,17 @@ data_prep <- function(trackingdata,
   # the conditional formulation does not work, so indseasondata must always be provided, but it may not have all columns
   
     if('age_cy' %in% names(indseasondata)){
-      indseasondata<- indseasondata %>% dplyr::mutate(age_cy=ifelse(is.na(indseasondata$age_cy),age,indseasondata$age_cy)) ### assign user-specified value to missing values in data
+      indseasondata<- indseasondata %>% dplyr::mutate(age_cy=dplyr::if_else(is.na(indseasondata$age_cy),age,indseasondata$age_cy)) ### assign user-specified value to missing values in data
     }else{
       indseasondata<- indseasondata %>% dplyr::mutate(age_cy=age) ### assign user-specified value to non-existing column
     }
     
     if('sex' %in% names(indseasondata)){
-      indseasondata<- indseasondata %>% dplyr::mutate(sex=ifelse(is.na(indseasondata$sex),"m",indseasondata$sex)) ### assign random value (males) to missing values in data
+      indseasondata<- indseasondata %>% dplyr::mutate(sex=dplyr::if_else(is.na(indseasondata$sex),"m",indseasondata$sex)) ### assign random value (males) to missing values in data
+      indseasondata$sex<-factor(indseasondata$sex, levels=c('m','f'))
     }else{
       indseasondata<- indseasondata %>% dplyr::mutate(sex="m") ### assign random value (males) to non-existing column
+      indseasondata$sex<-factor(indseasondata$sex, levels=c('m','f'))
     }
     
   ### joining of data must consider whether column names are already present in tracking data
@@ -126,7 +128,7 @@ data_prep <- function(trackingdata,
   checkTypes<- data.frame(Column = join.cols,
                df1 = sapply(as.data.frame(milvus)[,join.cols], class),
                df2 = sapply(as.data.frame(indseasondata)[,join.cols], class)) %>%
-    dplyr::mutate(Diff=ifelse(df1== df2, "Same", "Different")) %>%
+    dplyr::mutate(Diff=dplyr::if_else(df1== df2, "Same", "Different")) %>%
     dplyr::filter(Diff=="Different")
                     
   if(dim(checkTypes)[1]>0){
@@ -431,14 +433,14 @@ data_prep <- function(trackingdata,
       break
     }
     out<-nest_revisits[[i]] $revisitStats %>% dplyr::mutate(yday=lubridate::yday(entranceTime)) %>%
-      dplyr::mutate(broodphase=ifelse(yday<settleEnd,"Settle",
-                               ifelse(yday<Incu1End,"Incu1",
-                                      ifelse(yday<Incu2End,"Incu2",
-                                             ifelse(yday<Chick1End,"Chick1","Chick2"))))) %>%
+      dplyr::mutate(broodphase=dplyr::if_else(yday<settleEnd,"Settle",
+                               dplyr::if_else(yday<Incu1End,"Incu1",
+                                      dplyr::if_else(yday<Incu2End,"Incu2",
+                                             dplyr::if_else(yday<Chick1End,"Chick1","Chick2"))))) %>%
       dplyr::mutate(count=1)
     suppressWarnings({summary<- out %>% dplyr::group_by(id,broodphase) %>%
       dplyr::summarise(revisits=sum(count),time=sum(timeInside), last=max(yday),maxTimeAway=max(timeSinceLastVisit,na.rm=T)) %>%
-      dplyr::mutate(maxTimeAway=ifelse(maxTimeAway<0,720,maxTimeAway))})
+      dplyr::mutate(maxTimeAway=dplyr::if_else(maxTimeAway<0,720,maxTimeAway))})
     
     
     milvus_max_res_time$revisitsSettle[i] <- as.numeric(summary %>% dplyr::ungroup() %>% dplyr::filter(broodphase=="Settle") %>% dplyr::select(revisits))
@@ -453,11 +455,11 @@ data_prep <- function(trackingdata,
     milvus_max_res_time$timeChick2[i] <- as.numeric(summary %>% dplyr::ungroup() %>% dplyr::filter(broodphase=="Chick2") %>% dplyr::select(time))
     milvus_max_res_time$meandayrevisitsBrood[i] <- sum(summary %>% dplyr::ungroup() %>% dplyr::filter(broodphase %in% c("Incu2","Chick1")) %>% dplyr::select(revisits), na.rm=T)/30
     milvus_max_res_time$lastvisitDay[i] <- max(out$yday,na.rm=T)
-    milvus_max_res_time$maxtimeawayBrood[i] <- ifelse(max(out %>% dplyr::filter(broodphase %in% c("Incu2","Chick1")) %>% dplyr::select(timeSinceLastVisit), na.rm=T)<0,
+    milvus_max_res_time$maxtimeawayBrood[i] <- dplyr::if_else(max(out %>% dplyr::filter(broodphase %in% c("Incu2","Chick1")) %>% dplyr::select(timeSinceLastVisit), na.rm=T)<0,
                                                       720,
                                                       max(out %>% dplyr::filter(broodphase %in% c("Incu2","Chick1")) %>% dplyr::select(timeSinceLastVisit), na.rm=T))
     milvus_max_res_time$tottime100m[i] <- sum(summary$time, na.rm=t)
-    milvus_max_res_time$maxtimeawayBrood2km[i] <- ifelse(length(max_absences$T[max_absences$id==milvus_max_res_time$year_id[i]])==1,
+    milvus_max_res_time$maxtimeawayBrood2km[i] <- dplyr::if_else(length(max_absences$T[max_absences$id==milvus_max_res_time$year_id[i]])==1,
                                                          max_absences$T[max_absences$id==milvus_max_res_time$year_id[i]], -10)
     
     
@@ -467,10 +469,10 @@ data_prep <- function(trackingdata,
     
     ### calculate MCP for each brood phase
     mcpin<-milvus_track_amt %>% dplyr::filter(id==names(nest_revisits)[i]) %>% dplyr::mutate(yday=lubridate::yday(t_)) %>%
-      dplyr::mutate(broodphase=ifelse(yday<settleEnd,"Settle",
-                               ifelse(yday<Incu1End,"Incu1",
-                                      ifelse(yday<Incu2End,"Incu2",
-                                             ifelse(yday<Chick1End,"Chick1","Chick2")))))
+      dplyr::mutate(broodphase=dplyr::if_else(yday<settleEnd,"Settle",
+                               dplyr::if_else(yday<Incu1End,"Incu1",
+                                      dplyr::if_else(yday<Incu2End,"Incu2",
+                                             dplyr::if_else(yday<Chick1End,"Chick1","Chick2")))))
     for(s in unique(mcpin$broodphase)){
       mcp_area <- amt::hr_mcp(mcpin %>% dplyr::filter(broodphase==s), levels = c(0.95,0.99)) %>% amt::hr_area()
       mcp_area$area <- mcp_area$area/milvus_MCP[[i]]$area   #### sets the MCP area in proportion to the individuals 
@@ -488,8 +490,8 @@ data_prep <- function(trackingdata,
         sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
         sf::st_within(focal_nest)
       
-      milvus_max_res_time$maxtimeawayBrood2km[i] <- ifelse(dim(locs_brood)[2]==1,0,720) ### if there are no locations in the 2km circle around the nest then set max time away to 720, otherwise 0
-      milvus_max_res_time$maxtimeawayBrood[i] <- ifelse(dim(locs_brood)[2]==1,0,720) ### if there are no locations in the 2km circle around the nest then set max time away to 720, otherwise 0
+      milvus_max_res_time$maxtimeawayBrood2km[i] <- dplyr::if_else(dim(locs_brood)[2]==1,0,720) ### if there are no locations in the 2km circle around the nest then set max time away to 720, otherwise 0
+      milvus_max_res_time$maxtimeawayBrood[i] <- dplyr::if_else(dim(locs_brood)[2]==1,0,720) ### if there are no locations in the 2km circle around the nest then set max time away to 720, otherwise 0
     }
     
     ### SAFETY LOOP to flag up any mismatches in list dimensions
@@ -514,7 +516,7 @@ data_prep <- function(trackingdata,
     milvus_max_res_time[,c]<-tidyr::replace_na(milvus_max_res_time[,c],0)
   }
   #milvus_max_res_time$maxtimeawayBrood<-tidyr::replace_na(milvus_max_res_time$maxtimeawayBrood,720)  ## if no data exist the bird was away for 30 days or 720 hrs
-  milvus_max_res_time$maxtimeawayBrood2km<-ifelse(milvus_max_res_time$maxtimeawayBrood2km<0,720,milvus_max_res_time$maxtimeawayBrood2km)  ## if no data exist the bird was away for 30 days or 720 hrs
+  milvus_max_res_time$maxtimeawayBrood2km<-dplyr::if_else(milvus_max_res_time$maxtimeawayBrood2km<0,720,milvus_max_res_time$maxtimeawayBrood2km)  ## if no data exist the bird was away for 30 days or 720 hrs
   
   ### TRANSCRIBING THE MCP_OUT INTO VARIABLES
   milvus_max_res_time<-mcp_out %>% dplyr::mutate(VarName=paste("MCP",as.integer(100*level),broodphase, sep="")) %>%
@@ -530,10 +532,10 @@ data_prep <- function(trackingdata,
   
   # creating sf objects for distance calculation
   milvus_track_sf <- milvus_track %>% dplyr::mutate(yday=lubridate::yday(t_)) %>%
-    dplyr::mutate(broodphase=ifelse(yday<settleEnd,"Settle",
-                             ifelse(yday<Incu1End,"Incu1",
-                                    ifelse(yday<Incu2End,"Incu2",
-                                           ifelse(yday<Chick1End,"Chick1","Chick2"))))) %>%
+    dplyr::mutate(broodphase=dplyr::if_else(yday<settleEnd,"Settle",
+                             dplyr::if_else(yday<Incu1End,"Incu1",
+                                    dplyr::if_else(yday<Incu2End,"Incu2",
+                                           dplyr::if_else(yday<Chick1End,"Chick1","Chick2"))))) %>%
     dplyr::select(id,t_, broodphase,x_,y_) %>%
     sf::st_as_sf(coords = c("x_", "y_"), crs = 3035)
   milvus_nest_sf <- milvus_pot_nests %>%
