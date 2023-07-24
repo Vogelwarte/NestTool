@@ -4,11 +4,10 @@
 
 ### VALIDATION DATA PROVIDED BY MARTIN KOLBE AT ROTMILANZENTRUM (GER)
 
-
-install.packages("devtools", dependencies = TRUE)
-library(devtools)
-devtools::install_github("steffenoppel/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
-
+# install.packages("devtools", dependencies = TRUE)
+# library(devtools)
+# devtools::install_github("steffenoppel/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
+library(ranger)
 library(data.table)
 library(tidyverse)
 library(readxl)
@@ -24,9 +23,16 @@ setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis")
 indseasondata <- read_excel("NestTool2/data/REKI_NestTool_ValidationDataTemplate_RMZ.xlsx") %>%
   rename(bird_id=Bird_ID) %>%
   mutate(sex=ifelse(Sex=="?","m",Sex)) %>% ### randomly assign all unknowns to male
-  mutate(age_cy=ifelse(Age_when_tagged==">3",Year-Tag_year+6,Year-Tag_year+as.numeric(Age_when_tagged))) %>% ### assume that adult birds were 5 years old when tagged
+  #mutate(sex=fct_recode(sex, 'm'='m','f'='f')) %>% ### convert sex to factor
+  mutate(age_cy=as.integer(ifelse(Age_when_tagged==">3",Year-Tag_year+6,Year-Tag_year+as.numeric(Age_when_tagged)))) %>% ### assume that adult birds were 5 years old when tagged
   mutate(year_id=paste(Year,bird_id,sep="_")) %>%
   select(year_id,bird_id,sex,age_cy,Homerange,Nest,Nest_lat,Nest_long,n_fledglings)
+
+### ensure correct factor levels of sex to facilitate prediction
+indseasondata$sex<-factor(indseasondata$sex, levels=c('m','f'))
+str(indseasondata$sex)
+indseasondata %>% filter(is.na(sex))
+
 
 trackingdata<-readRDS("NestTool2/data/REKI_validation_tracks.rds") %>%
   mutate(lat_wgs=y_, long_wgs=x_) %>%
@@ -41,27 +47,35 @@ trackingdata<-readRDS("NestTool2/data/REKI_validation_tracks.rds") %>%
                 lat_eea = sf::st_coordinates(.)[,2]) %>%
   st_drop_geometry() %>%
   select(year_id,bird_id,timestamp,long_wgs,lat_wgs,long_eea,lat_eea) %>%
-  arrange(year_id,timestamp)
+  arrange(year_id,timestamp) %>%
+  ungroup()
 head(trackingdata)
+unique(trackingdata$year_id)
 
+#### PRELIMINARY ASSESSMENT - WHICH BIRDS HAVE ENOUGH DATA
+### those are the birds that don't have enough data
+
+trackingdata %>% group_by(year_id) %>%
+  summarise(n=length(timestamp), start=min(timestamp), end=max(timestamp)) %>%
+  arrange(n)
 
 
 #### STEP 1: prepare data - this takes approximately 15 minutes
 nest_data_input<-data_prep(trackingdata=trackingdata,
                       indseasondata=indseasondata,
-                      latboundary=45,
-                      longboundary=6,
-                      broodstart= yday(ymd("2023-05-01")),
-                      broodend<- yday(ymd("2023-06-01")),
+                      latboundary=50,
+                      longboundary=9,
+                      broodstart= yday(ymd("2023-05-15")),
+                      broodend<- yday(ymd("2023-06-15")),
                       minlocs=800,
                       nestradius=50,
                       homeradius=2000,
-                      startseason=70,
-                      endseason=180,
-                      settleEnd = 97,  # end of the settlement period in yday
-                      Incu1End = 113,   # end of the first incubation phase in yday
-                      Incu2End = 129,  # end of the second incubation phase in yday
-                      Chick1End = 152, # end of the first chick phase in yday
+                      startseason=yday(ymd("2023-03-15")),
+                      endseason=yday(ymd("2023-07-10")),
+                      settleEnd = yday(ymd("2023-04-05")),  # end of the settlement period in yday
+                      Incu1End = yday(ymd("2023-04-25")),   # end of the first incubation phase in yday
+                      Incu2End = yday(ymd("2023-05-15")),  # end of the second incubation phase in yday
+                      Chick1End = yday(ymd("2023-06-15")), # end of the first chick phase in yday
                       age =10)         # age of individuals for which no age is provided with data 
 
 names(nest_data_input$summary)
@@ -70,6 +84,7 @@ indseasondata  %>% select(year_id,bird_id,sex,age_cy)
 
 #### STEP 2: identify home ranges
 hr_model<-NestTool::hr_model
+nest_data_input$summary$sex<-factor(ifelse(nest_data_input$summary$sex==1,'m','f'), levels=c('m','f'))  ### recreate factor levels for sex to facilitate prediction
 pred_hr<-predict_ranging(model=hr_model$model,trackingsummary=nest_data_input$summary) # uses the model trained with our data (automatically loaded in the function)
 
 
