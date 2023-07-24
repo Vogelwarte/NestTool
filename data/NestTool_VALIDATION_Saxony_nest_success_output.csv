@@ -1,0 +1,32 @@
+year_id,ID,LDay,TCh2,VCh2,TDay,TotT,VDay,PNest,Nest,Success
+2016_Nienhagen 1,2016_Nienhagen 1,191,289,131,479,500,143,64 %,Yes,Yes
+2016_Nienhagen 2,2016_Nienhagen 2,191,149,246,267,246,355,47 %,Yes,Yes
+2017_Harsleben Sauteichsgraben,2017_Harsleben Sauteichsgraben,191,232,86,231,232,85,35 %,No,No
+2017_Nienhagen 2,2017_Nienhagen 2,184,116,82,548,654,355,68 %,Yes,No
+2018_Bullerberg Ost,2018_Bullerberg Ost,191,97,43,895,778,496,76 %,Yes,Yes
+2018_Bullerberg West,2018_Bullerberg West,191,109,38,690,841,400,78 %,Yes,Yes
+2018_Harsleben Hammmelsberg,2018_Harsleben Hammmelsberg,191,247,63,275,272,71,38 %,No,No
+2018_Harsleben Sauteichsgraben,2018_Harsleben Sauteichsgraben,191,227,97,1027,1056,124,77 %,Yes,No
+2018_Nienhagen 2,2018_Nienhagen 2,191,65,26,637,711,387,73 %,Yes,No
+2018_Veltensmühle,2018_Veltensmühle,191,121,50,226,228,84,47 %,No,No
+2019_Bullerberg West,2019_Bullerberg West,188,21,24,566,768,366,83 %,Yes,Yes
+2019_Halberstadt Spiegelsberge,2019_Halberstadt Spiegelsberge,191,54,50,995,1276,465,82 %,Yes,No
+2019_Harsleben Sauteichsgraben,2019_Harsleben Sauteichsgraben,191,335,116,1833,1832,202,73 %,Yes,Yes
+2019_Mahndorf,2019_Mahndorf,186,25,22,497,573,298,76 %,Yes,No
+2020_Halberstadt Spiegelsberge,2020_Halberstadt Spiegelsberge,191,133,121,1238,1350,728,81 %,Yes,No
+2020_Harsleben Sauteichsgraben,2020_Harsleben Sauteichsgraben,191,286,20,1933,1882,169,76 %,Yes,No
+2020_Ströbeck,2020_Ströbeck,191,63,55,517,520,278,66 %,Yes,No
+2020_Veltensmühle,2020_Veltensmühle,191,247,122,918,936,509,75 %,Yes,Yes
+2021_Bullerberg West,2021_Bullerberg West,139,0,0,254,353,102,80 %,Yes,No
+2021_Halberstadt Spiegelsberge,2021_Halberstadt Spiegelsberge,191,175,55,1054,1118,538,80 %,Yes,No
+2021_Halberstadt Spiegelsberge 2,2021_Halberstadt Spiegelsberge 2,187,112,33,542,543,398,89 %,Yes,No
+2021_Harsleben Mostrichmühle 2,2021_Harsleben Mostrichmühle 2,187,213,25,311,532,123,64 %,No,No
+2021_Veltensmühle,2021_Veltensmühle,178,94,56,535,720,542,80 %,Yes,No
+2022_Eilenstedt 1,2022_Eilenstedt 1,191,53,12,1150,1381,287,82 %,Yes,No
+2022_Eilenstedt 2,2022_Eilenstedt 2,191,13,29,390,678,362,74 %,Yes,Yes
+2022_Halberstadt Spiegelsberge 2,2022_Halberstadt Spiegelsberge 2,187,68,27,703,756,300,94 %,Yes,Yes
+2022_Harsleben Mostrichmühle 2,2022_Harsleben Mostrichmühle 2,189,153,7,1472,1921,204,93 %,Yes,No
+2022_Harsleben Sauteichsgraben,2022_Harsleben Sauteichsgraben,168,2,7,876,876,43,38 %,No,No
+2022_Quedlinburg Steinholz,2022_Quedlinburg Steinholz,189,57,14,298,515,258,62 %,Yes,Yes
+2023_Eilenstedt 1,2023_Eilenstedt 1,191,5,5,1216,1161,223,64 %,Yes,No
+2023_Halberstadt Spiegelsberge 2,2023_Halberstadt Spiegelsberge 2,109,0,0,217,229,271,58 %,No,No

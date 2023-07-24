@@ -7,12 +7,12 @@
 # install.packages("devtools", dependencies = TRUE)
 # library(devtools)
 # devtools::install_github("steffenoppel/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
-library(ranger)
 library(data.table)
 library(tidyverse)
 library(readxl)
 library(sf)
 library(NestTool)
+library(pROC)
 
 ?data_prep
 ?movement_visualisation
@@ -103,7 +103,8 @@ move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
                                      inddata=pred_succ,
                                      uncertainty=0.25,
                                      nestradius=50,
-                                     startseason=70,endseason=175)
+                                     startseason=yday(ymd("2023-03-15")),
+                                     endseason=yday(ymd("2023-07-10")))
 
 #### STEP 6: use ShinyApp to inspect all questionable individuals
 ?movement_visualisation
@@ -112,13 +113,15 @@ movement_visualisation(trackingdata=nest_data_input$movementtrack,
                        inddata=pred_succ,
                        move_metrics = move_metrics,
                        uncertainty = 0.25,
-                       output_path="NestTool_VALIDATION_GER_nest_success_output.csv")
+                       output_path="NestTool_VALIDATION_Saxony_nest_success_output.csv")
 
+### to find out where the file is stored:
+here::here()
 
 #### STEP 7: summarise the demographic parameters for the population
 
 ## READ IN AND COMBINE DATA OF MANUALLY CLASSIFIED AND AUTOMATICALLY CLASSIFIED DATA
-MANUAL<-fread("NestTool_example_nest_success_output.csv") %>%
+MANUAL<-fread(here::here("NestTool_VALIDATION_Saxony_nest_success_output.csv")) %>%
   rename(ManNest=Nest,ManSuccess=Success) %>%
   select(year_id,ManNest,ManSuccess)
 ALL<-pred_succ %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
@@ -134,5 +137,176 @@ ALL %>% filter(HR==1) %>% ungroup() %>%
 ## breeding success - what proportion of birds with a nesting attempt are successful?
 ALL %>% filter(Nest==1) %>% ungroup() %>%
   summarise(Success=mean(Success))
+
+
+
+##############---------------------------------------------------------------------#################
+### STEP 8: EVALUATE PREDICTIVE SUCCESS FROM PROVIDED DATA
+##############---------------------------------------------------------------------#################
+
+VALIDAT<-indseasondata %>% rename(HR_true=Homerange, Nest_true=Nest) %>%
+  mutate(Success_true=ifelse(n_fledglings==0,0,1)) %>%
+  select(year_id,HR_true,Nest_true,Success_true) %>%
+  right_join(ALL, by="year_id")
+
+#### IDENTIFY BEST THRESHOLDS FOR PRED SUCCESS
+ROC_val<-roc(data=VALIDAT,response=HR_true,predictor=hr_prob)
+HRthresh<-coords(ROC_val, "best", "threshold")$threshold
+
+ROC_val<-roc(data=VALIDAT,response=Nest_true,predictor=nest_prob)
+nestthresh<-coords(ROC_val, "best", "threshold")$threshold
+
+ROC_val<-roc(data=VALIDAT,response=Success_true,predictor=succ_prob)
+succthresh<-coords(ROC_val, "best", "threshold")$threshold
+
+
+
+ALL<-ALL %>%
+  mutate(HR=ifelse(hr_prob>HRthresh,1,0),Nest=ifelse(nest_prob>nestthresh,1,0),Success=ifelse(succ_prob>succthresh,1,0))
+
+## breeding propensity - what proportion of birds with a homerange have a nesting attempt?
+ALL %>% filter(HR==1) %>% ungroup() %>%
+  summarise(Propensity=mean(Nest))
+
+## breeding success - what proportion of birds with a nesting attempt are successful?
+ALL %>% filter(Nest==1) %>% ungroup() %>%
+  summarise(Success=mean(Success))
+
+
+
+
+### 8.1. evaluate home range identification
+ggplot(VALIDAT, aes(x=hr_prob,y=HR_true)) +
+  geom_point(size=2,position=position_dodge(0.05))
+VALIDAT <- VALIDAT %>%
+  dplyr::mutate(HR_true = as.factor(dplyr::case_when(HR_true==1 ~ "YES",
+                                                     HR_true==0 ~ "NO"))) %>%
+  dplyr::mutate(HR = as.factor(dplyr::case_when(HR==1 ~ "YES",
+                                                     HR==0 ~ "NO")))
+caret::confusionMatrix(data = VALIDAT$HR_true, reference = VALIDAT$HR, positive="YES")
+caret::confusionMatrix(data = VALIDAT$HR_true[VALIDAT$hr_prob>0.75 | VALIDAT$hr_prob<0.25], reference = VALIDAT$HR[VALIDAT$hr_prob>0.75 | VALIDAT$hr_prob<0.25], positive="YES")
+
+
+### create plot of variables that differ
+HRmissid<-VALIDAT %>% filter(HR_true!=HR)
+
+nest_data_input$summary %>%
+  mutate(Prediction=ifelse(year_id %in% HRmissid$year_id,"wrong","correct")) %>%
+  select(year_id,Prediction,median_day_dist_to_max_night,
+         tottime100m,
+         revisits_day,
+         residence_time_night,
+         residence_time_day,
+         meandayrevisitsBrood,
+         revisits_night,
+         revisitsSettle,
+         timeSettle) %>%
+  gather(key="Variable",value="value",-year_id,-Prediction) %>%
+  left_join(VALIDAT, by="year_id") %>%
+  
+  ggplot(aes(x=Prediction,y=value,colour=HR)) +
+  geom_point(position=position_jitterdodge(0.1)) +
+  facet_wrap(~Variable, ncol=3, scales="free_y") +
+  ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
+                 strip.text=ggplot2::element_text(size=14, color="black"),
+                 axis.text=ggplot2::element_text(size=16, color="black"), 
+                 axis.title=ggplot2::element_text(size=20), 
+                 panel.grid.major = ggplot2::element_blank(), 
+                 panel.grid.minor = ggplot2::element_blank(), 
+                 panel.border = ggplot2::element_blank())
+
+ggsave("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/plots/HR_validation_variable_plot.jpg", width=12, height=12)  
+
+
+
+### 8.2. evaluate nesting identification
+ggplot(VALIDAT, aes(x=nest_prob,y=Nest_true)) +
+  geom_point(size=2,position=position_dodge(0.05))
+VALIDAT <- VALIDAT %>%
+  dplyr::mutate(Nest_true = as.factor(dplyr::case_when(Nest_true==1 ~ "YES",
+                                                     Nest_true==0 ~ "NO"))) %>%
+  dplyr::mutate(Nest = as.factor(dplyr::case_when(Nest==1 ~ "YES",
+                                                Nest==0 ~ "NO")))
+caret::confusionMatrix(data = VALIDAT$Nest_true, reference = VALIDAT$Nest, positive="YES")
+caret::confusionMatrix(data = VALIDAT$Nest_true[VALIDAT$nest_prob>0.75 | VALIDAT$nest_prob<0.25], reference = VALIDAT$Nest[VALIDAT$nest_prob>0.75 | VALIDAT$nest_prob<0.25], positive="YES")
+
+
+### create plot of variables that differ
+Nestmissid<-VALIDAT %>% filter(Nest_true!=Nest)
+
+nest_data_input$summary %>%
+  mutate(Prediction=ifelse(year_id %in% Nestmissid$year_id,"wrong","correct")) %>%
+  select(year_id,Prediction,median_day_dist_to_max_night,
+         tottime100m,
+         revisits_day,
+         residence_time_night,
+         residence_time_day,
+         revisitsIncu1,
+         maxtimeawayBrood2km,
+         revisitsSettle,
+         timeSettle) %>%
+  gather(key="Variable",value="value",-year_id,-Prediction) %>%
+  left_join(VALIDAT, by="year_id") %>%
+  
+  ggplot(aes(x=Prediction,y=value,colour=Nest)) +
+  geom_point(position=position_jitterdodge(0.1)) +
+  facet_wrap(~Variable, ncol=3, scales="free_y") +
+  ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
+                 strip.text=ggplot2::element_text(size=14, color="black"),
+                 axis.text=ggplot2::element_text(size=16, color="black"), 
+                 axis.title=ggplot2::element_text(size=20), 
+                 panel.grid.major = ggplot2::element_blank(), 
+                 panel.grid.minor = ggplot2::element_blank(), 
+                 panel.border = ggplot2::element_blank())
+
+ggsave("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/plots/Nest_validation_variable_plot.jpg", width=12, height=12)  
+
+
+
+
+
+### 8.3. evaluate nest success prediction
+ggplot(VALIDAT, aes(x=succ_prob,y=Success_true)) +
+  geom_point(size=2,position=position_dodge(0.05))
+
+VALIDAT <- VALIDAT %>%
+  dplyr::mutate(Success_true = as.factor(dplyr::case_when(Success_true==1 ~ "YES",
+                                                       Success_true==0 ~ "NO"))) %>%
+  dplyr::mutate(Success = as.factor(dplyr::case_when(Success==1 ~ "YES",
+                                                  Success==0 ~ "NO")))
+caret::confusionMatrix(data = VALIDAT$Success_true, reference = VALIDAT$Success, positive="YES")
+caret::confusionMatrix(data = VALIDAT$Success_true[VALIDAT$succ_prob>0.75 | VALIDAT$succ_prob<0.25], reference = VALIDAT$Success[VALIDAT$succ_prob>0.75 | VALIDAT$succ_prob<0.25], positive="YES")
+
+
+### create plot of variables that differ
+Successmissid<-VALIDAT %>% filter(Success_true!=Success)
+Successmissid<-VALIDAT %>% filter(Success_true!=ManSuccess)
+
+nest_data_input$summary %>%
+  mutate(Prediction=ifelse(year_id %in% Successmissid$year_id,"wrong","correct")) %>%
+  select(year_id,Prediction,
+         timeChick2,
+         revisitsChick2,
+         timeChick1,
+         lastvisitDay,
+         MCP95Chick1,
+         dist_max_day_to_max_night,
+         median_day_dist_to_max_night,
+         residence_time_night) %>%
+  gather(key="Variable",value="value",-year_id,-Prediction) %>%
+  left_join(VALIDAT, by="year_id") %>%
+  
+  ggplot(aes(x=Prediction,y=value,colour=Success)) +
+  geom_point(position=position_jitterdodge(0.1)) +
+  facet_wrap(~Variable, ncol=3, scales="free_y") +
+  ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
+                 strip.text=ggplot2::element_text(size=14, color="black"),
+                 axis.text=ggplot2::element_text(size=16, color="black"), 
+                 axis.title=ggplot2::element_text(size=20), 
+                 panel.grid.major = ggplot2::element_blank(), 
+                 panel.grid.minor = ggplot2::element_blank(), 
+                 panel.border = ggplot2::element_blank())
+
+ggsave("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/plots/Success_validation_variable_plot.jpg", width=12, height=12)  
 
 
