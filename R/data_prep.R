@@ -459,7 +459,7 @@ data_prep <- function(trackingdata,
                                                       720,
                                                       max(out %>% dplyr::filter(broodphase %in% c("Incu2","Chick1")) %>% dplyr::select(timeSinceLastVisit), na.rm=T))
     milvus_max_res_time$tottime100m[i] <- sum(summary$time, na.rm=t)
-    milvus_max_res_time$maxtimeawayBrood2km[i] <- dplyr::if_else(length(max_absences$T[max_absences$id==milvus_max_res_time$year_id[i]])==1,
+    milvus_max_res_time$maxtimeawayBrood2km[i] <- ifelse(length(max_absences$T[max_absences$id==milvus_max_res_time$year_id[i]])==1,   ### this does not work with dplyr::if_else because it throws an error if max_absences==NULL
                                                          max_absences$T[max_absences$id==milvus_max_res_time$year_id[i]], -10)
     
     
@@ -568,9 +568,9 @@ data_prep <- function(trackingdata,
   
   
   
-  #' NORMALISING DISTANCE FROM LONGEST VISITED DAY LOCATION TO LONGEST VISITED
-  #' NIGHT LOCATION BY MEDIAN DISTANCE OF ALL DAY LOCATIONS TO LONGEST VISITED
-  #' NIGHT LOCATION
+  # NORMALISING DISTANCE FROM LONGEST VISITED DAY LOCATION TO LONGEST VISITED
+  # NIGHT LOCATION BY MEDIAN DISTANCE OF ALL DAY LOCATIONS TO LONGEST VISITED
+  # NIGHT LOCATION
   
   # creating two data frames of same dimension to calculate distances
   
