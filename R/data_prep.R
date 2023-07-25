@@ -187,7 +187,6 @@ data_prep <- function(trackingdata,
     print(sprintf("Stopped because individual(s) %s do not have night locations.", mismatches))
     break
   }
-
   
   
   # RECURSIONS DURING NIGHTTIME --------------------------------------------------
@@ -306,7 +305,7 @@ data_prep <- function(trackingdata,
     dplyr::left_join(milvus_night_max_sf %>% dplyr::select(year_id,revisits_night,residence_time_night,date_night), by = "year_id") %>%
     sf::st_drop_geometry()
   
-  
+  rm(milvus, milvus_day,milvus_night,milvus_day_recurse,milvus_night_recurse, milvus_track_night_list, milvus_track_day_list)
   
   ##### CALCULATING REVISITS TO POTENTIAL NEST SITE
   # using list apply over all individuals
