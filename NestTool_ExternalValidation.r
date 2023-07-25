@@ -4,9 +4,9 @@
 
 ### VALIDATION DATA PROVIDED BY MARTIN KOLBE AT ROTMILANZENTRUM (GER)
 
-# install.packages("devtools", dependencies = TRUE)
-# library(devtools)
-# devtools::install_github("steffenoppel/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
+install.packages("devtools", dependencies = TRUE)
+library(devtools)
+devtools::install_github("steffenoppel/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
 library(data.table)
 library(tidyverse)
 library(readxl)
@@ -28,8 +28,7 @@ indseasondata <- read_excel("NestTool2/data/REKI_NestTool_ValidationDataTemplate
 ### ensure correct factor levels of sex to facilitate prediction
 indseasondata$sex<-factor(indseasondata$sex, levels=c('m','f'))
 str(indseasondata$sex)
-indseasondata %>% filter(is.na(sex))
-
+indseasondata %>% filter(is.na(age_cy))
 
 trackingdata<-readRDS("NestTool2/data/REKI_validation_tracks.rds") %>%
   bind_rows(readRDS("NestTool2/data/ANITRA_validation_tracks.rds") %>% select(x_,y_,t_,year_id,burst_) %>% rename(id=year_id)) %>%
@@ -67,8 +66,8 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
                       broodstart= yday(ymd("2023-05-15")),
                       broodend<- yday(ymd("2023-06-15")),
                       minlocs=800,
-                      nestradius=50,
-                      homeradius=2000,
+                      nestradius=150,
+                      homeradius=2500,
                       startseason=yday(ymd("2023-03-15")),
                       endseason=yday(ymd("2023-07-10")),
                       settleEnd = yday(ymd("2023-04-05")),  # end of the settlement period in yday
