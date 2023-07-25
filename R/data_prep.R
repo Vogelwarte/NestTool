@@ -193,8 +193,9 @@ data_prep <- function(trackingdata,
   # RECURSIONS DURING NIGHTTIME --------------------------------------------------
   # splitting track into a list with each single id grouped to an element
   milvus_track_night <- as.data.frame(milvus_track_night)
+  milvus_track_night$id <- factor(milvus_track_night$id, levels=unique(milvus_track_night$id))  ## required to prevent re-ordering in split
   milvus_track_night_list <- split(milvus_track_night, milvus_track_night$id)
-  
+
   # calculating recursions
   print(sprintf("Calculating night recursions for %i nocturnal locations",dim(milvus_track_night)[1]))
   milvus_night_recurse <- lapply(milvus_track_night_list, function(x)
@@ -214,6 +215,7 @@ data_prep <- function(trackingdata,
   # RECURSIONS DURING DAYTIME ----------------------------------------------------
   # splitting track into a list with each single id grouped to an element
   milvus_track_day <- as.data.frame(milvus_track_day)
+  milvus_track_day$id <- factor(milvus_track_day$id, levels=unique(milvus_track_day$id))  ## required to prevent re-ordering in split
   milvus_track_day_list <- split(milvus_track_day, milvus_track_day$id)
   
   # calculating recursions (1.5 mins)
