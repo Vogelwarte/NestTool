@@ -14,9 +14,6 @@ library(sf)
 library(NestTool)
 library(pROC)
 
-?data_prep
-?movement_visualisation
-
 # LOAD AND FORMAT EXAMPLE TRACKING DATA
 setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis")
 
