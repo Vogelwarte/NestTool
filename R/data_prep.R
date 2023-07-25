@@ -314,7 +314,9 @@ data_prep <- function(trackingdata,
   # add nest locations to tracking data
   # first calculate the most visited location for both day and night (as above, but data combined)
   milvus_track <- as.data.frame(milvus_track_amt %>% dplyr::select(-tod_))
+  milvus_track$id <- factor(milvus_track$id, levels=unique(milvus_track$id))  ## required to prevent re-ordering in split
   milvus_track_list <- split(milvus_track, milvus_track$id)
+  milvus_track_amt$id <- factor(milvus_track_amt$id, levels=unique(milvus_track_amt$id))  ## required to prevent re-ordering in split
   milvus_track_amt_list <- split(milvus_track_amt, milvus_track_amt$id)
   
   # calculating recursions (1.5 mins)
