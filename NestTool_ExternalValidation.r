@@ -35,6 +35,7 @@ indseasondata %>% filter(is.na(sex))
 
 
 trackingdata<-readRDS("NestTool2/data/REKI_validation_tracks.rds") %>%
+  bind_rows(readRDS("NestTool2/data/ANITRA_validation_tracks.rds") %>% select(x_,y_,t_,year_id,burst_) %>% rename(id=year_id)) %>%
   mutate(lat_wgs=y_, long_wgs=x_) %>%
   mutate(timestamp=as.POSIXct(t_)) %>%
   rename(year_id=id) %>%
@@ -57,6 +58,7 @@ unique(trackingdata$year_id)
 
 trackingdata %>% group_by(year_id) %>%
   summarise(n=length(timestamp), start=min(timestamp), end=max(timestamp)) %>%
+  filter(year_id %in% indseasondata$year_id) %>%
   arrange(n)
 
 

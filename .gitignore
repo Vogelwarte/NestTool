@@ -11,6 +11,9 @@
 # Example code in package build process
 KERAS_attempt.R
 
+# Raw external data
+data/valdat/*.csv
+
 
 # Output files from R CMD check
 /*.Rcheck/
