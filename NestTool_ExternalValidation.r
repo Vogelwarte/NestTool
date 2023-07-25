@@ -4,9 +4,9 @@
 
 ### VALIDATION DATA PROVIDED BY MARTIN KOLBE AT ROTMILANZENTRUM (GER)
 
-install.packages("devtools", dependencies = TRUE)
-library(devtools)
-devtools::install_github("steffenoppel/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
+# install.packages("devtools", dependencies = TRUE)
+# library(devtools)
+# devtools::install_github("steffenoppel/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
 library(data.table)
 library(tidyverse)
 library(readxl)
@@ -35,8 +35,11 @@ trackingdata<-readRDS("NestTool2/data/REKI_validation_tracks.rds") %>%
   mutate(lat_wgs=y_, long_wgs=x_) %>%
   mutate(timestamp=as.POSIXct(t_)) %>%
   rename(year_id=id) %>%
+  mutate(year_id=str_replace(string=year_id,pattern="\xf6",replacement="ö")) %>%
+  mutate(year_id=str_replace(string=year_id,pattern="Mostrichmöhle",replacement="Mostrichmühle")) %>%
   mutate(bird_id=str_split_i(year_id,pattern="_",i=2)) %>%
   #mutate(event_id=seq_along(t_)) %>%
+  filter(year_id %in% unique(indseasondata$year_id)) %>%
   filter(!is.na(x_)) %>%
   st_as_sf(coords = c("x_", "y_"), crs=4326) %>%
   st_transform(3035) %>%
@@ -47,7 +50,13 @@ trackingdata<-readRDS("NestTool2/data/REKI_validation_tracks.rds") %>%
   arrange(year_id,timestamp) %>%
   ungroup()
 head(trackingdata)
+
+unique(trackingdata$bird_id)
 unique(trackingdata$year_id)
+
+### for these birds there are no tracking data
+indseasondata[-(which(indseasondata$year_id %in% unique(trackingdata$year_id))),]
+
 
 #### PRELIMINARY ASSESSMENT - WHICH BIRDS HAVE ENOUGH DATA
 ### those are the birds that don't have enough data
@@ -77,7 +86,8 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
                       age =10)         # age of individuals for which no age is provided with data 
 
 names(nest_data_input$summary)
-nest_data_input$summary %>% dplyr::filter(is.na(age_cy)) %>% select(year_id,bird_id,sex,age_cy)
+nest_data_input$summary %>% dplyr::filter(is.na(age_cy)) %>% select(year_id,bird_id,sex,age_cy) %>%
+  filter(year_id %in% indseasondata$year_id)
 indseasondata  %>% select(year_id,bird_id,sex,age_cy)
 
 #### STEP 2: identify home ranges
