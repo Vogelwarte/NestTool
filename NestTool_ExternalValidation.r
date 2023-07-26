@@ -78,8 +78,8 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
                       broodstart= yday(ymd("2023-05-15")),
                       broodend<- yday(ymd("2023-06-15")),
                       minlocs=800,
-                      nestradius=150,
-                      homeradius=2500,
+                      nestradius=250,
+                      homeradius=5000,
                       startseason=yday(ymd("2023-03-15")),
                       endseason=yday(ymd("2023-07-10")),
                       settleEnd = yday(ymd("2023-04-05")),  # end of the settlement period in yday
@@ -110,18 +110,18 @@ succ_model<-NestTool::succ_model
 pred_succ<-predict_success(model=succ_model$model,nestingsummary=pred_nest, nest_cutoff=succ_model$nest_cutoff) # uses the model trained with our data (automatically loaded in the function)
 
 #### STEP 5: extract weekly movement metrics for manual classification
-move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
-                                     nest_locs=nest_data_input$pot_nests, 
-                                     inddata=pred_succ,
-                                     uncertainty=0.25,
-                                     nestradius=150,
-                                     startseason=yday(ymd("2023-03-15")),
-                                     endseason=yday(ymd("2023-07-10")))
+# move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
+#                                      nest_locs=nest_data_input$pot_nests, 
+#                                      inddata=pred_succ,
+#                                      uncertainty=0.25,
+#                                      nestradius=150,
+#                                      startseason=yday(ymd("2023-03-15")),
+#                                      endseason=yday(ymd("2023-07-10")))
 
 #### STEP 6: use ShinyApp to inspect all questionable individuals
 # ?movement_visualisation
 # movement_visualisation(trackingdata=nest_data_input$movementtrack,
-#                        nest_locs=nest_data_input$pot_nests, 
+#                        nest_locs=nest_data_input$pot_nests,
 #                        inddata=pred_succ,
 #                        move_metrics = move_metrics,
 #                        uncertainty = 0.25,
@@ -148,6 +148,14 @@ ALL<-pred_succ %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
 
 end_time <- Sys.time()
 runtimeSAX<-as.numeric(end_time - start_time,units="secs")
+
+
+
+
+### check outlier 
+pred_succ %>% filter(median_day_dist_to_max_night>10000) %>% select(year_id,hr_prob,nest_prob,succ_prob) %>% left_join(indseasondata, by="year_id")
+
+
 
 
 ##############---------------------------------------------------------------------#################
