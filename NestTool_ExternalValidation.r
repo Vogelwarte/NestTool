@@ -160,26 +160,26 @@ VALIDAT<-indseasondata %>% rename(HR_true=Homerange, Nest_true=Nest) %>%
   right_join(ALL, by="year_id")
 
 #### IDENTIFY BEST THRESHOLDS FOR PRED SUCCESS
-ROC_val<-roc(data=VALIDAT,response=HR_true,predictor=hr_prob)
-HRthresh<-coords(ROC_val, "best", "threshold")$threshold
+ROC_val_hr<-roc(data=VALIDAT,response=HR_true,predictor=hr_prob)
+HRthresh<-coords(ROC_val_hr, "best", "threshold")$threshold
 
-ROC_val<-roc(data=VALIDAT,response=Nest_true,predictor=nest_prob)
-nestthresh<-coords(ROC_val, "best", "threshold")$threshold
+ROC_val_nest<-roc(data=VALIDAT,response=Nest_true,predictor=nest_prob)
+nestthresh<-coords(ROC_val_nest, "best", "threshold")$threshold
 
-ROC_val<-roc(data=VALIDAT,response=Success_true,predictor=succ_prob)
-succthresh<-coords(ROC_val, "best", "threshold")$threshold
+ROC_val_succ<-roc(data=VALIDAT,response=Success_true,predictor=succ_prob)
+succthresh<-coords(ROC_val_succ, "best", "threshold")$threshold
 
-VALIDAT %>% filter(Nest=="YES") %>% filter(succ_prob>0.25 & succ_prob<0.75)
+# VALIDAT %>% filter(Nest=="YES") %>% filter(succ_prob>0.25 & succ_prob<0.75)
 
-ALL<-ALL %>%
-  mutate(HR=ifelse(hr_prob>HRthresh,1,0),Nest=ifelse(nest_prob>nestthresh,1,0),Success=ifelse(succ_prob>succthresh,1,0))
+VALIDAT<-VALIDAT %>%
+  mutate(Nest=ifelse(nest_prob>nestthresh,1,0),Success=ifelse(succ_prob>succthresh,1,0)) #HR=ifelse(hr_prob>HRthresh,1,0),
 
 ## breeding propensity - what proportion of birds with a homerange have a nesting attempt?
-ALL %>% filter(HR==1) %>% ungroup() %>%
+VALIDAT %>% filter(HR==1) %>% ungroup() %>%
   summarise(Propensity=mean(Nest))
 
 ## breeding success - what proportion of birds with a nesting attempt are successful?
-ALL %>% filter(Nest==1) %>% ungroup() %>%
+VALIDAT %>% filter(Nest==1) %>% ungroup() %>%
   summarise(Success=mean(Success))
 
 
@@ -188,18 +188,18 @@ ALL %>% filter(Nest==1) %>% ungroup() %>%
 ### 8.1. evaluate home range identification
 ggplot(VALIDAT, aes(x=hr_prob,y=HR_true)) +
   geom_point(size=2,position=position_dodge(0.05))
-VALIDAT <- VALIDAT %>%
+VX <- VALIDAT %>%
   dplyr::mutate(HR_true = as.factor(dplyr::case_when(HR_true==1 ~ "YES",
                                                      HR_true==0 ~ "NO"))) %>%
   dplyr::mutate(HR = as.factor(dplyr::case_when(HR==1 ~ "YES",
                                                      HR==0 ~ "NO")))
-caret::confusionMatrix(data = VALIDAT$HR_true, reference = VALIDAT$HR, positive="YES")
-caret::confusionMatrix(data = VALIDAT$HR_true[VALIDAT$hr_prob>0.75 | VALIDAT$hr_prob<0.25], reference = VALIDAT$HR[VALIDAT$hr_prob>0.75 | VALIDAT$hr_prob<0.25], positive="YES")
+caret::confusionMatrix(data = VX$HR_true, reference = VX$HR, positive="YES")
+caret::confusionMatrix(data = VX$HR_true[VALIDAT$hr_prob>0.75 | VX$hr_prob<0.25], reference = VX$HR[VX$hr_prob>0.75 | VX$hr_prob<0.25], positive="YES")
 
 
 ### create plot of variables that differ
-HRmissid<-VALIDAT %>% filter(HR_true!=HR)
-table(VALIDAT$HR_true)
+HRmissid<-VX %>% filter(HR_true!=HR)
+table(VX$HR_true)
 nest_data_input$summary %>%
   mutate(Prediction=ifelse(year_id %in% HRmissid$year_id,"false","true")) %>%
   select(year_id,Prediction,median_day_dist_to_max_night,
@@ -212,7 +212,7 @@ nest_data_input$summary %>%
          revisitsSettle,
          timeSettle) %>%
   gather(key="Variable",value="value",-year_id,-Prediction) %>%
-  left_join(VALIDAT, by="year_id") %>%
+  left_join(VX, by="year_id") %>%
   
   ggplot(aes(x=HR,y=value,colour=Prediction)) +
   geom_point(position=position_jitterdodge(0.1)) +
@@ -232,17 +232,17 @@ ggsave("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/plots/HR_vali
 ### 8.2. evaluate nesting identification
 ggplot(VALIDAT, aes(x=nest_prob,y=Nest_true)) +
   geom_point(size=2,position=position_dodge(0.05))
-VALIDAT <- VALIDAT %>%
+VX <- VX %>%
   dplyr::mutate(Nest_true = as.factor(dplyr::case_when(Nest_true==1 ~ "YES",
                                                      Nest_true==0 ~ "NO"))) %>%
   dplyr::mutate(Nest = as.factor(dplyr::case_when(Nest==1 ~ "YES",
                                                 Nest==0 ~ "NO")))
-SAXval_nest<-caret::confusionMatrix(data = VALIDAT$Nest_true, reference = VALIDAT$Nest, positive="YES")
-caret::confusionMatrix(data = VALIDAT$Nest_true[VALIDAT$nest_prob>0.75 | VALIDAT$nest_prob<0.25], reference = VALIDAT$Nest[VALIDAT$nest_prob>0.75 | VALIDAT$nest_prob<0.25], positive="YES")
+SAXval_nest<-caret::confusionMatrix(data = VX$Nest_true, reference = VX$Nest, positive="YES")
+caret::confusionMatrix(data = VX$Nest_true[VX$nest_prob>0.75 | VX$nest_prob<0.25], reference = VX$Nest[VX$nest_prob>0.75 | VX$nest_prob<0.25], positive="YES")
 
 
 ### create plot of variables that differ
-Nestmissid<-VALIDAT %>% filter(Nest_true!=Nest)
+Nestmissid<-VX %>% filter(Nest_true!=Nest)
 
 nest_data_input$summary %>%
   mutate(Prediction=ifelse(year_id %in% Nestmissid$year_id,"false","true")) %>%
@@ -256,7 +256,7 @@ nest_data_input$summary %>%
          revisitsSettle,
          timeSettle) %>%
   gather(key="Variable",value="value",-year_id,-Prediction) %>%
-  left_join(VALIDAT, by="year_id") %>%
+  left_join(VX, by="year_id") %>%
   
   ggplot(aes(x=Nest,y=value,colour=Prediction)) +
   geom_point(position=position_jitterdodge(0.1)) +
@@ -279,18 +279,18 @@ ggsave("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/plots/Nest_va
 ggplot(VALIDAT, aes(x=succ_prob,y=Success_true)) +
   geom_point(size=2,position=position_dodge(0.05))
 
-VALIDAT <- VALIDAT %>%
+VX <- VX %>%
   dplyr::mutate(Success_true = as.factor(dplyr::case_when(Success_true==1 ~ "YES",
                                                        Success_true==0 ~ "NO"))) %>%
   dplyr::mutate(Success = as.factor(dplyr::case_when(Success==1 ~ "YES",
                                                   Success==0 ~ "NO")))
-caret::confusionMatrix(data = VALIDAT$Success_true, reference = VALIDAT$Success, positive="YES")
-caret::confusionMatrix(data = VALIDAT$Success_true[VALIDAT$succ_prob>0.75 | VALIDAT$succ_prob<0.25], reference = VALIDAT$Success[VALIDAT$succ_prob>0.75 | VALIDAT$succ_prob<0.25], positive="YES")
+caret::confusionMatrix(data = VX$Success_true, reference = VX$Success, positive="YES")
+caret::confusionMatrix(data = VX$Success_true[VX$succ_prob>0.75 | VX$succ_prob<0.25], reference = VX$Success[VX$succ_prob>0.75 | VX$succ_prob<0.25], positive="YES")
 
 
 ### create plot of variables that differ
-Successmissid<-VALIDAT %>% filter(Success_true!=Success)
-#Successmissid<-VALIDAT %>% filter(Success_true!=ManSuccess)
+Successmissid<-VX %>% filter(Success_true!=Success)
+#Successmissid<-VX %>% filter(Success_true!=ManSuccess)
 
 nest_data_input$summary %>%
   mutate(Prediction=ifelse(year_id %in% Successmissid$year_id,"wrong","correct")) %>%
@@ -304,7 +304,7 @@ nest_data_input$summary %>%
          median_day_dist_to_max_night,
          residence_time_night) %>%
   gather(key="Variable",value="value",-year_id,-Prediction) %>%
-  left_join(VALIDAT, by="year_id") %>%
+  left_join(VX, by="year_id") %>%
   
   ggplot(aes(x=Success,y=value,colour=Prediction)) +
   geom_point(position=position_jitterdodge(0.1)) +
@@ -334,7 +334,7 @@ library(rmarkdown)
 # Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/RStudio/resources/app/bin/quarto/share/pandoc")
 # pandoc_version()
 rmarkdown::render('C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool\\NestTool_ResultsValidation.Rmd',
-                  output_file = "NestTool_ResultsValidation.docx",
+                  output_file = "NestTool_ResultsValidation.html",
                   output_dir = 'C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool')
 
 
