@@ -214,7 +214,7 @@ nest_data_input$summary %>%
   gather(key="Variable",value="value",-year_id,-Prediction) %>%
   left_join(VX, by="year_id") %>%
   
-  ggplot(aes(x=HR,y=value,colour=Prediction)) +
+  ggplot(aes(x=HR_true,y=value,colour=Prediction)) +
   geom_point(position=position_jitterdodge(0.1)) +
   facet_wrap(~Variable, ncol=3, scales="free_y") +
   ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
@@ -258,7 +258,7 @@ nest_data_input$summary %>%
   gather(key="Variable",value="value",-year_id,-Prediction) %>%
   left_join(VX, by="year_id") %>%
   
-  ggplot(aes(x=Nest,y=value,colour=Prediction)) +
+  ggplot(aes(x=Nest_true,y=value,colour=Prediction)) +
   geom_point(position=position_jitterdodge(0.1)) +
   facet_wrap(~Variable, ncol=3, scales="free_y") +
   ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
@@ -293,7 +293,7 @@ Successmissid<-VX %>% filter(Success_true!=Success)
 #Successmissid<-VX %>% filter(Success_true!=ManSuccess)
 
 nest_data_input$summary %>%
-  mutate(Prediction=ifelse(year_id %in% Successmissid$year_id,"wrong","correct")) %>%
+  mutate(Prediction=ifelse(year_id %in% Successmissid$year_id,"false","true")) %>%
   select(year_id,Prediction,
          timeChick2,
          revisitsChick2,
@@ -305,8 +305,9 @@ nest_data_input$summary %>%
          residence_time_night) %>%
   gather(key="Variable",value="value",-year_id,-Prediction) %>%
   left_join(VX, by="year_id") %>%
+  filter(!is.na(Success_true)) %>%
   
-  ggplot(aes(x=Success,y=value,colour=Prediction)) +
+  ggplot(aes(x=Success_true,y=value,colour=Prediction)) +
   geom_point(position=position_jitterdodge(0.1)) +
   facet_wrap(~Variable, ncol=3, scales="free_y") +
   ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
