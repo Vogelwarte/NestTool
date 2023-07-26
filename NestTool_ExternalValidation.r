@@ -161,13 +161,13 @@ VALIDAT<-indseasondata %>% rename(HR_true=Homerange, Nest_true=Nest) %>%
 
 #### IDENTIFY BEST THRESHOLDS FOR PRED SUCCESS
 ROC_val_hr<-roc(data=VALIDAT,response=HR_true,predictor=hr_prob)
-HRthresh<-coords(ROC_val_hr, "best", "threshold")$threshold
+HRthresh<-pROC::coords(ROC_val_hr, "best", "threshold")$threshold
 
 ROC_val_nest<-roc(data=VALIDAT,response=Nest_true,predictor=nest_prob)
-nestthresh<-coords(ROC_val_nest, "best", "threshold")$threshold
+nestthresh<-pROC::coords(ROC_val_nest, "best", "threshold")$threshold
 
 ROC_val_succ<-roc(data=VALIDAT,response=Success_true,predictor=succ_prob)
-succthresh<-coords(ROC_val_succ, "best", "threshold")$threshold
+succthresh<-pROC::coords(ROC_val_succ, "best", "threshold")$threshold
 
 # VALIDAT %>% filter(Nest=="YES") %>% filter(succ_prob>0.25 & succ_prob<0.75)
 
@@ -335,10 +335,10 @@ library(rmarkdown)
 # Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/RStudio/resources/app/bin/quarto/share/pandoc")
 # pandoc_version()
 rmarkdown::render('C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool\\NestTool_ResultsValidation.Rmd',
-                  output_file = "NestTool_ResultsValidation.html",
+                  output_file = "NestTool_ResultsValidation_60min.html",
                   output_dir = 'C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool')
 
 
-save.image("NestTool2/NestToolValidationSAX.RData")  
+save.image("NestTool2/NestToolValidationSAX_60min.RData")  
 load("NestTool2/NestToolValidationSAX.RData")
 
