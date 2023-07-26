@@ -14,6 +14,8 @@ library(sf)
 library(NestTool)
 library(pROC)
 
+start_time <- Sys.time()
+
 # LOAD AND FORMAT EXAMPLE TRACKING DATA
 setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis")
 
@@ -35,9 +37,10 @@ trackingdata<-readRDS("NestTool2/data/REKI_validation_tracks.rds") %>%
   mutate(lat_wgs=y_, long_wgs=x_) %>%
   mutate(timestamp=as.POSIXct(t_)) %>%
   rename(year_id=id) %>%
-  mutate(year_id=str_replace(string=year_id,pattern="\xf6",replacement="ö")) %>%
-  mutate(year_id=str_replace(string=year_id,pattern="Mostrichmöhle",replacement="Mostrichmühle")) %>%
-  mutate(bird_id=str_split_i(year_id,pattern="_",i=2)) %>%
+  mutate(year_id=str_replace(string=year_id,pattern="\xf6",replacement="ö")) %>%   ## takes all special characters and converts them to ü
+  mutate(year_id=str_replace(string=year_id,pattern="Mostrichmöhle",replacement="Mostrichmühle")) %>% ## manually replace the ü for ö
+  #mutate(bird_id=str_split_i(year_id,pattern="_",i=2)) %>%  ### this does not work because some birds have _03 in their name
+  mutate(bird_id=indseasondata$bird_id[match(year_id,indseasondata$year_id)]) %>%
   #mutate(event_id=seq_along(t_)) %>%
   filter(year_id %in% unique(indseasondata$year_id)) %>%
   filter(!is.na(x_)) %>%
@@ -86,9 +89,10 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
                       age =10)         # age of individuals for which no age is provided with data 
 
 names(nest_data_input$summary)
-nest_data_input$summary %>% dplyr::filter(is.na(age_cy)) %>% select(year_id,bird_id,sex,age_cy) %>%
+missinddat<-nest_data_input$summary %>% dplyr::filter(is.na(age_cy)) %>% select(year_id,bird_id,sex,age_cy) %>%
   filter(year_id %in% indseasondata$year_id)
-indseasondata  %>% select(year_id,bird_id,sex,age_cy)
+indseasondata  %>% dplyr::filter(year_id %in% missinddat$year_id) %>% select(year_id,bird_id,sex,age_cy)
+trackingdata  %>% dplyr::filter(year_id %in% missinddat$year_id) %>% group_by(year_id,bird_id) %>% summarise(N = length(timestamp))
 
 #### STEP 2: identify home ranges
 hr_model<-NestTool::hr_model
@@ -110,42 +114,40 @@ move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
                                      nest_locs=nest_data_input$pot_nests, 
                                      inddata=pred_succ,
                                      uncertainty=0.25,
-                                     nestradius=50,
+                                     nestradius=150,
                                      startseason=yday(ymd("2023-03-15")),
                                      endseason=yday(ymd("2023-07-10")))
 
 #### STEP 6: use ShinyApp to inspect all questionable individuals
-?movement_visualisation
-movement_visualisation(trackingdata=nest_data_input$movementtrack,
-                       nest_locs=nest_data_input$pot_nests, 
-                       inddata=pred_succ,
-                       move_metrics = move_metrics,
-                       uncertainty = 0.25,
-                       output_path="NestTool_VALIDATION_Saxony_nest_success_output.csv")
-
-### to find out where the file is stored:
-here::here()
+# ?movement_visualisation
+# movement_visualisation(trackingdata=nest_data_input$movementtrack,
+#                        nest_locs=nest_data_input$pot_nests, 
+#                        inddata=pred_succ,
+#                        move_metrics = move_metrics,
+#                        uncertainty = 0.25,
+#                        output_path="NestTool_VALIDATION_Saxony_nest_success_output.csv")
+# 
+# ### to find out where the file is stored:
+# here::here()
 
 #### STEP 7: summarise the demographic parameters for the population
 
 ## READ IN AND COMBINE DATA OF MANUALLY CLASSIFIED AND AUTOMATICALLY CLASSIFIED DATA
-MANUAL<-fread(here::here("NestTool_VALIDATION_Saxony_nest_success_output.csv")) %>%
-  rename(ManNest=Nest,ManSuccess=Success) %>%
-  select(year_id,ManNest,ManSuccess)
+# MANUAL<-fread(here::here("NestTool_VALIDATION_Saxony_nest_success_output.csv")) %>%
+#   rename(ManNest=Nest,ManSuccess=Success) %>%
+#   select(year_id,ManNest,ManSuccess)
+# ALL<-pred_succ %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
+#   left_join(MANUAL, by='year_id') %>%
+#   mutate(nest_prob=ifelse((!is.na(ManNest) & ManNest=="Yes"),1,nest_prob), succ_prob=ifelse((!is.na(ManSuccess) & ManSuccess=="Yes"),1,succ_prob)) %>%
+#   mutate(nest_prob=ifelse((!is.na(ManNest) & ManNest=="No"),0,nest_prob), succ_prob=ifelse((!is.na(ManSuccess) & ManSuccess=="No"),0,succ_prob)) %>%
+#   mutate(HR=ifelse(hr_prob>0.5,1,0),Nest=ifelse(nest_prob>0.5,1,0),Success=ifelse(succ_prob>0.5,1,0))
+
 ALL<-pred_succ %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
-  left_join(MANUAL, by='year_id') %>%
-  mutate(nest_prob=ifelse((!is.na(ManNest) & ManNest=="Yes"),1,nest_prob), succ_prob=ifelse((!is.na(ManSuccess) & ManSuccess=="Yes"),1,succ_prob)) %>%
-  mutate(nest_prob=ifelse((!is.na(ManNest) & ManNest=="No"),0,nest_prob), succ_prob=ifelse((!is.na(ManSuccess) & ManSuccess=="No"),0,succ_prob)) %>%
   mutate(HR=ifelse(hr_prob>0.5,1,0),Nest=ifelse(nest_prob>0.5,1,0),Success=ifelse(succ_prob>0.5,1,0))
 
-## breeding propensity - what proportion of birds with a homerange have a nesting attempt?
-ALL %>% filter(HR==1) %>% ungroup() %>%
-  summarise(Propensity=mean(Nest))
 
-## breeding success - what proportion of birds with a nesting attempt are successful?
-ALL %>% filter(Nest==1) %>% ungroup() %>%
-  summarise(Success=mean(Success))
-
+end_time <- Sys.time()
+runtimeSAX<-as.numeric(end_time - start_time,units="secs")
 
 
 ##############---------------------------------------------------------------------#################
@@ -167,7 +169,7 @@ nestthresh<-coords(ROC_val, "best", "threshold")$threshold
 ROC_val<-roc(data=VALIDAT,response=Success_true,predictor=succ_prob)
 succthresh<-coords(ROC_val, "best", "threshold")$threshold
 
-
+VALIDAT %>% filter(Nest=="YES") %>% filter(succ_prob>0.25 & succ_prob<0.75)
 
 ALL<-ALL %>%
   mutate(HR=ifelse(hr_prob>HRthresh,1,0),Nest=ifelse(nest_prob>nestthresh,1,0),Success=ifelse(succ_prob>succthresh,1,0))
@@ -197,9 +199,9 @@ caret::confusionMatrix(data = VALIDAT$HR_true[VALIDAT$hr_prob>0.75 | VALIDAT$hr_
 
 ### create plot of variables that differ
 HRmissid<-VALIDAT %>% filter(HR_true!=HR)
-
+table(VALIDAT$HR_true)
 nest_data_input$summary %>%
-  mutate(Prediction=ifelse(year_id %in% HRmissid$year_id,"wrong","correct")) %>%
+  mutate(Prediction=ifelse(year_id %in% HRmissid$year_id,"false","true")) %>%
   select(year_id,Prediction,median_day_dist_to_max_night,
          tottime100m,
          revisits_day,
@@ -212,7 +214,7 @@ nest_data_input$summary %>%
   gather(key="Variable",value="value",-year_id,-Prediction) %>%
   left_join(VALIDAT, by="year_id") %>%
   
-  ggplot(aes(x=Prediction,y=value,colour=HR)) +
+  ggplot(aes(x=HR,y=value,colour=Prediction)) +
   geom_point(position=position_jitterdodge(0.1)) +
   facet_wrap(~Variable, ncol=3, scales="free_y") +
   ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
@@ -235,7 +237,7 @@ VALIDAT <- VALIDAT %>%
                                                      Nest_true==0 ~ "NO"))) %>%
   dplyr::mutate(Nest = as.factor(dplyr::case_when(Nest==1 ~ "YES",
                                                 Nest==0 ~ "NO")))
-caret::confusionMatrix(data = VALIDAT$Nest_true, reference = VALIDAT$Nest, positive="YES")
+SAXval_nest<-caret::confusionMatrix(data = VALIDAT$Nest_true, reference = VALIDAT$Nest, positive="YES")
 caret::confusionMatrix(data = VALIDAT$Nest_true[VALIDAT$nest_prob>0.75 | VALIDAT$nest_prob<0.25], reference = VALIDAT$Nest[VALIDAT$nest_prob>0.75 | VALIDAT$nest_prob<0.25], positive="YES")
 
 
@@ -243,7 +245,7 @@ caret::confusionMatrix(data = VALIDAT$Nest_true[VALIDAT$nest_prob>0.75 | VALIDAT
 Nestmissid<-VALIDAT %>% filter(Nest_true!=Nest)
 
 nest_data_input$summary %>%
-  mutate(Prediction=ifelse(year_id %in% Nestmissid$year_id,"wrong","correct")) %>%
+  mutate(Prediction=ifelse(year_id %in% Nestmissid$year_id,"false","true")) %>%
   select(year_id,Prediction,median_day_dist_to_max_night,
          tottime100m,
          revisits_day,
@@ -256,7 +258,7 @@ nest_data_input$summary %>%
   gather(key="Variable",value="value",-year_id,-Prediction) %>%
   left_join(VALIDAT, by="year_id") %>%
   
-  ggplot(aes(x=Prediction,y=value,colour=Nest)) +
+  ggplot(aes(x=Nest,y=value,colour=Prediction)) +
   geom_point(position=position_jitterdodge(0.1)) +
   facet_wrap(~Variable, ncol=3, scales="free_y") +
   ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
@@ -288,7 +290,7 @@ caret::confusionMatrix(data = VALIDAT$Success_true[VALIDAT$succ_prob>0.75 | VALI
 
 ### create plot of variables that differ
 Successmissid<-VALIDAT %>% filter(Success_true!=Success)
-Successmissid<-VALIDAT %>% filter(Success_true!=ManSuccess)
+#Successmissid<-VALIDAT %>% filter(Success_true!=ManSuccess)
 
 nest_data_input$summary %>%
   mutate(Prediction=ifelse(year_id %in% Successmissid$year_id,"wrong","correct")) %>%
@@ -304,7 +306,7 @@ nest_data_input$summary %>%
   gather(key="Variable",value="value",-year_id,-Prediction) %>%
   left_join(VALIDAT, by="year_id") %>%
   
-  ggplot(aes(x=Prediction,y=value,colour=Success)) +
+  ggplot(aes(x=Success,y=value,colour=Prediction)) +
   geom_point(position=position_jitterdodge(0.1)) +
   facet_wrap(~Variable, ncol=3, scales="free_y") +
   ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
@@ -317,4 +319,25 @@ nest_data_input$summary %>%
 
 ggsave("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/plots/Success_validation_variable_plot.jpg", width=12, height=12)  
 
+
+
+
+
+##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+########## COMPILE THE OUTPUT REPORT   #############
+##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+library(knitr)
+library(markdown)
+library(rmarkdown)
+
+## create HTML report for overall summary report
+# Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/RStudio/resources/app/bin/quarto/share/pandoc")
+# pandoc_version()
+rmarkdown::render('C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool\\NestTool_ResultsValidation.Rmd',
+                  output_file = "NestTool_ResultsValidation.docx",
+                  output_dir = 'C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool')
+
+
+save.image("NestTool2/NestToolValidationSAX.RData")  
+load("NestTool2/NestToolValidationSAX.RData")
 
