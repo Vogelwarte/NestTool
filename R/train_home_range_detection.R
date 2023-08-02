@@ -43,8 +43,13 @@ if(!("HR" %in% names(trackingsummary))){
 }  
 
 # DATA PREPARATION -------------------------------------------------------------
-# cast dependend variable and sex to factor
-trackingsummary$HR <- factor(trackingsummary$HR, levels = c("yes", "no"))
+# cast dependent variable and sex to factor
+  if(is.numeric(trackingsummary$HR)==TRUE){
+    trackingsummary$HR <- factor(ifelse(trackingsummary$HR==1,"yes","no"), levels = c("yes", "no"))
+  } else{
+    trackingsummary$HR <- factor(trackingsummary$HR, levels = c("yes", "no"))
+  }
+
 trackingsummary$sex <- factor(trackingsummary$sex, levels = c("m","f"))
 
 
@@ -57,6 +62,11 @@ milvus_train <- trackingsummary %>%
 milvus_test <- trackingsummary %>%
   dplyr::filter(!year_id %in% milvus_id_train)
 names(milvus_train)
+
+
+# CREATE INFORMATIVE ERROR MESSAGE WHEN THERE ARE INSUFFICIENT DATA ---------------
+
+
 
 ############### LOOP OVER TUNING SETTINGS TO IMPROVE PERFORMANCE ##################
 dim.vars<-length(names(trackingsummary))-10
