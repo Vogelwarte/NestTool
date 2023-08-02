@@ -46,7 +46,7 @@ if(!("nest" %in% names(trackingsummary))){
   if(is.numeric(trackingsummary$nest)==TRUE){
     trackingsummary$nest <- factor(ifelse(trackingsummary$nest==1,"nest","no nest"), levels = c("nest", "no nest"))
   } else{
-    trackingsummary$nest <- factor(trackingsummary$nest, levels = c("yes", "no"))
+    trackingsummary$nest <- factor(trackingsummary$nest, levels = c("nest", "no nest"))
   }
 
 trackingsummary$sex <- factor(trackingsummary$sex, levels = c("m","f"))

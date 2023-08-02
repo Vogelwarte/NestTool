@@ -9,7 +9,7 @@
 #'
 #'
 #' @param nestingsummary data.frame created by \code{\link{predict_nesting}} with information on individual identity, age, sex, seasonal movement metrics, and the probability that nesting occurred in that season.
-#' Must contain a column 'success' with two possible values, 'yes' or 'no' to be able to train the model - these data will be read in by \code{\link{data_prep}} in the input data.frame \code{indseasondata}.
+#' Must contain a column 'success' with two possible values, 'yes' or 'no' (or 1 or 0) to be able to train the model (at least 5 of each are required) - these data will be read in by \code{\link{data_prep}} and should be present in the input data.frame \code{indseasondata}.
 #' If no such data are available, use \code{\link{predict_success}} instead.
 #' @param plot logical. If TRUE, a variable importance plot is produced.
 #' @return Returns a list with five elements: \code{model} is the random forest model to predict nesting;
@@ -61,8 +61,14 @@ nestingsummary <- nestingsummary %>%
          VarDist=stats::var(c(Dist95Incu1,Dist95Incu2,Dist95Chick1,Dist95Chick2)))
 
 # cast dependent variable and sex to factor
-nestingsummary$success <- factor(nestingsummary$success, levels = c("yes", "no"))
+if(is.numeric(nestingsummary$success)==TRUE){
+  nestingsummary$success <- factor(ifelse(nestingsummary$success==1,"yes", "no"), levels = c("yes", "no"))
+} else{
+  nestingsummary$success <- factor(nestingsummary$success, levels = c("yes", "no"))
+}
 nestingsummary$sex <- factor(nestingsummary$sex, levels = c("m","f"))
+
+
 
 # SPLIT DATA FRAME RANDOMLY INTO TWO--------------------------------------------
 
@@ -74,6 +80,21 @@ nestingsummary_train <- nestingsummary %>%
 nestingsummary_test <- nestingsummary %>%
   dplyr::filter(!year_id %in% training_ids)
 names(nestingsummary_train)
+
+
+
+# CREATE INFORMATIVE ERROR MESSAGE WHEN THERE ARE INSUFFICIENT DATA ---------------
+
+if(min(table(nestingsummary$success))<5){
+  print(sprintf("There are only %i cases of the minority class in your input datafile, which is insufficient for model training and testing. Either add more balanced data to train a model, or use the function 'predict_success' if you want to predict from an existing model.",
+                min(table(nestingsummary$success))))
+  break
+} 
+
+
+
+
+
 
 ############### LOOP OVER TUNING SETTINGS TO IMPROVE PERFORMANCE ##################
 tuning.out<-expand.grid(m=seq(1:30),t=c(500,750,100,1500,2000,2500,5000)) %>%

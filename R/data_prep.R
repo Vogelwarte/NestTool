@@ -13,7 +13,7 @@
 #' Must contain a timestamp, and coordinates in both geographic ('lat_wgs', 'long_wgs') and projected coordinate systems ('lat_eea', 'long_eea'). 
 #' @param indseasondata data.frame with nesting information per individual and season, which links to \code{trackingdata} by the unique identifier ('year_id').
 #' Must contain columns for the age ('age_cy' as integer in calender years) and sex ('sex': either 'm' or 'f') of individuals in that season.
-#' Will optionally contain three columns of binary training data, namely 'HR' (whether a home range existed or not), 'nest' (whether a nesting attempt took place) and 'fledged' (whether the nest was successful)
+#' Will optionally contain three columns of binary training data, namely 'HR' (whether a home range existed or not), 'nest' (whether a nesting attempt took place) and 'success' (whether the nest was successful)
 #' If no nesting information is available, \code{indseasondata} can be created from \code{trackingdata} by grouping and summarising \code{trackingdata} to yield one line per individual and season. 
 #' @param latboundary numeric. Value for the southern latitudinal boundary, i.e. locations will only be retained if \code{trackingdata$lat_wgs} is >\code{latboundary}
 #' @param longboundary  numeric. Value for the western longitudinal boundary, i.e. locations will only be retained if \code{trackingdata$long_wgs}  is >\code{longboundary}
