@@ -46,6 +46,20 @@ if(!("success" %in% names(nestingsummary))){
 
 
 # DATA PREPARATION -------------------------------------------------------------
+  
+# cast dependent variable and sex to factor
+  if(is.numeric(nestingsummary$success)==TRUE){
+    nestingsummary$success <- factor(ifelse(nestingsummary$success==1,"yes", "no"), levels = c("yes", "no"))
+  } else{
+    nestingsummary$success <- factor(nestingsummary$success, levels = c("yes", "no"))
+  }
+  nestingsummary$sex <- factor(nestingsummary$sex, levels = c("m","f"))  
+  
+  
+  
+  
+  
+  
 ## calculate differences between variables
 
 nestingsummary <- nestingsummary %>%
@@ -60,13 +74,7 @@ nestingsummary <- nestingsummary %>%
          VarMCP=stats::var(c(MCP95Incu1,MCP95Incu2,MCP95Chick1,MCP95Chick2)),
          VarDist=stats::var(c(Dist95Incu1,Dist95Incu2,Dist95Chick1,Dist95Chick2)))
 
-# cast dependent variable and sex to factor
-if(is.numeric(nestingsummary$success)==TRUE){
-  nestingsummary$success <- factor(ifelse(nestingsummary$success==1,"yes", "no"), levels = c("yes", "no"))
-} else{
-  nestingsummary$success <- factor(nestingsummary$success, levels = c("yes", "no"))
-}
-nestingsummary$sex <- factor(nestingsummary$sex, levels = c("m","f"))
+
 
 
 
