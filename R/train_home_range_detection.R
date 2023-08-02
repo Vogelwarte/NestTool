@@ -8,7 +8,7 @@
 #'
 #'
 #' @param trackingsummary data.frame created by \code{\link{data_prep}} with information on individual identity, age, sex, and seasonal movement metrics.
-#' Must contain a column 'HR' with two possible values, 'nest' or 'no' to be able to train the model. If no such data are available, use \code{\link{predict_ranging}} instead.
+#' Must contain a column 'HR' with two possible values, 'yes' or 'no' (or 1 or 0) to be able to train the model (at least 5 of each are required). If no such data are available, use \code{\link{predict_ranging}} instead.
 #' @param plot logical. If TRUE, a variable importance plot is produced.
 #' @return Returns a list with four elements: \code{model} is the random forest model to predict ranging;
 #' \code{summary} is the output data.frame with predicted probabilities of a home range;

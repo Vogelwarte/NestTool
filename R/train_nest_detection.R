@@ -8,7 +8,7 @@
 #'
 #'
 #' @param trackingsummary data.frame created by \code{\link{data_prep}} with information on individual identity, age, sex, and seasonal movement metrics.
-#' Must contain a column 'nest' with two possible values, 'no nest' or 'nest' to be able to train the model. If no such data are available, use \code{\link{predict_nesting}} instead.
+#' Must contain a column 'nest' with two possible values, 'no nest' or 'nest' (or 0 or 1) to be able to train the model (at least 5 of each are required). If no such data are available, use \code{\link{predict_nesting}} instead.
 #' @param plot logical. If TRUE, a variable importance plot is produced.
 #' @return Returns a list with four elements: \code{model} is the random forest model to predict nesting;
 #' \code{summary} is the output data.frame with predicted probabilities of a nest, including all input data for further use in \code{\link{predict_success}};
@@ -42,8 +42,13 @@ if(!("nest" %in% names(trackingsummary))){
 }  
 
 # DATA PREPARATION -------------------------------------------------------------
-# cast dependend variable and sex to factor
-trackingsummary$nest <- factor(trackingsummary$nest, levels = c("nest", "no nest"))
+# cast dependent variable and sex to factor
+  if(is.numeric(trackingsummary$nest)==TRUE){
+    trackingsummary$nest <- factor(ifelse(trackingsummary$nest==1,"nest","no nest"), levels = c("nest", "no nest"))
+  } else{
+    trackingsummary$nest <- factor(trackingsummary$nest, levels = c("yes", "no"))
+  }
+
 trackingsummary$sex <- factor(trackingsummary$sex, levels = c("m","f"))
 
 
@@ -56,6 +61,17 @@ milvus_train <- trackingsummary %>%
 milvus_test <- trackingsummary %>%
   dplyr::filter(!year_id %in% milvus_id_train)
 names(milvus_train)
+
+
+
+# CREATE INFORMATIVE ERROR MESSAGE WHEN THERE ARE INSUFFICIENT DATA ---------------
+
+if(min(table(trackingsummary$nest))<5){
+  print(sprintf("There are only %i cases of the minority class in your input datafile, which is insufficient for model training and testing. Either add more balanced data to train a model, or use the function 'predict_nesting' if you want to predict from an existing model.",
+                min(table(trackingsummary$nest))))
+  break
+} 
+
 
 ############### LOOP OVER TUNING SETTINGS TO IMPROVE PERFORMANCE ##################
 dim.vars<-length(names(trackingsummary))-10
