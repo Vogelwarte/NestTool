@@ -66,6 +66,11 @@ names(milvus_train)
 
 # CREATE INFORMATIVE ERROR MESSAGE WHEN THERE ARE INSUFFICIENT DATA ---------------
 
+if(min(table(trackingsummary$HR))<5){
+  print(sprintf("There are only %i cases of the minority class in your input datafile, which is insufficient for model training and testing. Either add more balanced data to train a model, or use the function 'predict_ranging' if you want to predict from an existing model.",
+                min(table(trackingsummary$HR))))
+  break
+} 
 
 
 ############### LOOP OVER TUNING SETTINGS TO IMPROVE PERFORMANCE ##################
