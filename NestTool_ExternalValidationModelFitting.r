@@ -3,9 +3,14 @@
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~###########
 
 ### VALIDATION DATA PROVIDED BY MARTIN KOLBE AT ROTMILANZENTRUM (GER)
+### COMBINED WITH DATA FROM THOMAS PFEIFFER FROM THüRINGEN
 
-### second attempt trying to re-build models - does not work with hourly data because too few cases
-### need to downsample data to 15 min intervals and then try again
+### tried to re-build models - does not work with hourly data because too few cases
+### but even with 15 min resolution there are too few cases of no HR and no nest -> CANNOT BUILD MODELS
+### validation based on extrapolated models from SUI
+### only nest success model will be fit for GER
+
+
 
 # install.packages("devtools", dependencies = TRUE)
 # library(devtools)
@@ -31,11 +36,6 @@ indseasondata <- read_excel("NestTool2/data/REKI_NestTool_ValidationDataTemplate
   mutate(success=ifelse(n_fledglings>0,1,0)) %>%
   select(year_id,bird_id,sex,age_cy,HR,nest,success)
 
-### ensure correct factor levels of sex to facilitate prediction
-indseasondata$sex<-factor(indseasondata$sex, levels=c('m','f'))
-str(indseasondata$sex)
-indseasondata %>% filter(is.na(age_cy))
-
 trackingdata<-readRDS("NestTool2/data/REKI_validation_tracks.rds") %>%
   bind_rows(readRDS("NestTool2/data/ANITRA_validation_tracks.rds") %>% select(x_,y_,t_,year_id,burst_) %>% rename(id=year_id)) %>%
   mutate(lat_wgs=y_, long_wgs=x_) %>%
@@ -57,12 +57,34 @@ trackingdata<-readRDS("NestTool2/data/REKI_validation_tracks.rds") %>%
   arrange(year_id,timestamp) %>%
   ungroup()
 head(trackingdata)
+dim(trackingdata)
+# unique(trackingdata$bird_id)
+# unique(trackingdata$year_id)
 
-unique(trackingdata$bird_id)
-unique(trackingdata$year_id)
+
+
+# ADD BIRDS FROM THURINGEN
+THUdata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/04_milvus_thuringia.csv")
+##make up indseasondata as input is now mandatory
+indseasondata <- THUdata %>% group_by(year_id) %>%
+  summarise(sex=first(sex), bird_id=first(bird_id)) %>%
+  mutate(HR=1,nest=1,success=1, age_cy=6) %>%  ### all birds bred successfully and were adult
+  select(year_id,bird_id,sex,age_cy,HR,nest,success) %>%
+  bind_rows(indseasondata)
+
+trackingdata<- THUdata %>% select(year_id,bird_id,timestamp,long_wgs,lat_wgs,long_eea,lat_eea) %>%
+  arrange(year_id,timestamp) %>%
+  ungroup() %>%
+  bind_rows(trackingdata)
+dim(trackingdata)
+
+### ensure correct factor levels of sex to facilitate prediction
+indseasondata$sex<-factor(indseasondata$sex, levels=c('m','f'))
 
 ### for these birds there are no tracking data
 indseasondata[-(which(indseasondata$year_id %in% unique(trackingdata$year_id))),]
+
+
 
 
 #### PRELIMINARY ASSESSMENT - WHICH BIRDS HAVE ENOUGH DATA
