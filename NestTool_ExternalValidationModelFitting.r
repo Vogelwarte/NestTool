@@ -135,9 +135,10 @@ pred_nest<-predict_nesting(model=nest_model$model,trackingsummary=pred_hr) # use
 
 
 #### STEP 4: determine outcome
-#succ_model<-NestTool::succ_model
+succ_model<-NestTool::succ_model
 succ_model_GER<-train_nest_success(nestingsummary=pred_nest,plot=T)
 pred_succ<-predict_success(model=succ_model_GER$model,nestingsummary=pred_nest, nest_cutoff=succ_model$nest_cutoff) # uses the model trained with our data (automatically loaded in the function)
+pred_succ_SUI<-predict_success(model=succ_model$model,nestingsummary=pred_nest, nest_cutoff=succ_model$nest_cutoff) # uses the model trained with our data (automatically loaded in the function)
 
 #### STEP 5: extract weekly movement metrics for manual classification
 # move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
@@ -172,9 +173,15 @@ pred_succ<-predict_success(model=succ_model_GER$model,nestingsummary=pred_nest, 
 #   mutate(nest_prob=ifelse((!is.na(ManNest) & ManNest=="No"),0,nest_prob), succ_prob=ifelse((!is.na(ManSuccess) & ManSuccess=="No"),0,succ_prob)) %>%
 #   mutate(HR=ifelse(hr_prob>0.5,1,0),Nest=ifelse(nest_prob>0.5,1,0),Success=ifelse(succ_prob>0.5,1,0))
 
-ALL<-pred_succ %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
-  mutate(HR=ifelse(hr_prob>0.5,1,0),Nest=ifelse(nest_prob>0.5,1,0),Success=ifelse(succ_prob>0.5,1,0))
 
+
+##### COMBINE PREDICTIONS FOR NEST SUCCESS FROM SUISSE AND GERMAN MODEL
+ALL<-pred_succ_SUI %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
+  mutate(HR=ifelse(hr_prob>0.5,1,0),Nest=ifelse(nest_prob>0.5,1,0),Success=ifelse(succ_prob>0.5,1,0))
+ALL<-pred_succ %>% select(year_id,succ_prob) %>%
+  mutate(Success_GER=ifelse(succ_prob>0.5,1,0)) %>%
+  rename(succ_prob_GER=succ_prob) %>%
+  left_join(ALL,by="year_id")
 
 end_time <- Sys.time()
 runtimeSAX<-as.numeric(end_time - start_time,units="secs")
@@ -207,10 +214,13 @@ nestthresh<-pROC::coords(ROC_val_nest, "best", "threshold")$threshold
 ROC_val_succ<-roc(data=VALIDAT,response=Success_true,predictor=succ_prob)
 succthresh<-pROC::coords(ROC_val_succ, "best", "threshold")$threshold
 
+ROC_val_succ_GER<-roc(data=VALIDAT,response=Success_true,predictor=succ_prob_GER)
+succthresh_GER<-pROC::coords(ROC_val_succ_GER, "best", "threshold")$threshold
+
 # VALIDAT %>% filter(Nest=="YES") %>% filter(succ_prob>0.25 & succ_prob<0.75)
 
 VALIDAT<-VALIDAT %>%
-  mutate(Nest=ifelse(nest_prob>nestthresh,1,0),Success=ifelse(succ_prob>succthresh,1,0)) #HR=ifelse(hr_prob>HRthresh,1,0),
+  mutate(Nest=ifelse(nest_prob>nestthresh,1,0),Success=ifelse(succ_prob>succthresh,1,0),Success_GER=ifelse(succ_prob_GER>succthresh_GER,1,0)) #HR=ifelse(hr_prob>HRthresh,1,0),
 
 ## breeding propensity - what proportion of birds with a homerange have a nesting attempt?
 VALIDAT %>% filter(HR==1) %>% ungroup() %>%
@@ -218,7 +228,7 @@ VALIDAT %>% filter(HR==1) %>% ungroup() %>%
 
 ## breeding success - what proportion of birds with a nesting attempt are successful?
 VALIDAT %>% filter(Nest==1) %>% ungroup() %>%
-  summarise(Success=mean(Success))
+  summarise(Success=mean(Success), Success_GER=mean(Success_GER))
 
 
 
@@ -321,8 +331,11 @@ VX <- VX %>%
   dplyr::mutate(Success_true = as.factor(dplyr::case_when(Success_true==1 ~ "YES",
                                                        Success_true==0 ~ "NO"))) %>%
   dplyr::mutate(Success = as.factor(dplyr::case_when(Success==1 ~ "YES",
-                                                  Success==0 ~ "NO")))
+                                                  Success==0 ~ "NO"))) %>%
+  dplyr::mutate(Success_GER = as.factor(dplyr::case_when(Success_GER==1 ~ "YES",
+                                                     Success_GER==0 ~ "NO")))
 caret::confusionMatrix(data = VX$Success_true, reference = VX$Success, positive="YES")
+caret::confusionMatrix(data = VX$Success_true, reference = VX$Success_GER, positive="YES")
 caret::confusionMatrix(data = VX$Success_true[VX$succ_prob>0.75 | VX$succ_prob<0.25], reference = VX$Success[VX$succ_prob>0.75 | VX$succ_prob<0.25], positive="YES")
 
 
@@ -373,10 +386,10 @@ library(rmarkdown)
 # Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/RStudio/resources/app/bin/quarto/share/pandoc")
 # pandoc_version()
 rmarkdown::render('C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool\\NestTool_ResultsValidation.Rmd',
-                  output_file = "NestTool_ResultsValidation_60min.html",
+                  output_file = "NestTool_ResultsValidation_GER.html",
                   output_dir = 'C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool')
 
 
-save.image("NestTool2/NestToolValidationSAX_60min.RData")  
-load("NestTool2/NestToolValidationSAX.RData")
+save.image("NestTool2/NestToolValidation_GER.RData")  
+load("NestTool2/NestToolValidation_GER.RData")
 
