@@ -57,7 +57,7 @@ movement_visualisation <- function(trackingdata,
            "TCh2" = round(timeChick2),
            "VCh2" = revisitsChick2,
            "TDay" = round(residence_time_day),
-           "TotT" = round(tottime100m),
+           "TotT" = round(tottime_nest),
            "VDay" = revisits_day,
            "PNest" = paste(round(nest_prob*100), "%"),
            Nest = NA, Success = NA) %>%
