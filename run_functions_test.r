@@ -79,8 +79,8 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
 names(nest_data_input$summary)
 #fwrite(nest_data_input$summary,here("output/05_full_run_CH/trackingsummary.csv"))
 #fwrite(nest_data_input$summary,here("output/05_full_run_THU/trackingsummary.csv"))
-#saveRDS(nest_data_input, here("output/05_full_run_CH/nest_data_input_CH.rds"))
-#nest_data_input <- readRDS(here("output/05_full_run_CH/nest_data_input_CH.rds"))
+saveRDS(nest_data_input, "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/05_full_run_CH/nest_data_input_CH.rds")
+nest_data_input <- readRDS("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/05_full_run_CH/nest_data_input_CH.rds")
 
 
 
@@ -186,7 +186,7 @@ suppressWarnings({certain_test<-caret::confusionMatrix(data = succ_test_cert$suc
 milvus_5d_move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
                                                nest_locs=nest_data_input$pot_nests, 
                                      inddata=pred_succ,
-                                     uncertainty=0.45,
+                                     uncertainty=0.25,
                                      nestradius=50,
                                      startseason=70,endseason=175)
 #fwrite(milvus_5d_move_metrics,here("output/05_full_run_CH/movemetrics.csv"))
@@ -208,10 +208,9 @@ movement_visualisation(trackingdata = nest_data_input$movementtrack,
 
 
 #### OPTIONAL STEP: show movement metrics 
-plot_move_metrics(movemetrics=milvus_5d_move_metrics, individual="2022_526")
+plot_move_metrics(movemetrics=milvus_5d_move_metrics, individual="2017_186")
 
-names(pred_succ_)[!(names(pred_succ_) %in% names(pred_succ))]
-names(pred_succ)[!(names(pred_succ) %in% names(pred_succ_))]
+names(pred_succ)[!(names(pred_succ) %in% names(pred_succ))]
 # ### examples of unsuccessful birds:
 # i="2017_186"
 # i="2017_187"
@@ -235,7 +234,7 @@ names(pred_succ)[!(names(pred_succ) %in% names(pred_succ_))]
 #### SUMMARISE BREEDING PROPENSITY AND SUCCESS
 
 ## READ IN AND COMBINE DATA OF MANUALLY CLASSIFIED AND AUTOMATICALLY CLASSIFIED DATA
-MANUAL<-fread("output/05_full_run_CH/nest_success_output.csv") %>%
+MANUAL<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/05_full_run_CH/nest_success_output.csv") %>%
   rename(ManNest=Nest,ManSuccess=Success) %>%
   select(year_id,ManNest,ManSuccess)
 ALL<-pred_succ %>% select(year_id,nest_observed,success_observed,hr_observed,hr_prob,nest_prob,succ_prob) %>%
