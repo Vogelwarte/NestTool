@@ -275,6 +275,13 @@ nest_data_input$summary %>%
 
 ggsave("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/plots/HR_validation_variable_plot.jpg", width=12, height=12)  
 
+HRmissid<-VX %>% filter(HR_true!=HR)
+table(VX$HR_true)
+round(as.numeric(nest_data_input$summary %>%
+  filter(year_id %in% HRmissid$year_id)  %>%
+  filter(HR==0) %>%
+  ungroup() %>%
+  select(median_day_dist_to_max_night))/1000,1)
 
 
 ### 8.2. evaluate nesting identification
