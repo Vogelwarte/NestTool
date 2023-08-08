@@ -87,8 +87,8 @@ names(nest_data_input$summary)
 #### STEP 2: train home range model (if training data available)
 trackingsummary<-nest_data_input$summary
 hr_model<-train_home_range_detection(trackingsummary=trackingsummary,plot=T)
-saveRDS(hr_model, "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/dataR/hr_model.rds")
-usethis::use_data(hr_model, overwrite=TRUE)
+# saveRDS(hr_model, "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/dataR/hr_model.rds")
+# usethis::use_data(hr_model, overwrite=TRUE)
 
 
 #### STEP 3: identify home ranges
@@ -103,7 +103,7 @@ trackingsummary<-nest_data_input$summary
 #trackingsummary <- fread(here("output/05_full_run_THU/trackingsummary.csv"))
 unique(trackingsummary$nest) # now includes NA which must be removed for training model
 nest_model<-train_nest_detection(trackingsummary=trackingsummary[!is.na(trackingsummary$nest),],plot=T)
-usethis::use_data(nest_model, overwrite=TRUE)
+# usethis::use_data(nest_model, overwrite=TRUE)
 #saveRDS(nest_model, "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/nest_model.rds"))
 
 
@@ -115,7 +115,7 @@ pred_nest<-predict_nesting(model=nest_model$model,trackingsummary=pred_hr) # if 
 #fwrite(pred_nest,here("output/05_full_run_CH/nestingsummary.csv"))
 #fwrite(pred_nest,here("output/05_full_run_THU/nestingsummary.csv"))
 names(pred_nest)
-
+dim(pred_nest)
 
 
 #### STEP 6: train outcome model (if training data available)
@@ -124,7 +124,7 @@ names(pred_nest)
 #nestingsummary<-fread(here("output/05_full_run_CH/nestingsummary.csv"))
 #nestingsummary<-fread(here("output/05_full_run_THU/nestingsummary.csv"))
 succ_model<-train_nest_success(nestingsummary=pred_nest[pred_nest$success %in% c("yes","no"),],plot=T)
-usethis::use_data(succ_model, overwrite=TRUE)
+#usethis::use_data(succ_model, overwrite=TRUE)
 #saveRDS(succ_model, here("R/succ_model.rds"))
 
 
@@ -138,6 +138,19 @@ pred_succ<-predict_success(model=succ_model$model,nestingsummary=pred_nest,nest_
 #fwrite(pred_succ,here("output/05_full_run_CH/successsummary.csv"))
 #fwrite(pred_succ,here("output/05_full_run_THU/successsummary.csv"))
 
+### filter out the uncertain seasons
+hist(pred_succ$succ_prob[])
+pred_succ %>% dplyr::filter(success_observed %in% c("yes","no"))  %>%     ### filter out all data that are not useful for training purposes
+  mutate(certain=ifelse(succ_prob>=0.75 | succ_prob <=(1-0.75),1,0)) %>%
+  ungroup() %>%
+  summarise(prop_certain=sum(certain)/length(certain))
+
+succ_test_cert <- pred_succ %>% dplyr::filter(success_observed %in% c("yes","no"))  %>%     ### filter out all data that are not useful for training purposes
+  filter(succ_prob>=0.75 | succ_prob <=(1-0.75)) %>%
+  dplyr::mutate(success_predicted = as.factor(dplyr::case_when(succ_prob > no_succ_prob ~ "yes",
+                                                               succ_prob < no_succ_prob ~ "no")))
+succ_test_cert$success <- factor(ifelse(succ_test_cert$success_observed=="yes","yes", "no"), levels = c("yes", "no"))
+suppressWarnings({certain_test<-caret::confusionMatrix(data = succ_test_cert$success, reference = succ_test_cert$success_predicted)})
 
 
 
