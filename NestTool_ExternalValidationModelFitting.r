@@ -251,7 +251,7 @@ table(VX$HR_true)
 nest_data_input$summary %>%
   mutate(Prediction=ifelse(year_id %in% HRmissid$year_id,"false","true")) %>%
   select(year_id,Prediction,median_day_dist_to_max_night,
-         tottime100m,
+         tottime_nest,
          revisits_day,
          residence_time_night,
          residence_time_day,
@@ -295,7 +295,7 @@ Nestmissid<-VX %>% filter(Nest_true!=Nest)
 nest_data_input$summary %>%
   mutate(Prediction=ifelse(year_id %in% Nestmissid$year_id,"false","true")) %>%
   select(year_id,Prediction,median_day_dist_to_max_night,
-         tottime100m,
+         tottime_nest,
          revisits_day,
          residence_time_night,
          residence_time_day,
@@ -392,4 +392,13 @@ rmarkdown::render('C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\
 
 save.image("NestTool2/NestToolValidation_GER.RData")  
 load("NestTool2/NestToolValidation_GER.RData")
+
+
+### WRITE MANUSCRIPT RESULTS SECTION ###
+
+rmarkdown::render('C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool\\NestTool_ResultsSection_GER.Rmd',
+                  output_file = "NestTool_ResultsSection_GER.docx",
+                  output_dir = 'C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool')
+
+
 
