@@ -256,6 +256,7 @@ fig2_move_metrics<-data.frame()
 for (i in fig2inds$year_id) {
   
   ind_track<-milvus_track %>% dplyr::filter(id==i)
+  ind_times<-absence_times %>% dplyr::filter(id==i)
   ind_track_amt<-milvus_track_amt %>% dplyr::filter(id==i)
   
   for (w in wincentres) {
@@ -264,21 +265,37 @@ for (i in fig2inds$year_id) {
     
     if(dim(win_track)[1]>1){
       
+      win_times<-ind_times %>% dplyr::mutate(yday=lubridate::yday(entranceTime)) %>% dplyr::filter(yday %in% window)
       win_track_amt<-ind_track_amt %>% dplyr::mutate(yday=lubridate::yday(t_)) %>% dplyr::filter(yday %in% window)
       
-      ### calculate mean daily travel distance and distance from nest
+      ### calculate mean daily distance from nest
       day_sum<-win_track %>% dplyr::group_by(id,yday) %>%
-        dplyr::summarise(daydist=sum(step_dist,na.rm=T)) %>%
+        dplyr::summarise(nestdist=max(nest_dist,na.rm=T)) %>%
         dplyr::ungroup() %>%
         dplyr::group_by(id) %>%
-        dplyr::summarise(median_daydist=median(daydist,na.rm=T))
+        dplyr::summarise(median_nestdist=median(nestdist,na.rm=T))
       
       ### calculate MCP95
       day_sum$MCP<-as.numeric(amt::hr_mcp(win_track_amt, levels=0.95)$mcp$area)/10000  ## convert home range area to hectares
       
+      ### calculate time at nest and max time away from nest
+      if(dim(win_times)[1]>0){
+        day_sum<-win_times %>% dplyr::group_by(id,yday) %>%
+          dplyr::summarise(time=sum(timeInside)) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(id) %>%
+          dplyr::summarise(median_time_at_nest=median(time,na.rm=T)) %>%
+          dplyr::mutate(median_time_at_nest=ifelse(median_time_at_nest>24,24,median_time_at_nest)) %>% ## time at nest cannot exceed hrs in the day, but can occur mathematically because recursions are calculated not daily
+          dplyr::left_join(day_sum, by="id")        ## calculate median daily time at nest
+        suppressWarnings({day_sum<-win_times %>% dplyr::summarise(max_time_away_from_nest=max(timeSinceLastVisit,na.rm=T)) %>% bind_cols(day_sum)}) ## calculate max time away from nest
+      }else{
+        day_sum$median_time_at_nest<-ifelse(day_sum$median_nestdist>150,0,24)         ## if there are no locations near the nest the bird spent all time away
+        day_sum$max_time_away_from_nest<-ifelse(day_sum$median_nestdist>150,5*24,0)   ## if there are no locations near the nest then the bird was away all 5 days
+      }
+      
       ## summarise the output and write into data.frame
       fig2_move_metrics<- day_sum %>% dplyr::mutate(week=format(parse_date_time(x = w, orders = "j"), format="%d %b")) %>%
-        dplyr::select(id,week,MCP,median_daydist) %>%
+        dplyr::select(id,week,median_nestdist,median_time_at_nest,max_time_away_from_nest) %>%
         dplyr::bind_rows(fig2_move_metrics)
       
     }else{print(sprintf("no data for %s in week %s",i,format(lubridate::parse_date_time(x = w, orders = "j"), format="%d %b")))}
@@ -296,10 +313,11 @@ fig2_move_metrics <- fig2_move_metrics %>% rename(year_id=id) %>%
 # plotting
 
 plot_df<-fig2_move_metrics %>%
-  select(-nest_observed,-nest_prob) %>%
-  dplyr::filter(year_id %in% c("2019_426","2019_28","2022_747")) %>%  ## select three animals at a time
-  dplyr::rename(`Home range size (95% MCP, ha)`= MCP,
-                `Median daily travel distance (m)`= median_daydist,
+  select(-success_observed, -succ_prob) %>%
+  dplyr::filter(year_id %in% c("2019_337","2020_270","2021_342")) %>%  ## select three animals at a time
+  dplyr::rename(`Median max distance from nest (m)`= median_nestdist,
+       `Median daily time at nest (hrs)`= median_time_at_nest,
+       `Max time away from nest (hrs)`= max_time_away_from_nest,
   ) %>%
   tidyr::gather(key="MoveMetric",value="Value",-year_id,-week,-age_cy,-sex,-label) %>%
   dplyr::filter(!is.na(Value)) %>%
