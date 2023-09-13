@@ -218,7 +218,7 @@ movement_visualisation <- function(trackingdata,
                               # Table with brood specific metrics of the inspected bird
                               fluidRow(style = "padding-left:15px;",
                                        column(width = 12, class = "well", style = "height: 750px;",
-                                              h3("Movement metrics & nest decisions"),
+                                              h3("List of individuals for manual nest and success classification"),
                                               div(DT::dataTableOutput("table"),
                                                   # style = "font-size:clamp(10px, 0.6vw, 0.7vw);") # this would allow dynamic adaptation of font size based on window size
                                                   style = "font-size:12px;")
