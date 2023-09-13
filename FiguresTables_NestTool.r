@@ -108,7 +108,9 @@ milvus_track <- as.data.frame(milvus_track_amt) %>% dplyr::left_join(nest_data_i
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### plot only home range size and median daily travel distance
-fig1inds<-c(NONESTEX$year_id,SUCCEX$year_id,UNCERTNESTEX$year_id)
+fig1inds<-bind_rows(NONESTEX,SUCCEX,UNCERTNESTEX) %>%
+  select(year_id,age_cy,sex,nest_observed,nest_prob) %>%
+  mutate(label=if_else(nest_prob==0,"not breeding",if_else(nest_prob>0.9,"breeding","uncertain")))
 
 
 
@@ -126,7 +128,7 @@ fig1_move_metrics<-data.frame()
 
 ##### start loop across all individuals and time windows ##############################################################################################
 
-for (i in fig1inds) {
+for (i in fig1inds$year_id) {
   
   ind_track<-milvus_track %>% dplyr::filter(id==i)
   ind_track_amt<-milvus_track_amt %>% dplyr::filter(id==i)
@@ -161,11 +163,44 @@ for (i in fig1inds) {
 
 ##### end of loop across all individuals and weeks ##############################################################################################
 
-milvus_5d_move_metrics <- milvus_5d_move_metrics %>% dplyr::left_join(
-  (inddata %>% dplyr::select(year_id,sex,age_cy) %>%
-     dplyr::rename(id=year_id)),by ="id")
+fig1_move_metrics <- fig1_move_metrics %>% rename(year_id=id) %>%
+  dplyr::left_join(fig1inds,by ="year_id")
 
 
+
+# plotting
+
+plot_df<-fig1_move_metrics %>%
+  select(-nest_observed,-nest_prob) %>%
+  dplyr::filter(year_id %in% c("2018_17","2018_5","2020_270")) %>%  ## select three animals at a time
+  dplyr::rename(`Home range size (95% MCP, ha)`= MCP,
+                `Median daily travel distance (m)`= median_daydist,
+  ) %>%
+  tidyr::gather(key="MoveMetric",value="Value",-year_id,-week,-age_cy,-sex,-label) %>%
+  dplyr::filter(!is.na(Value)) %>%
+  dplyr::mutate(Date=lubridate::dmy(paste0(week, "2020"))) %>%
+  dplyr::ungroup()
+
+
+ggplot2::ggplot(plot_df) +
+  ggplot2::geom_point(ggplot2::aes(x = Date, y=Value, color=MoveMetric), size = 2) +
+  ggplot2::geom_line(ggplot2::aes(x = Date, y=Value, color=MoveMetric, group=MoveMetric), linewidth = 1) +
+  ggplot2::facet_grid(MoveMetric~label, scales="free_y") + 
+  
+  ggplot2::labs(y = "", x = "5 day moving window over season") +
+  ggplot2::scale_x_date(date_breaks="2 weeks",date_labels=format("%d %b")) +
+  ggplot2::theme(plot.title = ggplot2::element_text(colour = "darkolivegreen",
+                                                    size = 12,hjust = 0.5),
+                 panel.background=ggplot2::element_rect(fill="#ecf0f1", colour="black"),
+                 plot.background=ggplot2::element_rect(fill="#ecf0f1"),
+                 legend.position="none",
+                 panel.grid.major = ggplot2::element_line(colour = "gray70", size = .05),
+                 panel.grid.minor = ggplot2::element_line(colour = "gray70"),
+                 axis.text=ggplot2::element_text(size=10, color="black"),
+                 axis.title=ggplot2::element_text(size=10), 
+                 strip.text=ggplot2::element_text(size=10, color="black"), 
+                 strip.background=ggplot2::element_rect(fill="#ecf0f1", colour="black")
+  )
 
 
 
