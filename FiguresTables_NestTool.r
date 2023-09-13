@@ -312,9 +312,9 @@ fig2_move_metrics <- fig2_move_metrics %>% rename(year_id=id) %>%
 plot_df<-fig2_move_metrics %>%
   select(-success_observed, -succ_prob) %>%
   dplyr::filter(year_id %in% c("2019_337","2020_270","2021_342")) %>%  ## select three animals at a time
-  dplyr::rename(`Median max distance from nest (m)`= median_nestdist,
-       `Median daily time at nest (hrs)`= median_time_at_nest,
-       `Max time away from nest (hrs)`= max_time_away_from_nest,
+  dplyr::rename(`distance from nest (m)`= median_nestdist,
+       `daily time at nest (hrs)`= median_time_at_nest,
+       `time away from nest (hrs)`= max_time_away_from_nest,
   ) %>%
   tidyr::gather(key="MoveMetric",value="Value",-year_id,-week,-age_cy,-sex,-label) %>%
   dplyr::filter(!is.na(Value)) %>%
