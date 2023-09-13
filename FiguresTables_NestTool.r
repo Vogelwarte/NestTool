@@ -189,18 +189,15 @@ ggplot2::ggplot(plot_df) +
   
   ggplot2::labs(y = "", x = "") +
   ggplot2::scale_x_date(date_breaks="2 weeks",date_labels=format("%d %b")) +
-  ggplot2::theme(plot.title = ggplot2::element_text(colour = "darkolivegreen",
-                                                    size = 12,hjust = 0.5),
-                 panel.background=ggplot2::element_rect(fill="#ecf0f1", colour="black"),
-                 plot.background=ggplot2::element_rect(fill="#ecf0f1"),
+  ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"),
+                 plot.background=ggplot2::element_rect(fill="white"),
                  legend.position="none",
                  panel.grid.major = ggplot2::element_line(colour = "gray70", size = .05),
                  panel.grid.minor = ggplot2::element_line(colour = "gray70"),
                  axis.text=ggplot2::element_text(size=10, color="black"),
                  axis.title=ggplot2::element_text(size=12), 
                  strip.text=ggplot2::element_text(size=12, color="black"), 
-                 strip.background=ggplot2::element_rect(fill="#ecf0f1", colour="black")
-  )
+                 strip.background=ggplot2::element_rect(fill="white", colour="black"))
 
 ggsave("C:/Users/sop/OneDrive - Vogelwarte/General/MANUSCRIPTS/NestTool/Fig_1.jpg", width=13, height=7)
 
@@ -332,18 +329,15 @@ ggplot2::ggplot(plot_df) +
   
   ggplot2::labs(y = "", x = "") +
   ggplot2::scale_x_date(date_breaks="2 weeks",date_labels=format("%d %b")) +
-  ggplot2::theme(plot.title = ggplot2::element_text(colour = "darkolivegreen",
-                                                    size = 12,hjust = 0.5),
-                 panel.background=ggplot2::element_rect(fill="#ecf0f1", colour="black"),
-                 plot.background=ggplot2::element_rect(fill="#ecf0f1"),
+  ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"),
+                 plot.background=ggplot2::element_rect(fill="white"),
                  legend.position="none",
                  panel.grid.major = ggplot2::element_line(colour = "gray70", size = .05),
                  panel.grid.minor = ggplot2::element_line(colour = "gray70"),
                  axis.text=ggplot2::element_text(size=10, color="black"),
                  axis.title=ggplot2::element_text(size=12), 
                  strip.text=ggplot2::element_text(size=12, color="black"), 
-                 strip.background=ggplot2::element_rect(fill="#ecf0f1", colour="black")
-  )
+                 strip.background=ggplot2::element_rect(fill="white", colour="black"))
 
 ggsave("C:/Users/sop/OneDrive - Vogelwarte/General/MANUSCRIPTS/NestTool/Fig_2.jpg", width=13, height=7)
 
