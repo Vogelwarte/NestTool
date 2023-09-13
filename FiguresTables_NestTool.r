@@ -172,7 +172,7 @@ fig1_move_metrics <- fig1_move_metrics %>% rename(year_id=id) %>%
 
 plot_df<-fig1_move_metrics %>%
   select(-nest_observed,-nest_prob) %>%
-  dplyr::filter(year_id %in% c("2018_17","2018_5","2020_270")) %>%  ## select three animals at a time
+  dplyr::filter(year_id %in% c("2019_426","2019_28","2022_747")) %>%  ## select three animals at a time
   dplyr::rename(`Home range size (95% MCP, ha)`= MCP,
                 `Median daily travel distance (m)`= median_daydist,
   ) %>%
@@ -187,7 +187,7 @@ ggplot2::ggplot(plot_df) +
   ggplot2::geom_line(ggplot2::aes(x = Date, y=Value, color=MoveMetric, group=MoveMetric), linewidth = 1) +
   ggplot2::facet_grid(MoveMetric~label, scales="free_y") + 
   
-  ggplot2::labs(y = "", x = "5 day moving window over season") +
+  ggplot2::labs(y = "", x = "") +
   ggplot2::scale_x_date(date_breaks="2 weeks",date_labels=format("%d %b")) +
   ggplot2::theme(plot.title = ggplot2::element_text(colour = "darkolivegreen",
                                                     size = 12,hjust = 0.5),
@@ -197,12 +197,12 @@ ggplot2::ggplot(plot_df) +
                  panel.grid.major = ggplot2::element_line(colour = "gray70", size = .05),
                  panel.grid.minor = ggplot2::element_line(colour = "gray70"),
                  axis.text=ggplot2::element_text(size=10, color="black"),
-                 axis.title=ggplot2::element_text(size=10), 
-                 strip.text=ggplot2::element_text(size=10, color="black"), 
+                 axis.title=ggplot2::element_text(size=12), 
+                 strip.text=ggplot2::element_text(size=12, color="black"), 
                  strip.background=ggplot2::element_rect(fill="#ecf0f1", colour="black")
   )
 
-
+ggsave("C:/Users/sop/OneDrive - Vogelwarte/General/MANUSCRIPTS/NestTool/Fig_1.jpg", width=13, height=7)
 
 
 
@@ -214,20 +214,11 @@ ggplot2::ggplot(plot_df) +
 #### FIGURE 2: 3 panel plot with example of unsuccessful nesting, successful nesting and uncertain bird
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-
-
-
-##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
-########## CALCULATE DISTANCES FROM AND TIMES AT POTENTIAL NEST   #############
-##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
-
-
 # calculating recursions to potential nest site
 milvus_track_list <- split(milvus_track, milvus_track$id)
 nest_revisits <- lapply(milvus_track_list, function(x)
   recurse::getRecursionsAtLocations(x = as.data.frame(x[1:4]), locations = as.data.frame(x %>% dplyr::select(nest_long,nest_lat))[1,],
-                                    radius = nestradius, timeunits = "hours"))
+                                    radius = 50, timeunits = "hours"))
 
 # writing the distances into the track data frame
 for (i in 1:length(nest_revisits)) {
@@ -238,6 +229,105 @@ for (i in 1:length(nest_revisits)) {
 #### max absence time during key brood phase 15 May to 15 June
 absence_times <- lapply(nest_revisits, function(x)
   purrr::pluck(x,5)) %>% bind_rows()
+
+
+
+### plot only home range size and median daily travel distance
+fig2inds<-bind_rows(UNSUCCEX,SUCCEX,UNCERTEX) %>%
+  select(year_id,age_cy,sex,success_observed,succ_prob) %>%
+  mutate(label=if_else(succ_prob<0.1,"failed",if_else(succ_prob>0.9,"successful","uncertain")))
+
+
+
+##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+########## LOOP OVER EACH INDIVIDUAL AND EXTRACT DATA FOR 5-day MOVING WINDOW   #############
+##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+
+## define the central points of moving window (with 2 days on either side of centre day)
+wincentres<-seq(72,173,3)
+
+### create blank output summaries
+fig2_move_metrics<-data.frame()
+
+
+
+##### start loop across all individuals and time windows ##############################################################################################
+
+for (i in fig2inds$year_id) {
+  
+  ind_track<-milvus_track %>% dplyr::filter(id==i)
+  ind_track_amt<-milvus_track_amt %>% dplyr::filter(id==i)
+  
+  for (w in wincentres) {
+    window<-seq(w-2,w+2,1)  ## create a 5 day moving window
+    win_track<-ind_track %>% dplyr::mutate(yday=lubridate::yday(t_)) %>% dplyr::filter(yday %in% window)
+    
+    if(dim(win_track)[1]>1){
+      
+      win_track_amt<-ind_track_amt %>% dplyr::mutate(yday=lubridate::yday(t_)) %>% dplyr::filter(yday %in% window)
+      
+      ### calculate mean daily travel distance and distance from nest
+      day_sum<-win_track %>% dplyr::group_by(id,yday) %>%
+        dplyr::summarise(daydist=sum(step_dist,na.rm=T)) %>%
+        dplyr::ungroup() %>%
+        dplyr::group_by(id) %>%
+        dplyr::summarise(median_daydist=median(daydist,na.rm=T))
+      
+      ### calculate MCP95
+      day_sum$MCP<-as.numeric(amt::hr_mcp(win_track_amt, levels=0.95)$mcp$area)/10000  ## convert home range area to hectares
+      
+      ## summarise the output and write into data.frame
+      fig2_move_metrics<- day_sum %>% dplyr::mutate(week=format(parse_date_time(x = w, orders = "j"), format="%d %b")) %>%
+        dplyr::select(id,week,MCP,median_daydist) %>%
+        dplyr::bind_rows(fig2_move_metrics)
+      
+    }else{print(sprintf("no data for %s in week %s",i,format(lubridate::parse_date_time(x = w, orders = "j"), format="%d %b")))}
+    
+  }
+}
+
+##### end of loop across all individuals and weeks ##############################################################################################
+
+fig2_move_metrics <- fig2_move_metrics %>% rename(year_id=id) %>%
+  dplyr::left_join(fig2inds,by ="year_id")
+
+
+
+# plotting
+
+plot_df<-fig2_move_metrics %>%
+  select(-nest_observed,-nest_prob) %>%
+  dplyr::filter(year_id %in% c("2019_426","2019_28","2022_747")) %>%  ## select three animals at a time
+  dplyr::rename(`Home range size (95% MCP, ha)`= MCP,
+                `Median daily travel distance (m)`= median_daydist,
+  ) %>%
+  tidyr::gather(key="MoveMetric",value="Value",-year_id,-week,-age_cy,-sex,-label) %>%
+  dplyr::filter(!is.na(Value)) %>%
+  dplyr::mutate(Date=lubridate::dmy(paste0(week, "2020"))) %>%
+  dplyr::ungroup()
+
+
+ggplot2::ggplot(plot_df) +
+  ggplot2::geom_point(ggplot2::aes(x = Date, y=Value, color=MoveMetric), size = 2) +
+  ggplot2::geom_line(ggplot2::aes(x = Date, y=Value, color=MoveMetric, group=MoveMetric), linewidth = 1) +
+  ggplot2::facet_grid(MoveMetric~label, scales="free_y") + 
+  
+  ggplot2::labs(y = "", x = "") +
+  ggplot2::scale_x_date(date_breaks="2 weeks",date_labels=format("%d %b")) +
+  ggplot2::theme(plot.title = ggplot2::element_text(colour = "darkolivegreen",
+                                                    size = 12,hjust = 0.5),
+                 panel.background=ggplot2::element_rect(fill="#ecf0f1", colour="black"),
+                 plot.background=ggplot2::element_rect(fill="#ecf0f1"),
+                 legend.position="none",
+                 panel.grid.major = ggplot2::element_line(colour = "gray70", size = .05),
+                 panel.grid.minor = ggplot2::element_line(colour = "gray70"),
+                 axis.text=ggplot2::element_text(size=10, color="black"),
+                 axis.title=ggplot2::element_text(size=12), 
+                 strip.text=ggplot2::element_text(size=12, color="black"), 
+                 strip.background=ggplot2::element_rect(fill="#ecf0f1", colour="black")
+  )
+
+ggsave("C:/Users/sop/OneDrive - Vogelwarte/General/MANUSCRIPTS/NestTool/Fig_2.jpg", width=13, height=7)
 
 
 
