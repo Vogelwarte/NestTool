@@ -121,7 +121,7 @@ pred_nest <- predict_nesting(model = nest_model$model, trackingsummary = pred_hr
 Similar to the home range model above, the function `train_nest_detection` will return a graph that indicates the most important predictor variables and the accuracy in predicting the correct outcome for testing data that were automatically split from the input to `train_nest_detection`. Our model for red kites in Switzerland achieves an accuracy of >95% of correct nesting classification, and we see that the total time spent within the nest radius and the distance between day and night roost locations are important to distinguish between nesting and non-nesting birds.
 
 
-```{r nesting_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center", fig.cap="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred"}
+```{r nesting_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center", fig.cap="Permutation-derived variable importance of predictor variables to classify whether a nesting attempt occurred"}
 knitr::include_graphics("plots/nest_varimp.png", dpi = 100)
 ```
 
@@ -145,7 +145,7 @@ pred_succ <- predict_success(model = succ_model$model, nestingsummary = pred_nes
 When training a model with the function `train_nest_success`, a similar graph as above will be produced that indicates the most important predictor variables and the accuracy in predicting the correct outcome for testing data. Our model for red kites in Switzerland achieves an accuracy of >75% of correct nest success classifications - which is much less accurate than the identification of home range and nesting behaviour. The number of visits to the nest during the late chick stage, and the amount of time spent around the nest are very important to determine success, but the less impressive accuracy is due to the fact that even some birds that fail to raise fledglings remain around their nest (this was one of the main reasons why the approach used in the R package [nestR](https://github.com/picardis/nestR) did not work for our purposes).
 
 
-```{r success_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center", fig.cap="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred"}
+```{r success_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center", fig.cap="Permutation-derived variable importance of predictor variables to classify whether a nesting attempt was successful"}
 knitr::include_graphics("plots/succ_varimp.png", dpi = 100)
 ```
 
@@ -177,7 +177,7 @@ plot_move_metrics(movemetrics = move_metrics, individual = "2022_95")
 The utility function `plot_move_metrics` will show a graph of 5 movement metrics for a single individual, with the `year_id`, `sex`, and `age` in the title of the plot.
 
 
-```{r move_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center", fig.cap="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred"}
+```{r move_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center", fig.cap="Seasonal trajectory of movement metrics of a focal individual to assist with manual classification"}
 knitr::include_graphics("plots/move_metrics.png", dpi = 100)
 ```
 
@@ -210,7 +210,7 @@ The Shiny App opened by the function `movement_visualisation` consists of four p
 With the help of the different movement visualisations, a decision can be made in the panel at the top left for each individual season whether nesting took place and whether the brood was successful. After pressing the "Save" button, the decisions are displayed in the table in the panel at the bottom left and simultaneously saved as a data.frame under the specified path. The decisions can be overwritten at any time if necessary. After closing the Shiny App, the output table should be saved in a different location or renamed to avoid overwriting it and losing the decisions already made when starting the Shiny App again.
 
 
-```{r shiny_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center"}
+```{r shiny_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center", fig.cap="Example of the Shiny App to assist with manual classification of individual seasons"}
 knitr::include_graphics("plots/shiny_app.png", dpi = 100)
 ```
 

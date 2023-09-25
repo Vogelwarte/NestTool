@@ -125,8 +125,8 @@ Similar to the home range model above, the function `train_nest_detection` will 
 
 
 <div class="figure" style="text-align: center">
-<img src="plots/nest_varimp.png" alt="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred" width="80%" height="80%" />
-<p class="caption">Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred</p>
+<img src="plots/nest_varimp.png" alt="Permutation-derived variable importance of predictor variables to classify whether a nesting attempt occurred" width="80%" height="80%" />
+<p class="caption">Permutation-derived variable importance of predictor variables to classify whether a nesting attempt occurred</p>
 </div>
 
 
@@ -150,8 +150,8 @@ When training a model with the function `train_nest_success`, a similar graph as
 
 
 <div class="figure" style="text-align: center">
-<img src="plots/succ_varimp.png" alt="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred" width="80%" height="80%" />
-<p class="caption">Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred</p>
+<img src="plots/succ_varimp.png" alt="Permutation-derived variable importance of predictor variables to classify whether a nesting attempt was successful" width="80%" height="80%" />
+<p class="caption">Permutation-derived variable importance of predictor variables to classify whether a nesting attempt was successful</p>
 </div>
 
 
@@ -183,8 +183,8 @@ The utility function `plot_move_metrics` will show a graph of 5 movement metrics
 
 
 <div class="figure" style="text-align: center">
-<img src="plots/move_metrics.png" alt="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred" width="80%" height="80%" />
-<p class="caption">Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred</p>
+<img src="plots/move_metrics.png" alt="Seasonal trajectory of movement metrics of a focal individual to assist with manual classification" width="80%" height="80%" />
+<p class="caption">Seasonal trajectory of movement metrics of a focal individual to assist with manual classification</p>
 </div>
 
 
@@ -218,8 +218,8 @@ With the help of the different movement visualisations, a decision can be made i
 
 
 <div class="figure" style="text-align: center">
-<img src="plots/shiny_app.png" alt="plot of chunk shiny_graphic" width="80%" height="80%" />
-<p class="caption">plot of chunk shiny_graphic</p>
+<img src="plots/shiny_app.png" alt="Example of the Shiny App to assist with manual classification of individual seasons" width="80%" height="80%" />
+<p class="caption">Example of the Shiny App to assist with manual classification of individual seasons</p>
 </div>
 
 
