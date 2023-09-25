@@ -5,7 +5,7 @@ This R package is an informal collection of R functions created by the [Swiss Or
 ## Installation
 
 
-This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/) with the following command:
+This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/Vogelwarte/NestTool) with the following command:
 
 ``` {r, eval = FALSE}
 library(devtools)
@@ -27,8 +27,8 @@ This is how you could read in your data:
 
 ```{r dataload, eval= FALSE, message=FALSE, warning = FALSE, include=T}
 ### LOAD THE TRACKING DATA AND INDIVIDUAL SEASON SUMMARIES 
-trackingdata <- fread(here("output/02_preprocessing/03_milvus_combined.csv"))
-indseasondata <- fread(here("output/01_validation/03_validation_combined.csv")) %>%
+trackingdata <- fread("MyTrackingData.csv")
+indseasondata <- fread("MyTrackingMetaData.csv") %>%
   mutate(nest = case_when(nest_id > 0 ~ "nest",
                         nest_id == 0 ~ "no nest"))
 
@@ -85,7 +85,7 @@ First, we use the data.frame summary created by `data_prep` to train a model for
 ```{r ranging, message=FALSE, eval= FALSE, include=T}
 ### train a model for home range behaviour
 hr_model <- train_home_range_detection(trackingsummary = nest_data_input$summary, plot = T)
-#saveRDS(hr_model, here("hr_model.rds"))   ## optionally save the model for later use
+#saveRDS(hr_model, "output/hr_model.rds")   ## optionally save the model for later use
 
 ### predict home range behaviour for tracked birds
 ## if no model has been trained, the model statement can be omitted and the Red Kite model from Switzerland will be used
@@ -100,7 +100,7 @@ When training a model with the function `train_home_range_detection`, a graph wi
 ```{r ranging_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center"}
 knitr::include_graphics("plots/HR_varimp.png", dpi = 100)
 ```
-
+![Home range variable importance](plots/HR_varimp.png?raw=true "Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred")
 
 ### Identifying nesting attempts
 
