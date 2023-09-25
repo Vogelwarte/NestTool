@@ -98,7 +98,7 @@ When training a model with the function `train_home_range_detection`, a graph wi
 
 
 ```{r ranging_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center"}
-knitr::include_graphics(here("plots/HR_varimp.png"), dpi = 100)
+knitr::include_graphics("plots/HR_varimp.png", dpi = 100)
 ```
 
 
@@ -122,7 +122,7 @@ Similar to the home range model above, the function `train_nest_detection` will 
 
 
 ```{r nesting_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center"}
-knitr::include_graphics(here("plots/nest_varimp.png"), dpi = 100)
+knitr::include_graphics("plots/nest_varimp.png", dpi = 100)
 ```
 
 
@@ -146,7 +146,7 @@ When training a model with the function `train_nest_success`, a similar graph as
 
 
 ```{r success_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center"}
-knitr::include_graphics(here("plots/succ_varimp.png"), dpi = 100)
+knitr::include_graphics("plots/succ_varimp.png", dpi = 100)
 ```
 
 
@@ -178,7 +178,7 @@ The utility function `plot_move_metrics` will show a graph of 5 movement metrics
 
 
 ```{r move_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center"}
-knitr::include_graphics(here("plots/move_metrics.png"), dpi = 100)
+knitr::include_graphics("plots/move_metrics.png", dpi = 100)
 ```
 
 
@@ -268,4 +268,4 @@ Picardi S, Smith BJ, Boone ME, Frederick PC, Cecere JG, Rubolini D, Serra L, Pir
 [MovebankID 230545451](https://www.movebank.org/cms/webapp?gwt_fragment=page=studies,path=study230545451): GSM transmitted GPS position data of red kites (*Milvus milvus*) of the red kite project of the Swiss Ornithological Institute
 
 ### Acknowledgements
-This project has received funding from the European Union’s LIFE Programme and a million others.
+This project has received funding from the European Union’s LIFE Programme and the Swiss national Science Foundation.
