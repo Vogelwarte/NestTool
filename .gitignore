@@ -9,8 +9,13 @@
 .Ruserdata
 
 # Example code in package build process
-KERAS_attempt.R
+package_creation.r
+NestToolValidation_GER.RData
+NestToolValidationSAX_30min.RData
+NestToolValidationSAX_60min.RData
+NestToolValidation_GER.RData
 NestTool_SUI_all.RData
+README.rmd
 
 # Raw external data
 data/valdat/*.csv
