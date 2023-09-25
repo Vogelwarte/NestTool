@@ -10,6 +10,7 @@
 
 # Example code in package build process
 KERAS_attempt.R
+NestTool_SUI_all.RData
 
 # Raw external data
 data/valdat/*.csv
