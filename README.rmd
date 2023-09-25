@@ -97,7 +97,7 @@ pred_hr <- predict_ranging(model = hr_model$model, trackingsummary = nest_data_i
 When training a model with the function `train_home_range_detection`, a graph will be produced that indicates the most important predictor variables and the accuracy in predicting the correct outcome for testing data that were not used to train the model (these are automatically split from the input to `train_home_range_detection`). The accuracy is the proportion of cases that were predicted correctly, and ranges between 0 (all predictions were false) to 1 (all predictions were correct). Our model for red kites in Switzerland achieves an accuracy of >95% of correct home range classification, and we see that the total time spent within the nest radius during the day, and the distance between day and night roost locations are important to distinguish between territorial and vagabonding birds.
 
 
-```{r ranging_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center"}
+```{r ranging_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center", fig.cap="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred"}
 knitr::include_graphics("plots/HR_varimp.png", dpi = 100)
 ```
 
@@ -121,7 +121,7 @@ pred_nest <- predict_nesting(model = nest_model$model, trackingsummary = pred_hr
 Similar to the home range model above, the function `train_nest_detection` will return a graph that indicates the most important predictor variables and the accuracy in predicting the correct outcome for testing data that were automatically split from the input to `train_nest_detection`. Our model for red kites in Switzerland achieves an accuracy of >95% of correct nesting classification, and we see that the total time spent within the nest radius and the distance between day and night roost locations are important to distinguish between nesting and non-nesting birds.
 
 
-```{r nesting_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center"}
+```{r nesting_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center", fig.cap="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred"}
 knitr::include_graphics("plots/nest_varimp.png", dpi = 100)
 ```
 
@@ -145,7 +145,7 @@ pred_succ <- predict_success(model = succ_model$model, nestingsummary = pred_nes
 When training a model with the function `train_nest_success`, a similar graph as above will be produced that indicates the most important predictor variables and the accuracy in predicting the correct outcome for testing data. Our model for red kites in Switzerland achieves an accuracy of >75% of correct nest success classifications - which is much less accurate than the identification of home range and nesting behaviour. The number of visits to the nest during the late chick stage, and the amount of time spent around the nest are very important to determine success, but the less impressive accuracy is due to the fact that even some birds that fail to raise fledglings remain around their nest (this was one of the main reasons why the approach used in the R package [nestR](https://github.com/picardis/nestR) did not work for our purposes).
 
 
-```{r success_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center"}
+```{r success_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center", fig.cap="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred"}
 knitr::include_graphics("plots/succ_varimp.png", dpi = 100)
 ```
 
@@ -177,7 +177,7 @@ plot_move_metrics(movemetrics = move_metrics, individual = "2022_95")
 The utility function `plot_move_metrics` will show a graph of 5 movement metrics for a single individual, with the `year_id`, `sex`, and `age` in the title of the plot.
 
 
-```{r move_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center"}
+```{r move_graphic, echo=FALSE, out.height='80%', out.width='80%', fig.align="center", fig.cap="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred"}
 knitr::include_graphics("plots/move_metrics.png", dpi = 100)
 ```
 
@@ -268,4 +268,4 @@ Picardi S, Smith BJ, Boone ME, Frederick PC, Cecere JG, Rubolini D, Serra L, Pir
 [MovebankID 230545451](https://www.movebank.org/cms/webapp?gwt_fragment=page=studies,path=study230545451): GSM transmitted GPS position data of red kites (*Milvus milvus*) of the red kite project of the Swiss Ornithological Institute
 
 ### Acknowledgements
-This project has received funding from the European Union’s LIFE Programme and the Swiss national Science Foundation.
+This project has received funding from the European Union’s LIFE Programme and the Swiss National Science Foundation.

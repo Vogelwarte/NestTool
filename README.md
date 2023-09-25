@@ -100,8 +100,8 @@ When training a model with the function `train_home_range_detection`, a graph wi
 
 
 <div class="figure" style="text-align: center">
-<img src="plots/HR_varimp.png" alt="plot of chunk ranging_graphic" width="80%" height="80%" />
-<p class="caption">plot of chunk ranging_graphic</p>
+<img src="plots/HR_varimp.png" alt="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred" width="80%" height="80%" />
+<p class="caption">Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred</p>
 </div>
 
 
@@ -125,8 +125,8 @@ Similar to the home range model above, the function `train_nest_detection` will 
 
 
 <div class="figure" style="text-align: center">
-<img src="plots/nest_varimp.png" alt="plot of chunk nesting_graphic" width="80%" height="80%" />
-<p class="caption">plot of chunk nesting_graphic</p>
+<img src="plots/nest_varimp.png" alt="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred" width="80%" height="80%" />
+<p class="caption">Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred</p>
 </div>
 
 
@@ -150,8 +150,8 @@ When training a model with the function `train_nest_success`, a similar graph as
 
 
 <div class="figure" style="text-align: center">
-<img src="plots/succ_varimp.png" alt="plot of chunk success_graphic" width="80%" height="80%" />
-<p class="caption">plot of chunk success_graphic</p>
+<img src="plots/succ_varimp.png" alt="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred" width="80%" height="80%" />
+<p class="caption">Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred</p>
 </div>
 
 
@@ -183,8 +183,8 @@ The utility function `plot_move_metrics` will show a graph of 5 movement metrics
 
 
 <div class="figure" style="text-align: center">
-<img src="plots/move_metrics.png" alt="plot of chunk move_graphic" width="80%" height="80%" />
-<p class="caption">plot of chunk move_graphic</p>
+<img src="plots/move_metrics.png" alt="Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred" width="80%" height="80%" />
+<p class="caption">Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred</p>
 </div>
 
 
@@ -276,4 +276,4 @@ Picardi S, Smith BJ, Boone ME, Frederick PC, Cecere JG, Rubolini D, Serra L, Pir
 [MovebankID 230545451](https://www.movebank.org/cms/webapp?gwt_fragment=page=studies,path=study230545451): GSM transmitted GPS position data of red kites (*Milvus milvus*) of the red kite project of the Swiss Ornithological Institute
 
 ### Acknowledgements
-This project has received funding from the European Union’s LIFE Programme and the Swiss national Science Foundation.
+This project has received funding from the European Union’s LIFE Programme and the Swiss National Science Foundation.

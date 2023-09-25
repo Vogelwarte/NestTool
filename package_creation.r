@@ -77,7 +77,7 @@ devtools::document()
 
 ### CREATING THE READ ME.md file for GitHub
 library(knitr)
-knit(input="Readme.rmd", output = "README.md") #see ?knit for more options
+knit(input="README.rmd", output = "README.md") #see ?knit for more options
 
 ## use this manually if the knitting does not show the images
 ## ![Home range variable importance](plots/HR_varimp.png?raw=true "Permutation-derived variable importance of predictor variables to classify whether home range behaviour occurred")
