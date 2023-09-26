@@ -19,7 +19,7 @@ README.rmd
 
 # Raw external data
 data/valdat/*.csv
-
+data/valdat/BlindValidationTHU/*.txt
 
 # Output files from R CMD check
 /*.Rcheck/

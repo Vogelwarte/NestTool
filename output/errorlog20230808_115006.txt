@@ -1,6 +1,0 @@
-Error log 
-
-Burst 2021_5693: no locations revisited for more than 2 days
-Burst 2022_5693: no locations found for the specified set of parameters
-Burst 2020_6370a: no locations found for the specified set of parameters
-Burst 2020_6674: no locations found for the specified set of parameters
