@@ -46,7 +46,7 @@ dim(trackingdata)
 ##make up indseasondata as input is now mandatory
 indseasondata <- trackingdata %>% group_by(year_id) %>%
   summarise(bird_id=first(bird_id)) %>%
-  mutate(sex="m", age_cy=6) %>%  ### all birds were adult
+  mutate(sex=if_else(bird_id %in% c("3803", "6249a", "6249", "4532", "6674", "8966", "8968", "94754"),"f","m"), age_cy=6) %>%  ### all birds were adult
   select(year_id,bird_id,sex,age_cy)
 
 ### ensure correct factor levels of sex to facilitate prediction
