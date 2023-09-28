@@ -70,11 +70,11 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
                       longboundary=9,
                       broodstart= yday(ymd("2023-05-15")),
                       broodend<- yday(ymd("2023-06-15")),
-                      minlocs=800,
+                      minlocs=500,
                       nestradius=250,
                       homeradius=5000,
                       startseason=yday(ymd("2023-03-15")),
-                      endseason=yday(ymd("2023-07-10")),
+                      endseason=yday(ymd("2023-07-20")),
                       settleEnd = yday(ymd("2023-04-05")),  # end of the settlement period in yday
                       Incu1End = yday(ymd("2023-04-25")),   # end of the first incubation phase in yday
                       Incu2End = yday(ymd("2023-05-15")),  # end of the second incubation phase in yday
@@ -121,7 +121,7 @@ movement_visualisation(trackingdata=nest_data_input$movementtrack,
                        inddata=pred_succ,
                        move_metrics = move_metrics,
                        uncertainty = 0.25,
-                       output_path="NestTool_VALIDATION_Saxony_nest_success_output.csv")
+                       output_path="C:/Users/sop/OneDrive - Vogelwarte/NestTool_VALIDATION_THU2_nest_success_output.csv")
 # 
 # ### to find out where the file is stored:
 # here::here()
@@ -129,34 +129,26 @@ movement_visualisation(trackingdata=nest_data_input$movementtrack,
 #### STEP 7: summarise the demographic parameters for the population
 
 ## READ IN AND COMBINE DATA OF MANUALLY CLASSIFIED AND AUTOMATICALLY CLASSIFIED DATA
-# MANUAL<-fread(here::here("NestTool_VALIDATION_Saxony_nest_success_output.csv")) %>%
-#   rename(ManNest=Nest,ManSuccess=Success) %>%
-#   select(year_id,ManNest,ManSuccess)
-# ALL<-pred_succ %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
-#   left_join(MANUAL, by='year_id') %>%
-#   mutate(nest_prob=ifelse((!is.na(ManNest) & ManNest=="Yes"),1,nest_prob), succ_prob=ifelse((!is.na(ManSuccess) & ManSuccess=="Yes"),1,succ_prob)) %>%
-#   mutate(nest_prob=ifelse((!is.na(ManNest) & ManNest=="No"),0,nest_prob), succ_prob=ifelse((!is.na(ManSuccess) & ManSuccess=="No"),0,succ_prob)) %>%
-#   mutate(HR=ifelse(hr_prob>0.5,1,0),Nest=ifelse(nest_prob>0.5,1,0),Success=ifelse(succ_prob>0.5,1,0))
+MANUAL<-fread(here::here("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU/NestTool_VALIDATION_THU2_nest_success_output.csv")) %>%
+  rename(ManualNest=Nest,ManualSuccess=Success) %>%
+  select(year_id,ManualNest,ManualSuccess)
+ALL<-pred_succ %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
+  left_join(MANUAL, by='year_id') %>%
+  mutate(HR=ifelse(hr_prob>0.5,1,0),Nest=ifelse(nest_prob>0.5,1,0),Success=ifelse(succ_prob>0.5,1,0)) %>%
+  mutate(Nest=ifelse((!is.na(ManualNest) & ManualNest=="Yes"),1,Nest), Success=ifelse((!is.na(ManualSuccess) & ManualSuccess=="Yes"),1,Success)) %>%
+  mutate(Nest=ifelse((!is.na(ManualNest) & ManualNest=="No"),0,Nest), Success=ifelse((!is.na(ManualSuccess) & ManualSuccess=="No"),0,Success)) %>%
+  separate(year_id, c("year", "bird_id"), sep = "_", remove=T)
 
-
-
-##### COMBINE PREDICTIONS FOR NEST SUCCESS FROM SUISSE AND GERMAN MODEL
-ALL<-pred_succ_SUI %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
-  mutate(HR=ifelse(hr_prob>0.5,1,0),Nest=ifelse(nest_prob>0.5,1,0),Success=ifelse(succ_prob>0.5,1,0))
-ALL<-pred_succ %>% select(year_id,succ_prob) %>%
-  mutate(Success_GER=ifelse(succ_prob>0.5,1,0)) %>%
-  rename(succ_prob_GER=succ_prob) %>%
-  left_join(ALL,by="year_id")
-
-end_time <- Sys.time()
-runtimeSAX<-as.numeric(end_time - start_time,units="secs")
+fwrite(ALL,"C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU/THU_nest_validation_predictions.csv")
 
 
 
 
-### check outlier 
-pred_succ %>% filter(median_day_dist_to_max_night>10000) %>% select(year_id,hr_prob,nest_prob,succ_prob) %>% left_join(indseasondata, by="year_id")
-
+##### EXTRACT DATA FROM IND WITH INSUFFICIENT DATA
+indseasondata %>% filter(!(bird_id %in% ALL$bird_id)) %>%
+  left_join(trackingdata, by=c("year_id","bird_id")) %>%
+  group_by(year_id,bird_id,sex,age_cy) %>%
+  summarise(first=min(timestamp),last=max(timestamp),n_locs=length(timestamp))
 
 
 
@@ -164,4 +156,21 @@ save.image("NestTool2/NestToolValidation_GER.RData")
 load("NestTool2/NestToolValidation_GER.RData")
 
 
-
+#### troubleshoot data prep to understand why nest location is off
+milvus=trackingdata %>% filter(year_id=="2019_5081") %>%
+  dplyr::mutate(timestamp = as.POSIXct(timestamp, format ="%Y-%m-%d %H:%M:%S", tz = "UTC"),
+                date = as.Date(timestamp, tz = "UTC"),
+                week = as.integer(format(date, format = "%W")),
+                year_week = format(date, format = "%Y-%W"),
+                year_week_id = paste0(format(date, format = "%Y_%W"), "_", bird_id),
+                date_id = paste0(date, "_", bird_id),
+                event_id=seq_along(timestamp),
+                year_day = lubridate::yday(timestamp)) %>%
+  dplyr::filter(long_wgs>longboundary &  lat_wgs>latboundary)   ## remove all locations from Spain and southern France
+"2018_5081"
+"2020_5081"
+"2021_5081"
+"2021_6369"
+"2021_8165"
+"2022_52172"
+"2022_6369"
