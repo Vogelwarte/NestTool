@@ -305,7 +305,7 @@ data_prep <- function(trackingdata,
     dplyr::left_join(milvus_night_max_sf %>% dplyr::select(year_id,revisits_night,residence_time_night,date_night), by = "year_id") %>%
     sf::st_drop_geometry()
   
-  rm(milvus, milvus_night,milvus_day_recurse,milvus_night_recurse, milvus_track_night_list, milvus_track_day_list)
+  #rm(milvus, milvus_night,milvus_day_recurse,milvus_night_recurse, milvus_track_night_list, milvus_track_day_list)
   
   ##### CALCULATING REVISITS TO POTENTIAL NEST SITE
   # using list apply over all individuals
@@ -338,11 +338,14 @@ data_prep <- function(trackingdata,
   }
   
   # identify potential nest by averaging over coordinates with joint greatest residence time
-  suppressWarnings({milvus_pot_nests <- milvus_track %>%
+  suppressWarnings({milvus_pot_nests <- milvus_track %>% mutate(MOST=residence_time+revisits) %>% ##arrange(desc(MOST))
     dplyr::group_by(id) %>%
-    summarise(revisits=revisits[which(residence_time == max(residence_time))],
-              x = x_[which(residence_time == max(residence_time))],
-              y = y_[which(residence_time == max(residence_time))]) %>%
+    # summarise(revisits=revisits[which(residence_time == max(residence_time))],
+    #           x = x_[which(residence_time == max(residence_time))],
+    #           y = y_[which(residence_time == max(residence_time))]) %>%
+    summarise(revisits=revisits[which(MOST == max(MOST))],
+                x = x_[which(MOST == max(MOST))],
+                y = y_[which(MOST == max(MOST))]) %>%
     dplyr::ungroup() %>%
     dplyr::group_by(id) %>%
     dplyr::summarise(x = mean(x),
@@ -361,6 +364,59 @@ data_prep <- function(trackingdata,
 
   
   print(sprintf("Identified potential nest locations for %i individuals",dim(milvus_pot_nest_sf)[1]))
+  
+  ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+  ########## FOR CHECKING ONLY, PLOT NEST AND TRACKING LOCATION ON LEAFLET MAP   #############
+  ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~###################################### 
+  library(leaflet)
+
+  m4 <- leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
+    setView(lng = mean(st_coordinates(milvus_pot_nest_sf %>%  st_transform(4326))[,1]),
+            lat = mean(st_coordinates(milvus_pot_nest_sf %>%  st_transform(4326))[,2]),
+            zoom = 8) %>%
+    htmlwidgets::onRender("function(el, x) {L.control.zoom({ 
+                           position: 'bottomright' }).addTo(this)}"
+    ) %>% #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
+    addProviderTiles("Esri.WorldImagery", group = "Satellite",
+                     options = providerTileOptions(opacity = 0.6, attribution = F,minZoom = 5, maxZoom = 20)) %>%
+    addProviderTiles("OpenTopoMap", group = "Roadmap", options = providerTileOptions(attribution = F,minZoom = 5, maxZoom = 15)) %>%  
+    addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>%  
+    
+    addCircleMarkers(
+      data = milvus_night %>% sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
+      radius = 4,
+      color = "grey1",
+      weight = 0.5,
+      opacity = 0.7,
+      fillColor = "grey1",
+      fillOpacity = 0.7
+    ) %>%
+    
+    addCircleMarkers(
+      data = milvus_day  %>% sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
+      radius = 4,
+      color = "lightgreen",
+      weight = 0.5,
+      opacity = 0.7,
+      fillColor = "lightgreen",
+      fillOpacity = 0.7
+    ) %>%
+    
+    addCircleMarkers(
+      data = milvus_pot_nest_sf %>%  st_transform(4326),
+      radius = 6,
+      color = "firebrick",
+      weight = 0.5,
+      opacity = 0.7,
+      fillColor = "firebrick",
+      fillOpacity = 0.7
+    ) %>%
+    
+    addScaleBar(position = "bottomright", options = scaleBarOptions(imperial = F))
+  
+  m4
+  
+  
   
   
   
