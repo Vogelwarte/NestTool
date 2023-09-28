@@ -338,7 +338,7 @@ data_prep <- function(trackingdata,
   }
   
   # identify potential nest by averaging over coordinates with joint greatest residence time
-  suppressWarnings({milvus_pot_nests <- milvus_track %>% mutate(MOST=residence_time+revisits) %>% ##arrange(desc(MOST))
+  suppressWarnings({milvus_pot_nests <- milvus_track %>% ##mutate(MOST=residence_time+revisits) %>% slice_max(order_by=MOST, n=50)
     dplyr::group_by(id) %>%
     # summarise(revisits=revisits[which(residence_time == max(residence_time))],
     #           x = x_[which(residence_time == max(residence_time))],
@@ -352,6 +352,41 @@ data_prep <- function(trackingdata,
               y = mean(y))
   })
   
+  # # ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+  # # ########## CALCULATE DISTANCES BETWEEN ADJACENT POINTS AND SELECT NEST AS THE LOC WITH THE MOST NEIGHBOURING POINTS   #############
+  # # ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+  # milvus_pot_nests_sf <- milvus_track %>% mutate(MOST=residence_time+revisits) %>% slice_max(order_by=MOST, n=50) %>%
+  #   dplyr::rename(year_id=id) %>%
+  #   sf::st_as_sf(coords = c("x_", "y_"), crs = 3035)
+  # 
+  # milvus_track_sf <- milvus_track %>%
+  #   dplyr::rename(year_id=id) %>%
+  #   sf::st_as_sf(coords = c("x_", "y_"), crs = 3035)
+  # 
+  # dm = st_distance(milvus_track_sf)
+  # dim(dm)
+  # ijd = data.frame(expand.grid(i=1:n, j=1:n))
+  # ijd$distance = c(dm)
+  # 
+  # 
+  #   #   filter(as.numeric(dist_real_nest) > 100) %>%
+  #   #   st_transform(4326)
+  # 
+  # # 
+  # # ##### visualise the problem animals where nests are >100 m from actual nest
+  # # 
+  # # PROBLEM_NEST_LOCS <- milvus_pot_nest_sf %>%
+  # #   filter(year_id %in% known_nests_sf$year_id) %>% 
+  # #   arrange(year_id)
+  # # PROBLEM_NEST_LOCS <-  PROBLEM_NEST_LOCS %>% mutate(dist_real_nest = st_distance(PROBLEM_NEST_LOCS,known_nests_sf, by_element=T)) %>%
+  # #   filter(as.numeric(dist_real_nest) > 100) %>%
+  # #   st_transform(4326)
+  # 
+  # 
+  # 
+  # 
+  # 
+  
   
   # ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
   # ########## CALCULATE DISTANCES BETWEEN PREDICTED AND ACTUAL NESTS   #############
@@ -360,7 +395,7 @@ data_prep <- function(trackingdata,
   milvus_pot_nest_sf <- milvus_pot_nests %>%
     #data.table::fread("output/04_nest/09_predicted_nest_coordinates.csv") %>%
     dplyr::rename(year_id=id) %>%
-    sf::st_as_sf(coords = c("x", "y"), crs = 3035)
+    sf::st_as_sf(coords = c("x_", "y_"), crs = 3035)
 
   
   print(sprintf("Identified potential nest locations for %i individuals",dim(milvus_pot_nest_sf)[1]))
