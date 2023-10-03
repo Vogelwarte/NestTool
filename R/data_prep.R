@@ -337,8 +337,14 @@ data_prep <- function(trackingdata,
       milvus_recurse[[i]]$residenceTime
   }
   
-  # identify potential nest by averaging over coordinates with joint greatest residence time
-  suppressWarnings({milvus_pot_nests <- milvus_track %>% mutate(MOST=residence_time+revisits) %>% slice_max(order_by=MOST, n=50)
+  # identify potential nest by averaging over coordinates with joint greatest residence time and nearest neighbour distance
+  
+  library(RANN)
+  nn2()
+  nearest <- RANN::nn2(milvus_track[,1:2],milvus_track[,1:2],k=minlocs)$nn.dists
+  milvus_track$NN50dist<-apply(nearest,1,mean)
+  
+  suppressWarnings({milvus_pot_nests <- milvus_track %>% mutate(MOST=residence_time+revisits-NN50dist) %>% #slice_max(order_by=MOST, n=50)
     dplyr::group_by(id) %>%
     # summarise(revisits=revisits[which(residence_time == max(residence_time))],
     #           x = x_[which(residence_time == max(residence_time))],
@@ -363,11 +369,12 @@ data_prep <- function(trackingdata,
     dplyr::rename(year_id=id) %>%
     sf::st_as_sf(coords = c("x_", "y_"), crs = 3035)
   
-  milvus_pot_nests_sf <- milvus_track %>% mutate(MOST=residence_time+revisits) %>% slice_max(order_by=MOST, n=minlocs) %>%
-    dplyr::rename(year_id=id) %>%
+  milvus_pot_nests_sf <- milvus_track %>% mutate(MOST=residence_time+revisits) %>%
+    dplyr::rename(year_id=id) %>%    
+    slice_max(order_by=MOST, n=minlocs, by=year_id) %>%
     sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
     group_by(year_id) %>%
-    st_combine() %>% 
+    summarize(geometry = st_union(geometry)) %>% 
     st_centroid()
 
   dm = st_distance(milvus_track_sf)
@@ -390,9 +397,6 @@ data_prep <- function(trackingdata,
   #   st_transform(4326)
 
 
-
-
-
   
   
   # ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
@@ -402,7 +406,7 @@ data_prep <- function(trackingdata,
   milvus_pot_nest_sf <- milvus_pot_nests %>%
     #data.table::fread("output/04_nest/09_predicted_nest_coordinates.csv") %>%
     dplyr::rename(year_id=id) %>%
-    sf::st_as_sf(coords = c("x_", "y_"), crs = 3035)
+    sf::st_as_sf(coords = c("x", "y"), crs = 3035)
 
   
   print(sprintf("Identified potential nest locations for %i individuals",dim(milvus_pot_nest_sf)[1]))
@@ -451,6 +455,16 @@ data_prep <- function(trackingdata,
       weight = 0.5,
       opacity = 0.7,
       fillColor = "firebrick",
+      fillOpacity = 0.7
+    ) %>%
+    
+    addCircleMarkers(
+      data = milvus_pot_nest_sf %>%  st_transform(4326),
+      radius = 6,
+      color = "orange",
+      weight = 0.5,
+      opacity = 0.7,
+      fillColor = "orange",
       fillOpacity = 0.7
     ) %>%
     
