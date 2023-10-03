@@ -53,7 +53,7 @@
 #' @importFrom purrr reduce pluck
 #' @importFrom amt mk_track time_of_day arrange hr_mcp hr_area
 #' @importFrom recurse getRecursions getRecursionsAtLocations
-#' @importFrom sf st_as_sf st_distance st_drop_geometry st_transform st_buffer st_within
+#' @importFrom sf st_as_sf st_distance st_drop_geometry st_transform st_buffer st_within st_centroid
 #' @importFrom stats quantile median
 #' @importFrom tidyr replace_na spread gather
 
@@ -338,7 +338,7 @@ data_prep <- function(trackingdata,
   }
   
   # identify potential nest by averaging over coordinates with joint greatest residence time
-  suppressWarnings({milvus_pot_nests <- milvus_track %>% ##mutate(MOST=residence_time+revisits) %>% slice_max(order_by=MOST, n=50)
+  suppressWarnings({milvus_pot_nests <- milvus_track %>% mutate(MOST=residence_time+revisits) %>% slice_max(order_by=MOST, n=50)
     dplyr::group_by(id) %>%
     # summarise(revisits=revisits[which(residence_time == max(residence_time))],
     #           x = x_[which(residence_time == max(residence_time))],
@@ -352,40 +352,47 @@ data_prep <- function(trackingdata,
               y = mean(y))
   })
   
-  # # ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
-  # # ########## CALCULATE DISTANCES BETWEEN ADJACENT POINTS AND SELECT NEST AS THE LOC WITH THE MOST NEIGHBOURING POINTS   #############
-  # # ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
-  # milvus_pot_nests_sf <- milvus_track %>% mutate(MOST=residence_time+revisits) %>% slice_max(order_by=MOST, n=50) %>%
-  #   dplyr::rename(year_id=id) %>%
-  #   sf::st_as_sf(coords = c("x_", "y_"), crs = 3035)
-  # 
-  # milvus_track_sf <- milvus_track %>%
-  #   dplyr::rename(year_id=id) %>%
-  #   sf::st_as_sf(coords = c("x_", "y_"), crs = 3035)
-  # 
-  # dm = st_distance(milvus_track_sf)
-  # dim(dm)
-  # ijd = data.frame(expand.grid(i=1:n, j=1:n))
-  # ijd$distance = c(dm)
-  # 
-  # 
-  #   #   filter(as.numeric(dist_real_nest) > 100) %>%
-  #   #   st_transform(4326)
-  # 
-  # # 
-  # # ##### visualise the problem animals where nests are >100 m from actual nest
-  # # 
-  # # PROBLEM_NEST_LOCS <- milvus_pot_nest_sf %>%
-  # #   filter(year_id %in% known_nests_sf$year_id) %>% 
-  # #   arrange(year_id)
-  # # PROBLEM_NEST_LOCS <-  PROBLEM_NEST_LOCS %>% mutate(dist_real_nest = st_distance(PROBLEM_NEST_LOCS,known_nests_sf, by_element=T)) %>%
-  # #   filter(as.numeric(dist_real_nest) > 100) %>%
-  # #   st_transform(4326)
-  # 
-  # 
-  # 
-  # 
-  # 
+  # ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+  # ########## CALCULATE DISTANCES BETWEEN ADJACENT POINTS AND SELECT NEST AS THE LOC WITH THE MOST NEIGHBOURING POINTS   #############
+  # ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+  milvus_pot_nests_sf <- milvus_track %>% mutate(MOST=residence_time+revisits) %>% slice_max(order_by=MOST, n=50) %>%
+    dplyr::rename(year_id=id) %>%
+    sf::st_as_sf(coords = c("x_", "y_"), crs = 3035)
+
+  milvus_track_sf <- milvus_track %>%
+    dplyr::rename(year_id=id) %>%
+    sf::st_as_sf(coords = c("x_", "y_"), crs = 3035)
+  
+  milvus_pot_nests_sf <- milvus_track %>% mutate(MOST=residence_time+revisits) %>% slice_max(order_by=MOST, n=minlocs) %>%
+    dplyr::rename(year_id=id) %>%
+    sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
+    group_by(year_id) %>%
+    st_combine() %>% 
+    st_centroid()
+
+  dm = st_distance(milvus_track_sf)
+  dim(dm)
+  ijd = data.frame(expand.grid(i=1:n, j=1:n))
+  ijd$distance = c(dm)
+
+
+    #   filter(as.numeric(dist_real_nest) > 100) %>%
+    #   st_transform(4326)
+
+  #
+  # ##### visualise the problem animals where nests are >100 m from actual nest
+  #
+  # PROBLEM_NEST_LOCS <- milvus_pot_nest_sf %>%
+  #   filter(year_id %in% known_nests_sf$year_id) %>%
+  #   arrange(year_id)
+  # PROBLEM_NEST_LOCS <-  PROBLEM_NEST_LOCS %>% mutate(dist_real_nest = st_distance(PROBLEM_NEST_LOCS,known_nests_sf, by_element=T)) %>%
+  #   filter(as.numeric(dist_real_nest) > 100) %>%
+  #   st_transform(4326)
+
+
+
+
+
   
   
   # ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
@@ -438,7 +445,7 @@ data_prep <- function(trackingdata,
     ) %>%
     
     addCircleMarkers(
-      data = milvus_pot_nest_sf %>%  st_transform(4326),
+      data = milvus_pot_nests_sf %>%  st_transform(4326),
       radius = 6,
       color = "firebrick",
       weight = 0.5,
