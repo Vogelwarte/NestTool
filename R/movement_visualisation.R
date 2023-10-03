@@ -62,7 +62,7 @@ movement_visualisation <- function(trackingdata,
            "PNest" = paste(round(nest_prob*100), "%"),
            "PSucc" = paste(round(succ_prob*100), "%"),
            Nest = NA, Success = NA) %>%
-    dplyr::select(ID, LDay, TCh2, VCh2, TotT, VDay, PNest, PSucc
+    dplyr::select(ID, LDay, TCh2, VCh2, TotT, VDay, PNest, PSucc,
                   Nest, Success) %>%
     dplyr::arrange(ID)
   # saves table as template to fill in data on nests based on user input
