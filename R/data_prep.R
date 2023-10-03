@@ -364,10 +364,9 @@ data_prep <- function(trackingdata,
               y = mean(y))
   })
   
-  # milvus_pot_nests_sf <- milvus_pot_nests %>%
-  #   #data.table::fread("output/04_nest/09_predicted_nest_coordinates.csv") %>%
-  #   dplyr::rename(year_id=id) %>%
-  #   sf::st_as_sf(coords = c("x", "y"), crs = 3035)
+  milvus_pot_nest_sf <- milvus_pot_nests %>%
+    dplyr::rename(year_id=id) %>%
+    sf::st_as_sf(coords = c("x", "y"), crs = 3035)
   
   
   print(sprintf("Identified potential nest locations for %i individuals",dim(milvus_pot_nest_sf)[1]))
