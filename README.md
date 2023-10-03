@@ -10,7 +10,7 @@ This package is not available on CRAN and must therefore be installed from [GitH
 
 ```r
 library(devtools)
-devtools::install_github("steffenoppel/NestTool", dependencies=TRUE) 
+devtools::install_github("Vogelwarte/NestTool", dependencies=TRUE) 
 library(NestTool)
 ```
 
