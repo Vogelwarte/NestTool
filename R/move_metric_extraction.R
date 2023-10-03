@@ -49,8 +49,11 @@ move_metric_extraction <- function(trackingdata,
 
 # LOADING DATA -----------------------------------------------------------------
 # nest success classification data to select which individuals plots are needed for
+# expand to nest probability to ensure that also uncertain breeding attempts are flagged up  
+  
 unsure<-inddata %>%
-  dplyr::filter(succ_prob>=uncertainty & succ_prob <=(1-uncertainty))
+  dplyr::mutate(selprob=min(abs(0.5-succ_prob),abs(0.5-nest_prob))+0.5) %>% 
+  dplyr::filter(selprob<=(1-uncertainty))
 check_inds<-unique(unsure$year_id)  ## the individuals that need to be checked and for which manual classification will be necessary
  
 # # DATA PREPARATION -------------------------------------------------------------

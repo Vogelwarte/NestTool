@@ -47,11 +47,11 @@ movement_visualisation <- function(trackingdata,
   
   # DATA PREPARATION -----------------------------------------------------------
   # Define a path where to save user decisions on nests - this must be done by user!
-  ##output_path <- "output/05_full_run_CH/nest_success_output.csv"
-  
+
   # Brood metrics for success prediction
   milvus_metrics <- inddata %>%
-    dplyr::filter(succ_prob >= uncertainty & succ_prob <= (1-uncertainty)) %>%
+    dplyr::mutate(selprob=min(abs(0.5-succ_prob),abs(0.5-nest_prob))+0.5) %>% 
+    dplyr::filter(selprob<=(1-uncertainty)) %>%
     dplyr::mutate(ID = year_id,
            "LDay" = lastvisitDay,
            "TCh2" = round(timeChick2),
