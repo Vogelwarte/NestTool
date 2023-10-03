@@ -5,12 +5,11 @@ This R package is an informal collection of R functions created by the [Swiss Or
 ## Installation
 
 
-This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/Vogelwarte/NestTool) with the following command:
-
+This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/Vogelwarte/NestTool) with the following command. Note that depending on the R version and operating system you are working on, you may need to specify the download options. See [here](https://cran.r-project.org/web/packages/remotes/readme/README.html) for options for other operating systems (only Windows OS option shown in code below):
 
 ```r
 library(remotes)
-options(download.file.method="wininet")  ### for Windows OS, check [here](https://cran.r-project.org/web/packages/remotes/readme/README.html) for options for other operating systems 
+options(download.file.method="wininet")  ### for Windows OS 
 remotes::install_github("Vogelwarte/NestTool", dependencies=TRUE) 
 library(NestTool)
 ```
