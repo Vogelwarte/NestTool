@@ -9,8 +9,9 @@ This package is not available on CRAN and must therefore be installed from [GitH
 
 
 ```r
-library(devtools)
-devtools::install_github("Vogelwarte/NestTool", dependencies=TRUE) 
+library(remotes)
+options(download.file.method="wininet")  ### for Windows OS, check [here](https://cran.r-project.org/web/packages/remotes/readme/README.html) for options for other operating systems 
+remotes::install_github("Vogelwarte/NestTool", dependencies=TRUE) 
 library(NestTool)
 ```
 
