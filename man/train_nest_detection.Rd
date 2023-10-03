@@ -8,7 +8,7 @@ train_nest_detection(trackingsummary, plot = TRUE)
 }
 \arguments{
 \item{trackingsummary}{data.frame created by \code{\link{data_prep}} with information on individual identity, age, sex, and seasonal movement metrics.
-Must contain a column 'nest' with two possible values, 'no nest' or 'nest' to be able to train the model. If no such data are available, use \code{\link{predict_nesting}} instead.}
+Must contain a column 'nest' with two possible values, 'no nest' or 'nest' (or 0 or 1) to be able to train the model (at least 5 of each are required). If no such data are available, use \code{\link{predict_nesting}} instead.}
 
 \item{plot}{logical. If TRUE, a variable importance plot is produced.}
 }
