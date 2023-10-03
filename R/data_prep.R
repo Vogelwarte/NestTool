@@ -345,12 +345,12 @@ data_prep <- function(trackingdata,
   # ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
   ### COMBINED METRIC OF MEAN DISTANCE TO NEAREST NEIGHBOURS AND TIME AND REVISITS
   
-  # identify nearest neighbours and calculate the mean distance to fixed number of nearest neighbours
-  nearest <- RANN::nn2(milvus_track[,1:2],milvus_track[,1:2],k=150)$nn.dists
-  milvus_track$NN50dist<-apply(nearest,1,mean)
+  # # identify nearest neighbours and calculate the mean distance to fixed number of nearest neighbours
+  # nearest <- RANN::nn2(milvus_track[,1:2],milvus_track[,1:2],k=150)$nn.dists
+  # milvus_track$NN50dist<-apply(nearest,1,mean)
   
   # identify potential nest by averaging over coordinates with joint greatest residence time and nearest neighbour distance
-  suppressWarnings({milvus_pot_nests <- milvus_track %>% mutate(MOST=residence_time+revisits-NN50dist) %>% #slice_max(order_by=MOST, n=50)
+  suppressWarnings({milvus_pot_nests <- milvus_track %>% mutate(MOST=residence_time+revisits) %>% #slice_max(order_by=MOST, n=50)
     dplyr::group_by(id) %>%
     # summarise(revisits=revisits[which(residence_time == max(residence_time))],
     #           x = x_[which(residence_time == max(residence_time))],
@@ -366,6 +366,7 @@ data_prep <- function(trackingdata,
   
   milvus_pot_nest_sf <- milvus_pot_nests %>%
     dplyr::rename(year_id=id) %>%
+    mutate(Type="MaxTime") %>%
     sf::st_as_sf(coords = c("x", "y"), crs = 3035)
   
   
@@ -376,13 +377,13 @@ data_prep <- function(trackingdata,
   ### discarded on 3 Oct 2023 because it can create artificial locations in places where the bird never went
   ### reinstated by providing 3 alternative options
 
-  milvus_pot_nest_sf_alt2 <- milvus_track %>% 
-    dplyr::rename(year_id=id) %>%
-    slice_min(order_by=NN50dist, n=50, by=year_id) %>%
-    sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
-    group_by(year_id) %>%
-    summarize(geometry = st_union(geometry)) %>%
-    st_centroid()
+  # milvus_pot_nest_sf_alt2 <- milvus_track %>% 
+  #   dplyr::rename(year_id=id) %>%
+  #   slice_min(order_by=NN50dist, n=50, by=year_id) %>%
+  #   sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
+  #   group_by(year_id) %>%
+  #   summarize(geometry = st_union(geometry)) %>%
+  #   st_centroid()
   
   
   # ##### visualise the problem animals where nests are >100 m from actual nest
@@ -402,6 +403,24 @@ data_prep <- function(trackingdata,
   ## USE THE LOCATION WITH MORE SURROUNDING LOCATIONS
   
   for (i in milvus_pot_nest_sf$year_id) {
+    
+    # # identify nearest neighbours and calculate the mean distance to fixed number of nearest neighbours
+    nearest <- RANN::nn2(milvus_track[milvus_track$id == i,1:2],milvus_track[milvus_track$id == i,1:2],k=150)$nn.dists
+    milvus_track$NN50dist[milvus_track$id == i]<-apply(nearest,1,mean)
+    
+    ### create second alternative nest location
+    milvus_pot_nest_sf <- milvus_track %>% 
+      dplyr::rename(year_id=id) %>%
+      filter(year_id==i) %>%
+      slice_min(order_by=NN50dist, n=50, by=year_id) %>%
+      sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
+      group_by(year_id) %>%
+      summarize(geometry = st_union(geometry)) %>%
+      st_centroid() %>%
+      mutate(Type="MeanDist50") %>%
+      select(year_id,Type,geometry) %>%
+      bind_rows(milvus_pot_nest_sf)
+    
     ### create third alternative nest location
     radnests <- RANN::nn2(milvus_track[milvus_track$id == i,1:2],
                           milvus_track[milvus_track$id == i,1:2],
@@ -410,33 +429,29 @@ data_prep <- function(trackingdata,
     
     milvus_track$NPoint[milvus_track$id == i]<-lengths(apply(radnests,1,unique))
     
-    milvus_pot_nest_sf_alt3<-milvus_track %>% dplyr::rename(year_id=id) %>%
+    milvus_pot_nest_sf<-milvus_track %>% dplyr::rename(year_id=id) %>%
       filter(year_id==i) %>%
       slice_max(order_by=NPoint, n=10, by=year_id) %>%
-      sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
+      sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>% #print(n=11)
       summarize(geometry = st_union(geometry)) %>%
-      st_centroid()
+      st_centroid() %>%
+      mutate(Type="MaxPoints", year_id=i) %>%
+      select(year_id,Type,geometry) %>%
+      bind_rows(milvus_pot_nest_sf)
     
     ### compare point counts for 3 alternatives
-    radnests <- RANN::nn2(milvus_track[milvus_track$id == i,1:2],
-                          rbind(st_coordinates(milvus_pot_nest_sf[milvus_pot_nest_sf$year_id==i,]),
-                                st_coordinates(milvus_pot_nest_sf_alt2[milvus_pot_nest_sf$year_id==i,]),
-                                st_coordinates(milvus_pot_nest_sf_alt3)),
+    radnests2 <- RANN::nn2(milvus_track[milvus_track$id == i,1:2],
+                          rbind(st_coordinates(milvus_pot_nest_sf[milvus_pot_nest_sf$year_id==i,])),
+                                # st_coordinates(milvus_pot_nest_sf_alt2[milvus_pot_nest_sf$year_id==i,]),
+                                # st_coordinates(milvus_pot_nest_sf_alt3)),
                           k=dim(milvus_track[milvus_track$id == i,])[1],
                           searchtype="radius", radius = 50)$nn.idx
-    npoint<-lengths(apply(radnests,1,unique))
+    milvus_pot_nest_sf$npoint[milvus_pot_nest_sf$year_id==i]<-lengths(apply(radnests2,1,unique))
     
-    if(npoint[2]>npoint[1] & npoint[2]>npoint[3]){
+    ### retain only the nest with the highest point count
       milvus_pot_nest_sf<-milvus_pot_nest_sf %>%
-        filter(!year_id==i) %>%
-        bind_rows(milvus_pot_nest_sf_alt2[milvus_pot_nest_sf$year_id==i,])
-    }else{
-      if(npoint[3]>npoint[1]){
-        milvus_pot_nest_sf<-milvus_pot_nest_sf %>%
-          filter(!year_id==i) %>%
-          bind_rows(milvus_pot_nest_sf_alt3 %>% mutate(year_id=i) %>% select(year_id,geometry))
-      }
-    }
+        filter(!(year_id==i & npoint < max(npoint,na.rm=T))) %>%
+        select(year_id,Type,geometry)
   }
     
 
@@ -448,66 +463,76 @@ data_prep <- function(trackingdata,
   ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
   # ### need to make sure that 2 ways of calculating "milvus_pot_nests_sf" are labelled differently
   # library(leaflet)
-  # 
-  # m4 <- leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
-  #   setView(lng = mean(st_coordinates(milvus_pot_nest_sf %>%  st_transform(4326))[,1]),
-  #           lat = mean(st_coordinates(milvus_pot_nest_sf %>%  st_transform(4326))[,2]),
-  #           zoom = 8) %>%
-  #   htmlwidgets::onRender("function(el, x) {L.control.zoom({
-  #                          position: 'bottomright' }).addTo(this)}"
-  #   ) %>% #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
-  #   addProviderTiles("Esri.WorldImagery", group = "Satellite",
-  #                    options = providerTileOptions(opacity = 0.6, attribution = F,minZoom = 5, maxZoom = 20)) %>%
-  #   addProviderTiles("OpenTopoMap", group = "Roadmap", options = providerTileOptions(attribution = F,minZoom = 5, maxZoom = 15)) %>%
-  #   addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>%
-  # 
-  #   addCircleMarkers(
-  #     data = milvus_night %>% sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
-  #     radius = 4,
-  #     color = "grey1",
-  #     weight = 0.5,
-  #     opacity = 0.7,
-  #     fillColor = "grey1",
-  #     fillOpacity = 0.7
-  #   ) %>%
-  # 
-  #   addCircleMarkers(
-  #     data = milvus_day  %>% sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
-  #     radius = 4,
-  #     color = "lightgreen",
-  #     weight = 0.5,
-  #     opacity = 0.7,
-  #     fillColor = "lightgreen",
-  #     fillOpacity = 0.7
-  #   ) %>%
-  # 
-  #   addCircleMarkers(
-  #     data = milvus_pot_nests_sf %>%  st_transform(4326),
-  #     radius = 6,
-  #     color = "firebrick",
-  #     weight = 0.5,
-  #     opacity = 0.7,
-  #     fillColor = "firebrick",
-  #     fillOpacity = 0.7
-  #   ) %>%
-  # 
-  #   addCircleMarkers(
-  #     data = milvus_pot_nest_sf %>%  st_transform(4326),
-  #     radius = 6,
-  #     color = "orange",
-  #     weight = 0.5,
-  #     opacity = 0.7,
-  #     fillColor = "orange",
-  #     fillOpacity = 0.7#,
-  #     #popup = ~paste0("Time: <br>", round(MOST, 2), "N", round(NPoint, 2), "points")
-  #   ) %>%
-  # 
-  #   addScaleBar(position = "bottomright", options = scaleBarOptions(imperial = F))
-  # 
-  # m4
-  # 
-  # 
-  # 
+# 
+#   m4 <- leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
+#     setView(lng = mean(st_coordinates(milvus_pot_nest_sf %>%  st_transform(4326))[,1]),
+#             lat = mean(st_coordinates(milvus_pot_nest_sf %>%  st_transform(4326))[,2]),
+#             zoom = 8) %>%
+#     htmlwidgets::onRender("function(el, x) {L.control.zoom({
+#                            position: 'bottomright' }).addTo(this)}"
+#     ) %>% #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
+#     addProviderTiles("Esri.WorldImagery", group = "Satellite",
+#                      options = providerTileOptions(opacity = 0.6, attribution = F,minZoom = 5, maxZoom = 20)) %>%
+#     addProviderTiles("OpenTopoMap", group = "Roadmap", options = providerTileOptions(attribution = F,minZoom = 5, maxZoom = 15)) %>%
+#     addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>%
+# 
+#     addCircleMarkers(
+#       data = milvus_night %>% sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
+#       radius = 4,
+#       color = "grey1",
+#       weight = 0.5,
+#       opacity = 0.7,
+#       fillColor = "grey1",
+#       fillOpacity = 0.7
+#     ) %>%
+# 
+#     addCircleMarkers(
+#       data = milvus_day  %>% sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
+#       radius = 4,
+#       color = "lightgreen",
+#       weight = 0.5,
+#       opacity = 0.7,
+#       fillColor = "lightgreen",
+#       fillOpacity = 0.7
+#     ) %>%
+# 
+#     addCircleMarkers(
+#       data = milvus_pot_nest_sf_alt2 %>%  st_transform(4326),
+#       radius = 6,
+#       color = "firebrick",
+#       weight = 0.5,
+#       opacity = 0.7,
+#       fillColor = "firebrick",
+#       fillOpacity = 0.7
+#     ) %>%
+#     
+#     addCircleMarkers(
+#       data = milvus_pot_nest_sf_alt3 %>%  st_transform(4326),
+#       radius = 6,
+#       color = "yellow",
+#       weight = 0.5,
+#       opacity = 0.7,
+#       fillColor = "yellow",
+#       fillOpacity = 0.7
+#     ) %>%
+# 
+#     addCircleMarkers(
+#       data = milvus_pot_nest_sf %>%  st_transform(4326),
+#       radius = 6,
+#       color = "orange",
+#       weight = 0.5,
+#       opacity = 0.7,
+#       fillColor = "orange",
+#       fillOpacity = 0.7,
+#       popup = ~paste0("year_id: ", year_id)
+#     ) %>%
+# 
+#     addScaleBar(position = "bottomright", options = scaleBarOptions(imperial = F))
+# 
+#   m4
+
+
+
   
   
   
