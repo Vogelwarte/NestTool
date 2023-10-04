@@ -179,3 +179,90 @@ milvus=trackingdata %>% filter(year_id %in% c("2018_5081","2022_5081","2023_5081
 "2021_8165"
 "2022_52172"
 "2022_6369"
+
+
+
+
+##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+########## CALCULATE DISTANCE BETWEEN PREDICTED AND ACTUAL NEST LOCATION #################################
+##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+### read in nest locations provided by Thomas Pfeiffer on 4 Oct 2023
+setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU")
+nests<- read_excel("THU_nest_coordinates.xlsx", sheet="ALL") %>%
+  dplyr::mutate(year_id=paste(year,bird_id,sep="_")) %>%
+  filter(!is.na(lat)) %>%
+  sf::st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
+  st_transform(3035) %>%
+  arrange(year_id)
+
+pred_nests<-nest_data_input$pot_nests %>%
+  dplyr::rename(year_id=id) %>%
+  sf::st_as_sf(coords = c("x", "y"), crs = 3035)
+
+
+# ##### CALCULATE THE DISTANCE BETWEEN ACTUAL AND PREDICTED NESTS
+
+PRED_NESTS <-  pred_nests %>% 
+  filter(year_id %in% nests$year_id) %>%
+  arrange(year_id) %>%
+  mutate(dist_real_nest = st_distance(.,nests, by_element=T)) %>%
+  arrange(desc(as.numeric(dist_real_nest))) %>%
+  st_transform(4326)
+
+tail(PRED_NESTS)
+
+
+##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+########## PLOT PREDICTED AND ACTUAL NEST LOCATION   #############
+##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+
+library(leaflet)
+
+out <- leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
+  setView(lng = mean(st_coordinates(nests %>%  st_transform(4326))[,1]),
+          lat = mean(st_coordinates(nests %>%  st_transform(4326))[,2]),
+          zoom = 8) %>%
+  htmlwidgets::onRender("function(el, x) {L.control.zoom({
+                         position: 'bottomright' }).addTo(this)}"
+  ) %>% #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
+  addProviderTiles("Esri.WorldImagery", group = "Satellite",
+                   options = providerTileOptions(opacity = 0.6, attribution = F,minZoom = 5, maxZoom = 20)) %>%
+  addProviderTiles("OpenTopoMap", group = "Roadmap", options = providerTileOptions(attribution = F,minZoom = 5, maxZoom = 15)) %>%
+  addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>%
+
+  addCircleMarkers(
+    data = trackingdata  %>% sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
+    radius = 4,
+    color = "lightgreen",
+    weight = 0.5,
+    opacity = 0.7,
+    fillColor = "lightgreen",
+    fillOpacity = 0.7
+  ) %>%
+
+  addCircleMarkers(
+    data = PRED_NESTS,
+    radius = 6,
+    color = "firebrick",
+    weight = 0.5,
+    opacity = 0.7,
+    fillColor = "firebrick",
+    fillOpacity = 0.7,
+    popup = ~paste0("year_id: ", year_id, " - ", dist_real_nest)
+  ) %>%
+
+
+  addCircleMarkers(
+    data = nests %>% st_transform(4326),
+    radius = 6,
+    color = "orange",
+    weight = 0.5,
+    opacity = 0.7,
+    fillColor = "orange",
+    fillOpacity = 0.7,
+    popup = ~paste0("year_id: ", year_id)
+  ) %>%
+
+  addScaleBar(position = "bottomright", options = scaleBarOptions(imperial = F))
+
+out
