@@ -49,7 +49,7 @@
 #'
 #' @export 
 #' @importFrom lubridate yday ymd
-#' @importFrom dplyr mutate filter intersect left_join group_by summarise n select first rename bind_rows ungroup if_else
+#' @importFrom dplyr arrange mutate filter intersect left_join group_by summarise n select first rename bind_rows ungroup if_else slice_min slice_max
 #' @importFrom purrr reduce pluck
 #' @importFrom amt mk_track time_of_day arrange hr_mcp hr_area
 #' @importFrom recurse getRecursions getRecursionsAtLocations
@@ -413,7 +413,7 @@ data_prep <- function(trackingdata,
     ### subset the data ####
     workdat<- milvus_track %>% 
       dplyr::rename(year_id=id) %>%
-      filter(year_id==i)
+      dplyr::filter(year_id==i)
     dim(workdat)
     
     ### calculate nearest neighbour distances
@@ -422,12 +422,12 @@ data_prep <- function(trackingdata,
     workdat$NN50dist<-apply(nearest,1,median)
     
     ### apply sequential filters of residence time and revisits and nearest neighbour distance
-    potnests <- workdat %>% arrange(desc(residence_time)) %>% 
-      filter(residence_time > quantile(residence_time, 0.95)) %>%
-      arrange(desc(revisits)) %>% 
-      filter(revisits >= quantile(revisits, 0.75)) %>%
-      arrange(NN50dist) %>% 
-      filter(NN50dist <= quantile(NN50dist, 0.25))
+    potnests <- workdat %>% dplyr::arrange(desc(residence_time)) %>% 
+      dplyr::filter(residence_time > quantile(residence_time, 0.95)) %>%
+      dplyr::arrange(desc(revisits)) %>% 
+      dplyr::filter(revisits >= quantile(revisits, 0.75)) %>%
+      dplyr::arrange(NN50dist) %>% 
+      dplyr::filter(NN50dist <= quantile(NN50dist, 0.25))
     dim(potnests)
     
     ### compare point counts for 3 alternatives
@@ -449,15 +449,15 @@ data_prep <- function(trackingdata,
     ### retain only the nest with the highest point count
     ## in case of ties use most time, visits, distance and then earliest point
     milvus_pot_nests<-potnests %>% 
-      slice_max(order_by=npoint, n=1) %>%
-      slice_max(order_by=residence_time, n=1) %>%
-      slice_max(order_by=revisits, n=1) %>%
-      slice_min(order_by=NN50dist, n=1) %>%
-      slice_min(order_by=t_, n=1) %>%
-      select(year_id,event_id,x_,y_,npoint,revisits,residence_time,NN50dist) %>%
-      rename(id=year_id,x=x_,y=y_) %>%
+      dplyr::slice_max(order_by=npoint, n=1) %>%
+      dplyr::slice_max(order_by=residence_time, n=1) %>%
+      dplyr::slice_max(order_by=revisits, n=1) %>%
+      dplyr::slice_min(order_by=NN50dist, n=1) %>%
+      dplyr::slice_min(order_by=t_, n=1) %>%
+      dplyr::select(year_id,event_id,x_,y_,npoint,revisits,residence_time,NN50dist) %>%
+      dplyr::rename(id=year_id,x=x_,y=y_) %>%
       #mutate(Type="Revised") %>%
-      bind_rows(milvus_pot_nests)
+      dplyr::bind_rows(milvus_pot_nests)
   }
     
   milvus_pot_nest_sf <- milvus_pot_nests %>%
