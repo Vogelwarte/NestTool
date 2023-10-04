@@ -10,6 +10,8 @@
 ### validation based on extrapolated models from SUI
 ### only nest success model will be fit for GER
 
+### revised on 5 Oct to include additional data from THU
+
 
 
 # install.packages("devtools", dependencies = TRUE)
@@ -25,7 +27,8 @@ library(pROC)
 start_time <- Sys.time()
 
 # LOAD AND FORMAT EXAMPLE TRACKING DATA
-setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis")
+try(setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis"),silent=T)
+try(setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis"),silent=T)
 
 indseasondata <- read_excel("NestTool2/data/REKI_NestTool_ValidationDataTemplate_RMZ.xlsx") %>%
   rename(bird_id=Bird_ID, HR=Homerange,nest=Nest) %>%
@@ -64,7 +67,8 @@ dim(trackingdata)
 
 
 # ADD BIRDS FROM THURINGEN
-THUdata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/04_milvus_thuringia.csv")
+try(THUdata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/04_milvus_thuringia.csv"),silent=T)
+try(THUdata<-fread("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/04_milvus_thuringia.csv"),silent=T)
 ##make up indseasondata as input is now mandatory
 indseasondata <- THUdata %>% group_by(year_id) %>%
   summarise(sex=first(sex), bird_id=first(bird_id)) %>%
@@ -86,6 +90,51 @@ indseasondata[-(which(indseasondata$year_id %in% unique(trackingdata$year_id))),
 
 
 
+#### ADD THE UNSUCCESSFUL DATA FROM THURINGEN SUPPLIED BY THOMAS PFEIFFER IN OCTOBER 2023 ################
+
+
+# LOAD AND COMPILE TRACKING DATA
+try(setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU"),silent=T)
+try(setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU"),silent=T)
+alldat<-list.files(pattern=".txt")
+
+for(f in 1:length(alldat)){
+  dat<-fread(alldat[f])
+  names(dat)<-c("bird_id","timestamp","long_wgs","lat_wgs","alt")
+  trackingdata<-dat %>% mutate(year=year(timestamp)) %>%
+    mutate(bird_id=as.character(bird_id)) %>%
+    mutate(year_id=paste(year,bird_id,sep="_")) %>%
+    mutate(x=long_wgs,y=lat_wgs) %>%
+    filter(!is.na(x)) %>%
+    st_as_sf(coords = c("x", "y"), crs=4326) %>%
+    st_transform(3035) %>%
+    dplyr::mutate(long_eea = sf::st_coordinates(.)[,1],
+                  lat_eea = sf::st_coordinates(.)[,2]) %>%
+    st_drop_geometry() %>%
+    select(year_id,bird_id,timestamp,long_wgs,lat_wgs,long_eea,lat_eea) %>%
+    arrange(year_id,timestamp) %>%
+    bind_rows(trackingdata)
+}
+
+head(trackingdata)
+dim(trackingdata)
+
+## load nesting information
+try(setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU"),silent=T)
+try(setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU"),silent=T)
+indseasondata<- read_excel("THU_nest_coordinates.xlsx", sheet="ALL") %>%
+  rename(nest=breeding) %>%
+  dplyr::mutate(year_id=paste(year,bird_id,sep="_")) %>%
+  mutate(sex=if_else(bird_id %in% c("3803", "6249a", "6249", "4532", "6674", "8966", "8968", "94754"),"f","m"),
+         age_cy=6, ### all birds were adult
+         HR=1) %>%  
+  select(year_id,bird_id,sex,age_cy,HR,nest,success) %>%
+  bind_rows(indseasondata)
+
+
+### ensure correct factor levels of sex to facilitate prediction
+indseasondata$sex<-factor(indseasondata$sex, levels=c('m','f'))
+
 
 #### PRELIMINARY ASSESSMENT - WHICH BIRDS HAVE ENOUGH DATA
 ### those are the birds that don't have enough data
@@ -103,7 +152,7 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
                       longboundary=9,
                       broodstart= yday(ymd("2023-05-15")),
                       broodend<- yday(ymd("2023-06-15")),
-                      minlocs=800,
+                      minlocs=500,
                       nestradius=250,
                       homeradius=5000,
                       startseason=yday(ymd("2023-03-15")),
@@ -392,20 +441,22 @@ library(rmarkdown)
 ## create HTML report for overall summary report
 # Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/RStudio/resources/app/bin/quarto/share/pandoc")
 # pandoc_version()
-rmarkdown::render('C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool\\NestTool_ResultsValidation.Rmd',
-                  output_file = "NestTool_ResultsValidation_GER.html",
-                  output_dir = 'C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool')
+try(setwd("C:\\STEFFEN\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool"),silent=T)
+try(setwd("C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool"),silent=T)
+# rmarkdown::render('C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool\\NestTool_ResultsValidation.Rmd',
+#                   output_file = "NestTool_ResultsValidation_GER.html",
+#                   output_dir = 'C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool')
 
 
-save.image("NestTool2/NestToolValidation_GER.RData")  
-load("NestTool2/NestToolValidation_GER.RData")
+save.image("NestToolValidation_GER.RData")  
+load("NestToolValidation_GER.RData")
 
 
 ### WRITE MANUSCRIPT RESULTS SECTION ###
 
-rmarkdown::render('C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool\\NestTool_ResultsSection_GER.Rmd',
+rmarkdown::render('C:\\STEFFEN\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool\\NestTool_ResultsSection_GER.Rmd',
                   output_file = "NestTool_ResultsSection_GER.docx",
-                  output_dir = 'C:\\Users\\sop\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool')
+                  output_dir = 'C:\\STEFFEN\\OneDrive - Vogelwarte\\General\\MANUSCRIPTS\\NestTool')
 
 
 
