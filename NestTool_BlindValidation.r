@@ -9,13 +9,18 @@
 
 # install.packages("devtools", dependencies = TRUE)
 # library(devtools)
-# devtools::install_github("steffenoppel/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
+# devtools::install_github("Vogelwarte/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
+# library(remotes)
+# options(download.file.method="wininet")
+# remotes::install_github("Vogelwarte/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
+
 library(data.table)
 library(tidyverse)
 library(readxl)
 library(sf)
 library(NestTool)
 library(pROC)
+library(RANN)
 
 # LOAD AND COMPILE TRACKING DATA
 setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU")
@@ -129,7 +134,7 @@ movement_visualisation(trackingdata=nest_data_input$movementtrack,
 #### STEP 7: summarise the demographic parameters for the population
 
 ## READ IN AND COMBINE DATA OF MANUALLY CLASSIFIED AND AUTOMATICALLY CLASSIFIED DATA
-MANUAL<-fread(here::here("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU/NestTool_VALIDATION_THU2_nest_success_output.csv")) %>%
+MANUAL<-fread(here::here("C:/Users/sop/OneDrive - Vogelwarte/NestTool_VALIDATION_THU2_nest_success_output.csv")) %>%
   rename(ManualNest=Nest,ManualSuccess=Success) %>%
   select(year_id,ManualNest,ManualSuccess)
 ALL<-pred_succ %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
@@ -157,7 +162,7 @@ load("NestTool2/NestToolValidation_GER.RData")
 
 
 #### troubleshoot data prep to understand why nest location is off
-milvus=trackingdata %>% filter(year_id=="2019_5081") %>%
+milvus=trackingdata %>% filter(year_id %in% c("2018_5081","2022_5081","2023_5081","2021_6674","2021_8165","2022_6369","2023_8966")) %>%
   dplyr::mutate(timestamp = as.POSIXct(timestamp, format ="%Y-%m-%d %H:%M:%S", tz = "UTC"),
                 date = as.Date(timestamp, tz = "UTC"),
                 week = as.integer(format(date, format = "%W")),
