@@ -24,6 +24,7 @@ library(RANN)
 
 # LOAD AND COMPILE TRACKING DATA
 setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU")
+setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU")
 alldat<-list.files(pattern=".txt")
 
 trackingdata<-data.frame()
@@ -162,7 +163,7 @@ load("NestTool2/NestToolValidation_GER.RData")
 
 
 #### troubleshoot data prep to understand why nest location is off
-milvus=trackingdata %>% filter(year_id %in% c("2018_5081","2022_5081","2023_5081","2021_6674","2021_8165","2022_6369","2023_8966")) %>%
+milvus=trackingdata %>% #filter(year_id %in% c("2021_6674","2023_4532")) %>%
   dplyr::mutate(timestamp = as.POSIXct(timestamp, format ="%Y-%m-%d %H:%M:%S", tz = "UTC"),
                 date = as.Date(timestamp, tz = "UTC"),
                 week = as.integer(format(date, format = "%W")),
@@ -188,6 +189,7 @@ milvus=trackingdata %>% filter(year_id %in% c("2018_5081","2022_5081","2023_5081
 ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
 ### read in nest locations provided by Thomas Pfeiffer on 4 Oct 2023
 setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU")
+setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU")
 nests<- read_excel("THU_nest_coordinates.xlsx", sheet="ALL") %>%
   dplyr::mutate(year_id=paste(year,bird_id,sep="_")) %>%
   filter(!is.na(lat)) %>%
@@ -209,7 +211,7 @@ PRED_NESTS <-  pred_nests %>%
   arrange(desc(as.numeric(dist_real_nest))) %>%
   st_transform(4326)
 
-tail(PRED_NESTS)
+PRED_NESTS
 
 
 ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
