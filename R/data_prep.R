@@ -423,7 +423,8 @@ data_prep <- function(trackingdata,
     
     ### apply sequential filters of residence time and revisits and nearest neighbour distance
     potnests <- workdat %>% dplyr::arrange(desc(residence_time)) %>% 
-      dplyr::filter(residence_time > quantile(residence_time, 0.95)) %>%
+      dplyr::filter(residence_time > quantile(residence_time, 0.99)) %>%
+      ## need a second filter step here to eliminate locations if they differ too much in time
       dplyr::arrange(desc(revisits)) %>% 
       dplyr::filter(revisits >= quantile(revisits, 0.75)) %>%
       dplyr::arrange(NN50dist) %>% 
@@ -471,68 +472,70 @@ data_prep <- function(trackingdata,
   ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
   # ### need to make sure that 2 ways of calculating "milvus_pot_nests_sf" are labelled differently
   # library(leaflet)
-
-  # m4 <- leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
-  #   setView(lng = mean(st_coordinates(milvus_pot_nest_sf %>%  st_transform(4326))[,1]),
-  #           lat = mean(st_coordinates(milvus_pot_nest_sf %>%  st_transform(4326))[,2]),
-  #           zoom = 8) %>%
-  #   htmlwidgets::onRender("function(el, x) {L.control.zoom({
-  #                          position: 'bottomright' }).addTo(this)}"
-  #   ) %>% #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
-  #   addProviderTiles("Esri.WorldImagery", group = "Satellite",
-  #                    options = providerTileOptions(opacity = 0.6, attribution = F,minZoom = 5, maxZoom = 20)) %>%
-  #   addProviderTiles("OpenTopoMap", group = "Roadmap", options = providerTileOptions(attribution = F,minZoom = 5, maxZoom = 15)) %>%
-  #   addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>%
-  # 
-  #   addCircleMarkers(
-  #     data = milvus_night %>% sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
-  #     radius = 4,
-  #     color = "grey1",
-  #     weight = 0.5,
-  #     opacity = 0.7,
-  #     fillColor = "grey1",
-  #     fillOpacity = 0.7
-  #   ) %>%
-  # 
-  #   addCircleMarkers(
-  #     data = milvus_day  %>% sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
-  #     radius = 4,
-  #     color = "lightgreen",
-  #     weight = 0.5,
-  #     opacity = 0.7,
-  #     fillColor = "lightgreen",
-  #     fillOpacity = 0.7
-  #   ) %>%
-  # 
-  #   addCircleMarkers(
-  #     data = milvus_pot_nest_sf %>% filter(Type=="Revised") %>% st_transform(4326),
-  #     radius = 6,
-  #     color = "firebrick",
-  #     weight = 0.5,
-  #     opacity = 0.7,
-  #     fillColor = "firebrick",
-  #     fillOpacity = 0.7
-  #   ) %>%
-  # 
-  # 
-  #   addCircleMarkers(
-  #     data = milvus_pot_nest_sf %>% filter(Type=="MaxTime") %>%  st_transform(4326),
-  #     radius = 6,
-  #     color = "orange",
-  #     weight = 0.5,
-  #     opacity = 0.7,
-  #     fillColor = "orange",
-  #     fillOpacity = 0.7,
-  #     popup = ~paste0("year_id: ", year_id)
-  #   ) %>%
-  # 
-  #   addScaleBar(position = "bottomright", options = scaleBarOptions(imperial = F))
-  # 
-  # m4
-
-
-
-  
+# 
+#   m4 <- leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
+#     setView(lng = mean(st_coordinates(milvus_pot_nest_sf %>%  st_transform(4326))[,1]),
+#             lat = mean(st_coordinates(milvus_pot_nest_sf %>%  st_transform(4326))[,2]),
+#             zoom = 8) %>%
+#     htmlwidgets::onRender("function(el, x) {L.control.zoom({
+#                            position: 'bottomright' }).addTo(this)}"
+#     ) %>% #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
+#     addProviderTiles("Esri.WorldImagery", group = "Satellite",
+#                      options = providerTileOptions(opacity = 0.6, attribution = F,minZoom = 5, maxZoom = 20)) %>%
+#     addProviderTiles("OpenTopoMap", group = "Roadmap", options = providerTileOptions(attribution = F,minZoom = 5, maxZoom = 15)) %>%
+#     addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>%
+# 
+#     addCircleMarkers(
+#       data = milvus_night %>% filter(year_id =="2023_8164") %>%sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
+#       radius = 4,
+#       color = "grey1",
+#       weight = 0.5,
+#       opacity = 0.7,
+#       fillColor = "grey1",
+#       fillOpacity = 0.7
+#     ) %>%
+# 
+#     addCircleMarkers(
+#       data = milvus_day  %>% filter(year_id =="2023_8164") %>% sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
+#       radius = 4,
+#       color = "lightgreen",
+#       weight = 0.5,
+#       opacity = 0.7,
+#       fillColor = "lightgreen",
+#       fillOpacity = 0.7,
+#       popup = ~paste(residence_time,revisits, sep=" / ")
+#     ) %>%
+# 
+#     addCircleMarkers(
+#       data = milvus_pot_nest_sf %>% filter(year_id =="2023_8164") %>% st_transform(4326),   ##%>% filter(Type=="Revised") 
+#       radius = 6,
+#       color = "firebrick",
+#       weight = 0.5,
+#       opacity = 0.7,
+#       fillColor = "firebrick",
+#       fillOpacity = 0.7,
+#       popup = ~paste0("year_id: ", year_id)
+#     ) %>%
+# 
+# 
+#     addCircleMarkers(
+#       data = nests %>% filter(year_id =="2022_8164") %>% filter(year_id %in% milvus_pot_nest_sf$year_id) %>% st_transform(4326),
+#       radius = 6,
+#       color = "orange",
+#       weight = 0.5,
+#       opacity = 0.7,
+#       fillColor = "orange",
+#       fillOpacity = 0.7,
+#       popup = ~paste0("year_id: ", year_id)
+#     ) %>%
+# 
+#     addScaleBar(position = "bottomright", options = scaleBarOptions(imperial = F))
+# 
+#   m4
+# 
+# 
+# 
+#   
   
   
   ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
