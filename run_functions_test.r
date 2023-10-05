@@ -26,7 +26,8 @@ library(htmltools)
 library(NestTool)
 
 ## set root folder for project
-setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
+try(setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2"),silent=T)
+try(setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2"),silent=T)
 # library(here)
 # source("R//data_prep.r")
 source("R/train_nest_detection.r")
@@ -45,8 +46,8 @@ source("R/train_nest_success.r")
 
 
 ### LOAD THE TRACKING DATA AND INDIVIDUAL SEASON SUMMARIES 
-trackingdata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/03_milvus_combined.csv")
-indseasondata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/01_validation/03_validation_combined.csv") %>%
+trackingdata<-fread("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/03_milvus_combined.csv")
+indseasondata<-fread("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/01_validation/03_validation_combined.csv") %>%
   mutate(nest = case_when(nest_id > 0 ~ "nest",
                         nest_id == 0 ~ "no nest")) %>%
   mutate(HR = case_when(home_range_id > 0 ~ "yes",
@@ -87,7 +88,7 @@ nest_data_input <- readRDS("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/Nes
 #### STEP 2: train home range model (if training data available)
 trackingsummary<-nest_data_input$summary
 hr_model<-train_home_range_detection(trackingsummary=trackingsummary,plot=T)
-# saveRDS(hr_model, "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/dataR/hr_model.rds")
+# saveRDS(hr_model, "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/hr_model.rds")
 # usethis::use_data(hr_model, overwrite=TRUE)
 
 
@@ -104,7 +105,7 @@ trackingsummary<-nest_data_input$summary
 unique(trackingsummary$nest) # now includes NA which must be removed for training model
 nest_model<-train_nest_detection(trackingsummary=trackingsummary[!is.na(trackingsummary$nest),],plot=T)
 # usethis::use_data(nest_model, overwrite=TRUE)
-#saveRDS(nest_model, "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/nest_model.rds"))
+#saveRDS(nest_model, "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/nest_model.rds")
 
 
 #### STEP 5: identify nests
@@ -125,7 +126,7 @@ dim(pred_nest)
 #nestingsummary<-fread(here("output/05_full_run_THU/nestingsummary.csv"))
 succ_model<-train_nest_success(nestingsummary=pred_nest[pred_nest$success %in% c("yes","no"),],plot=T)
 #usethis::use_data(succ_model, overwrite=TRUE)
-#saveRDS(succ_model, here("R/succ_model.rds"))
+#saveRDS(succ_model, "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/succ_model.rds")
 
 
 
