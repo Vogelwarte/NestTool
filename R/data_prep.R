@@ -401,9 +401,9 @@ data_prep <- function(trackingdata,
   ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#####################################################################
 
   ## NEW APPROACH OF SEQUENTIAL HIERARCHY INTRODUCED ON 4 OCT 2023
-  # 1. select top 5% of locs with highest residence time
-  # 2. select top 5% of remaining locs with highest revisits
-  # 3. select top 5% of remaining locs with smallest median nearest neighbour distance to minlocs/10 locations
+  # 1. select top 1% of locs with highest residence time
+  # 2. select top 25% of remaining locs with highest revisits
+  # 3. select top 75% of remaining locs with smallest median nearest neighbour distance to minlocs/10 locations
   # 4. Of those select the location with the greatest number of neighbours in nestradius
   
   ## LOOP OVER EACH INDIVIDUAL YEAR
