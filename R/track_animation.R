@@ -191,6 +191,38 @@ leaflet() %>%
 
 
 
+##### TRY TO TAKE DAILY AVERAGE LOCATION #####
+
+milvus_track <- trackingdata %>%
+  dplyr::filter(year_id=="2021_157") %>%
+  dplyr::mutate(year_day = lubridate::yday(timestamp),
+                day=as.Date(timestamp)) %>%
+  group_by(year_id,day,year_day) %>%
+  summarise(lat=mean(lat_wgs),long=mean(long_wgs)) %>%
+  sf::st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
+  ungroup()
+  
+#milvus_track <- milvus_track[1:100,] ## trying whether it works for few locations
+
+
+leaflet() %>%
+  addTiles() %>%
+  leaflet.extras2::addPlayback(data = milvus_track,
+                               time = "day",
+                               options = leaflet.extras2::playbackOptions(tickLen=1000*60*60*12,
+                                                                            speed = 10,
+                                                                          maxInterpolationTime=1000*60*60*48))
+
+
+
+
+
+
+
+
+
+
+
 
 # CREATE A GRID TO SHOW DATA INTENSITY -------------------------------------------------------------------------
 
