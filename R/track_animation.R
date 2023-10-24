@@ -102,13 +102,15 @@ indseasondata <- NestTool::kite.nesting
 
 
 
-### TRY ALTERNATIVES:
-https://stackoverflow.com/questions/30370840/animate-map-in-r-with-leaflet-and-xts
-https://towardsdatascience.com/eye-catching-animated-maps-in-r-a-simple-introduction-3559d8c33be1
-https://stackoverflow.com/questions/35512306/r-maps-with-time-slider
+# ### TRY ALTERNATIVES:
+# https://stackoverflow.com/questions/30370840/animate-map-in-r-with-leaflet-and-xts
+# https://towardsdatascience.com/eye-catching-animated-maps-in-r-a-simple-introduction-3559d8c33be1
+# https://stackoverflow.com/questions/35512306/r-maps-with-time-slider
 
 
 
+### THIS EXAMPLE WORKS PERFECTLY BUT ONLY OVER 1 HOUR
+## FALLS APART WHEN TRIED TO DO IT OVER 1 MONTH
 # how many test data points to create
 num_points <- 100
 
@@ -125,9 +127,12 @@ df <- tibble::tibble(temp = (1:num_points),
 # create a leaflet map and add an animated marker
 leaflet() %>%
   addTiles() %>%
-  leaflet.extras2::addPlayback(data = milvus_track,
-                               time = "timestamp",
-                               options = leaflet.extras2::playbackOptions(speed = 10000))
+  leaflet.extras2::addPlayback(data = df,
+                               time = "datetime",
+                               options = leaflet.extras2::playbackOptions(speed = 100000,
+                                                                          tickLen=1000*60*60*5,  ## hourly tick lengths stated in milliseconds
+                                                                          maxInterpolationTime=1000*60*60*5, ## 5 hrs interpolation time
+                                                                          staleTime=1000*60*60*96))  ### 3 days before being faded out
 
 
 # EXTRACT DATA PREPARATION FROM movement_visualisation
@@ -137,7 +142,28 @@ milvus_track <- trackingdata %>%
   sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326) %>%
   mutate(long = sf::st_coordinates(.)[,1],
          lat = sf::st_coordinates(.)[,2])
-milvus_track <- milvus_track[1:100,] ## trying whether it works for few locations
+milvus_track <- milvus_track[1:1000,] ## trying whether it works for few locations
+milvus_track$timestamp
+
+
+
+leaflet() %>%
+  addTiles() %>%
+  leaflet.extras2::addPlayback(data = milvus_track,
+                               time = "timestamp",
+                               options = leaflet.extras2::playbackOptions(speed = 1000000,
+                                                                          tickLen=1000*60*60*12,  ## hourly tick lengths stated in milliseconds
+                                                                          maxInterpolationTime=1000*60*60*48, ## 5 hrs interpolation time
+                                                                          staleTime=1000*60*60*240))  ### 3 days before being faded out
+
+
+
+
+
+
+
+
+
 
 leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
   setView(lng = mean(st_coordinates(milvus_track)[,1]), lat = mean(st_coordinates(milvus_track)[,2]), zoom = 10) %>%
@@ -183,11 +209,7 @@ leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom
                                time = "timestamp",
                                options = leaflet.extras2::playbackOptions(speed = 500000))
 
-leaflet() %>%
-  addTiles() %>%
-  leaflet.extras2::addPlayback(data = milvus_track,
-                               time = "timestamp",
-                               options = leaflet.extras2::playbackOptions(speed = 10000))
+
 
 
 
