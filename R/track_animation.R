@@ -142,29 +142,44 @@ milvus_track <- trackingdata %>%
   sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326) %>%
   mutate(long = sf::st_coordinates(.)[,1],
          lat = sf::st_coordinates(.)[,2])
-milvus_track <- milvus_track[1:1000,] ## trying whether it works for few locations
+#milvus_track <- milvus_track[1:1000,] ## trying whether it works for few locations
 milvus_track$timestamp
 
 
-
+### very basic animation ###
 leaflet() %>%
   addTiles() %>%
   leaflet.extras2::addPlayback(data = milvus_track,
                                time = "timestamp",
-                               options = leaflet.extras2::playbackOptions(speed = 1000000,
-                                                                          tickLen=1000*60*60*12,  ## hourly tick lengths stated in milliseconds
+                               options = leaflet.extras2::playbackOptions(color = "blue",
+                                                                          radius = 2,
+                                                                          speed = 20000000,
+                                                                          tickLen=1000*60*60,  ## hourly tick lengths stated in milliseconds
                                                                           maxInterpolationTime=1000*60*60*48, ## 5 hrs interpolation time
                                                                           staleTime=1000*60*60*240))  ### 3 days before being faded out
 
 
+### trying a more nuanced animation ###
+leaflet() %>%
+  addTiles() %>%
+  leaflet.extras2::addPlayback(data = milvus_track,
+                               time = "timestamp",
+                               icon=makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
+                                             iconWidth=30,
+                                             iconHeight=18,
+                                             iconAnchorX=-1,
+                                             iconAnchorY=-1),
+                               options = leaflet.extras2::playbackOptions(color = "firebrick",
+                                                                          fill = "firebrick",
+                                                                          radius = 1,
+                                                                          speed = 10000000,
+                                                                          tickLen=1000*60*60,  ## hourly tick lengths stated in milliseconds
+                                                                          maxInterpolationTime=1000*60*60*5 ## 5 hrs interpolation time
+                                                                          ))  ### 3 days before being faded out
 
 
 
-
-
-
-
-
+### trying the best possible animation ###
 leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
   setView(lng = mean(st_coordinates(milvus_track)[,1]), lat = mean(st_coordinates(milvus_track)[,2]), zoom = 10) %>%
   htmlwidgets::onRender("function(el, x) {L.control.zoom({ 
@@ -173,7 +188,7 @@ leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom
   addProviderTiles("Esri.WorldImagery", group = "Satellite",
                    options = providerTileOptions(opacity = 0.6, attribution = F,minZoom = 5, maxZoom = 20)) %>%
   addProviderTiles("OpenTopoMap", group = "Roadmap", options = providerTileOptions(attribution = F,minZoom = 5, maxZoom = 15)) %>%  
-  addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>%  
+  addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>% 
   
   addPolylines(
     data = milvus_track,
@@ -184,7 +199,7 @@ leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom
     opacity = 0.7,
     group = "Trajectory"
   ) %>%
-
+  
   addCircleMarkers(
     data = milvus_track,
     radius = 2,
@@ -194,47 +209,20 @@ leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom
     group = "Locations"
   ) %>%
   
-  
-  milvus_track <- milvus_track[1:100,] ## trying whether it works for few locations
-  leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
-  setView(lng = mean(st_coordinates(milvus_track)[,1]), lat = mean(st_coordinates(milvus_track)[,2]), zoom = 10) %>%
-  htmlwidgets::onRender("function(el, x) {L.control.zoom({ 
-                           position: 'bottomright' }).addTo(this)}"
-  ) %>% #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
-  addProviderTiles("Esri.WorldImagery", group = "Satellite",
-                   options = providerTileOptions(opacity = 0.6, attribution = F,minZoom = 5, maxZoom = 20)) %>%
-  addProviderTiles("OpenTopoMap", group = "Roadmap", options = providerTileOptions(attribution = F,minZoom = 5, maxZoom = 15)) %>%  
-  addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>%  
   leaflet.extras2::addPlayback(data = milvus_track,
                                time = "timestamp",
-                               options = leaflet.extras2::playbackOptions(speed = 500000))
-
-
-
-
-
-##### TRY TO TAKE DAILY AVERAGE LOCATION #####
-
-milvus_track <- trackingdata %>%
-  dplyr::filter(year_id=="2021_157") %>%
-  dplyr::mutate(year_day = lubridate::yday(timestamp),
-                day=as.Date(timestamp)) %>%
-  group_by(year_id,day,year_day) %>%
-  summarise(lat=mean(lat_wgs),long=mean(long_wgs)) %>%
-  sf::st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
-  ungroup()
-  
-#milvus_track <- milvus_track[1:100,] ## trying whether it works for few locations
-
-
-leaflet() %>%
-  addTiles() %>%
-  leaflet.extras2::addPlayback(data = milvus_track,
-                               time = "day",
-                               options = leaflet.extras2::playbackOptions(tickLen=1000*60*60*12,
-                                                                            speed = 10,
-                                                                          maxInterpolationTime=1000*60*60*48))
-
+                               icon=makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
+                                             iconWidth=30,
+                                             iconHeight=18,
+                                             iconAnchorX=0.5,
+                                             iconAnchorY=0.5),
+                               options = leaflet.extras2::playbackOptions(color = "firebrick",
+                                                                          fill = "firebrick",
+                                                                          radius = 1,
+                                                                          speed = 10000000,
+                                                                          tickLen=1000*60*60,  ## hourly tick lengths stated in milliseconds
+                                                                          maxInterpolationTime=1000*60*60*5 ## 5 hrs interpolation time
+                               )) 
 
 
 
