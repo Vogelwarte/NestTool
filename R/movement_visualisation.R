@@ -159,6 +159,15 @@ movement_visualisation <- function(trackingdata,
                                             value = F)
                                    )
                                  ),
+                                 # Switch to add slider and animation
+                                 fluidRow(
+                                   column(width = 12,
+                                          materialSwitch(
+                                            inputId = "animation",
+                                            label = "Time Animation", 
+                                            value = F)
+                                   )
+                                 ),
                                  # Slider to select opacity of background map
                                  fluidRow(
                                    column(width = 12,
@@ -248,6 +257,8 @@ movement_visualisation <- function(trackingdata,
     input_id <- shiny::reactive({input$ID})
     # Should data be displayed in day-night mode
     input_day_night <- shiny::reactive({if(input$day_night == T){1} else{0}})
+    # Should temporal animation be added
+    input_animation <- shiny::reactive({if(input$animation == T){1} else{0}})
     # Defines map opacity
     input_map_opacity <- shiny::reactive({input$map_slider})
     # Defines data size
@@ -401,8 +412,8 @@ movement_visualisation <- function(trackingdata,
       # Creates a palette for time of day (tod)
       pal_tod <- colorFactor(palette = c("#FFFFFF", "#000000", "#777777"), levels = c("day", "night", "twilight"))
       
-      # Costum legend (Function)
-      # Inputs for costum legend function
+      # Custom legend (Function)
+      # Inputs for custom legend function
       if (input$day_night == T) {
         colors <- c("#740000", "#FFFFFF","#000000", "#777777") # fill colour inside borders of circles
         labels <- c("Nest", "Day", "Night", "Twilight")
@@ -517,7 +528,27 @@ movement_visualisation <- function(trackingdata,
                           position = "bottomright",
                           group = "Nest")
       }
-    })
+    #})
+    
+    # Adds temporal animation if selected
+    if (input$animation == T) {
+      leafletProxy("map", data = milvus_track_subset()) %>%
+        leaflet.extras2::addPlayback(data = milvus_track,
+                                     time = "t_",
+                                     icon=makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
+                                                   iconWidth=30,
+                                                   iconHeight=18,
+                                                   iconAnchorX=15,
+                                                   iconAnchorY=9),
+                                     options = leaflet.extras2::playbackOptions(color = "firebrick",
+                                                                                fill = "firebrick",
+                                                                                radius = 1,
+                                                                                speed = 10000000,
+                                                                                tickLen=1000*60*60,  ## hourly tick lengths stated in milliseconds
+                                                                                maxInterpolationTime=1000*60*60*5 ## 5 hrs interpolation time
+                                     ))
+    }
+  })
     
     # Creates a warning when no data is available in the selected period
     output$warning <- renderText({

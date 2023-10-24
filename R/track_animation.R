@@ -181,7 +181,7 @@ leaflet() %>%
 
 ### trying the best possible animation ###
 leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
-  setView(lng = mean(st_coordinates(milvus_track)[,1]), lat = mean(st_coordinates(milvus_track)[,2]), zoom = 10) %>%
+  setView(lng = mean(st_coordinates(milvus_track)[,1]), lat = mean(st_coordinates(milvus_track)[,2]), zoom = 12) %>%
   htmlwidgets::onRender("function(el, x) {L.control.zoom({ 
                            position: 'bottomright' }).addTo(this)}"
   ) %>% #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
@@ -214,8 +214,8 @@ leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom
                                icon=makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
                                              iconWidth=30,
                                              iconHeight=18,
-                                             iconAnchorX=0.5,
-                                             iconAnchorY=0.5),
+                                             iconAnchorX=15,
+                                             iconAnchorY=9),
                                options = leaflet.extras2::playbackOptions(color = "firebrick",
                                                                           fill = "firebrick",
                                                                           radius = 1,
@@ -226,82 +226,55 @@ leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom
 
 
 
+##########################  try visualisation in shiny app ################################
+## copied from workflow demo
+# #### STEP 1: prepare data - this takes approximately 15 minutes
+# nest_data_input<-data_prep(trackingdata=trackingdata,
+#                            indseasondata=indseasondata,
+#                            latboundary=45,
+#                            longboundary=4,
+#                            broodstart= yday(ymd("2023-05-01")),
+#                            broodend<- yday(ymd("2023-06-01")),
+#                            minlocs=800,
+#                            nestradius=50,
+#                            homeradius=2000,
+#                            startseason=70,
+#                            endseason=175,
+#                            settleEnd = 97,  # end of the settlement period in yday
+#                            Incu1End = 113,   # end of the first incubation phase in yday
+#                            Incu2End = 129,  # end of the second incubation phase in yday
+#                            Chick1End = 152, # end of the first chick phase in yday
+#                            age =10)         # age of individuals for which no age is provided with data 
+# 
+# 
+# #### STEP 2: identify home ranges
+# hr_model<-NestTool::hr_model
+# pred_hr<-predict_ranging(model=hr_model$model,trackingsummary=nest_data_input$summary) # uses the model trained with our data (automatically loaded in the function)
+# 
+# #### STEP 3: identify nests
+# nest_model<-NestTool::nest_model
+# pred_nest<-predict_nesting(model=nest_model$model,trackingsummary=pred_hr) # uses the model trained with our data (automatically loaded in the function)
+# 
+# #### STEP 4: determine outcome
+# succ_model<-NestTool::succ_model
+# pred_succ<-predict_success(model=succ_model$model,nestingsummary=pred_nest, nest_cutoff=succ_model$nest_cutoff) # uses the model trained with our data (automatically loaded in the function)
+# 
+# #### STEP 5: extract weekly movement metrics for manual classification
+# move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
+#                                      nest_locs=nest_data_input$pot_nests, 
+#                                      inddata=pred_succ,
+#                                      uncertainty=0.25,
+#                                      nestradius=50,
+#                                      startseason=70,endseason=175)
+
+#### STEP 6: use ShinyApp to inspect all questionable individuals
+movement_visualisation(trackingdata=nest_data_input$movementtrack,
+                       nest_locs=nest_data_input$pot_nests, 
+                       inddata=pred_succ,
+                       move_metrics = move_metrics,
+                       uncertainty = 0.25,
+                       output_path="NestTool_example_nest_success_output.csv")
 
 
-
-
-
-
-
-
-# CREATE A GRID TO SHOW DATA INTENSITY -------------------------------------------------------------------------
-
-## create hexagon grid at 0.1 degree resolution - convert to epsg::3035 if you want to specify km
-grid <- swisstracks %>% 
-  st_make_grid(cellsize = 0.1, what = "polygons",
-               square = FALSE) # This statements leads to hexagons
-
-tab <- st_intersects(grid, swisstracks)
-lengths(tab)
-countgrid <- st_sf(n = lengths(tab), geometry = st_cast(grid, "MULTIPOLYGON")) %>%
-  filter(n>0)
-summary(log(countgrid$n+1))
-
-
-
-
-
-# CREATE A SIMPLE LEAFLET MAP TO SHOW DATA INTENSITY -------------------------------------------------------------------------
-
-
-pal <- colorNumeric(c("cornflowerblue","firebrick"), seq(0,10))
-
-map <- leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
-  setView(lng = mean(st_coordinates(swisstracks)[,1]), lat = mean(st_coordinates(swisstracks)[,2]), zoom = 10) %>%
-  htmlwidgets::onRender("function(el, x) {L.control.zoom({ 
-                           position: 'bottomright' }).addTo(this)}"
-  ) %>% #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
-  addProviderTiles("Esri.WorldImagery", group = "Satellite",
-                   options = providerTileOptions(opacity = 0.6, attribution = F,minZoom = 5, maxZoom = 20)) %>%
-  addProviderTiles("OpenTopoMap", group = "Roadmap", options = providerTileOptions(attribution = F,minZoom = 5, maxZoom = 15)) %>%  
-  addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>%  
-  
-  addPolygons(
-    data=countgrid,
-    stroke = TRUE, color = ~pal(log(n+1)), weight = 1,
-    fillColor = ~pal(log(n+1)), fillOpacity = 0.5,
-    popup = ~ paste0(countgrid$n, " GPS locations")
-  ) %>%
-  
-  addCircleMarkers(
-    data=swisstracks,
-    radius = 2,
-    stroke = TRUE, color = "black", weight = 0.5,
-    fillColor = "grey75", fillOpacity = 0.5,
-    popup = ~ paste0("year ID: ", swisstracks$id, "<br>", swisstracks$t_)
-  ) %>%
-  
-  addLegend(
-    position = "topleft",
-    pal = pal,
-    values = log(countgrid$n+1),
-    opacity = 1,
-    title = "Intensity of tracking <br>locations (log scale)"
-  )
-
-map
-
-
-
-
-# SAVE MAP AS SHAPEFILE, HTML OR KML -------------------------------------------------------------------------
-
-## save as shp or kml
-st_write(countgrid, dsn = "REKI_GPS_locs.shp", layer = "REKI_GPS_locs.shp", driver = "ESRI Shapefile")
-st_write(countgrid,"REKI_GPS_locs.kml",append=FALSE)
-
-## save leaflet map as html
-htmltools::save_html(html = map, file = "REKI_GPS_locs.html")
-mapview::mapshot(map, url = "REKI_GPS_locs.html")
 
 
