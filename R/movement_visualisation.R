@@ -532,23 +532,23 @@ movement_visualisation <- function(trackingdata,
     #})
     
     # Adds temporal animation if selected
-    # if (input$animation == T) {
-    #   leafletProxy("map", data = milvus_track_subset()) %>%
-    #     leaflet.extras2::addPlayback(data = milvus_track,
-    #                                  time = "t_",
-    #                                  icon=makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
-    #                                                iconWidth=30,
-    #                                                iconHeight=18,
-    #                                                iconAnchorX=15,
-    #                                                iconAnchorY=9),
-    #                                  options = leaflet.extras2::playbackOptions(color = "firebrick",
-    #                                                                             fill = "firebrick",
-    #                                                                             radius = 1,
-    #                                                                             speed = 10000000,
-    #                                                                             tickLen=1000*60*60,  ## hourly tick lengths stated in milliseconds
-    #                                                                             maxInterpolationTime=1000*60*60*5 ## 5 hrs interpolation time
-    #                                  ))
-    # }
+    if (input$animation == T) {
+      leafletProxy("map", data = milvus_track_subset()) %>%
+        leaflet.extras2::addPlayback(data = milvus_track,
+                                     time = "t_",
+                                     icon=makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
+                                                   iconWidth=30,
+                                                   iconHeight=18,
+                                                   iconAnchorX=15,
+                                                   iconAnchorY=9),
+                                     options = leaflet.extras2::playbackOptions(color = "firebrick",
+                                                                                fill = "firebrick",
+                                                                                radius = 1,
+                                                                                speed = 10000000,
+                                                                                tickLen=1000*60*60,  ## hourly tick lengths stated in milliseconds
+                                                                                maxInterpolationTime=1000*60*60*5 ## 5 hrs interpolation time
+                                     ))
+    }
   })
     
     # Creates a warning when no data is available in the selected period
