@@ -138,7 +138,7 @@ leaflet() %>%
 # EXTRACT DATA PREPARATION FROM movement_visualisation
 unique(trackingdata$year_id)
 milvus_track <- trackingdata %>%
-  dplyr::filter(year_id=="2021_157") %>%
+  dplyr::filter(year_id=="2019_461") %>%
   sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326) %>%
   mutate(long = sf::st_coordinates(.)[,1],
          lat = sf::st_coordinates(.)[,2])
@@ -267,6 +267,9 @@ move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
 
 #### STEP 6: use ShinyApp to inspect all questionable individuals
 #source("NestTool2//R//movement_visualisation.r")
+library(shiny)
+library(shinythemes)
+library(shinyWidgets)
 movement_visualisation(trackingdata=nest_data_input$movementtrack,
                        nest_locs=nest_data_input$pot_nests, 
                        inddata=pred_succ,

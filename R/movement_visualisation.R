@@ -160,15 +160,15 @@ movement_visualisation <- function(trackingdata,
                                             value = F)
                                    )
                                  ),
-                                 # # Switch to add slider and animation
-                                 # fluidRow(
-                                 #   column(width = 12,
-                                 #          materialSwitch(
-                                 #            inputId = "animation",
-                                 #            label = "Time Animation", 
-                                 #            value = F)
-                                 #   )
-                                 # ),
+                                 # Switch to add slider and animation
+                                 fluidRow(
+                                   column(width = 12,
+                                          materialSwitch(
+                                            inputId = "animation",
+                                            label = "Time Animation",
+                                            value = F)
+                                   )
+                                 ),
                                  # Slider to select opacity of background map
                                  fluidRow(
                                    column(width = 12,
@@ -259,7 +259,7 @@ movement_visualisation <- function(trackingdata,
     # Should data be displayed in day-night mode
     input_day_night <- shiny::reactive({if(input$day_night == T){1} else{0}})
     # Should temporal animation be added
-    #input_animation <- shiny::reactive({if(input$animation == T){1} else{0}})
+    input_animation <- shiny::reactive({if(input$animation == T){1} else{0}})
     # Defines map opacity
     input_map_opacity <- shiny::reactive({input$map_slider})
     # Defines data size
