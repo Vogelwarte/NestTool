@@ -73,10 +73,10 @@ movement_visualisation <- function(trackingdata,
   milvus_track <- trackingdata %>%
     dplyr::filter(id %in% milvus_metrics$ID) %>%
     dplyr::mutate(t_ = as.POSIXct(t_, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
-           #t_ = format(t_, format = "%Y-%m-%d %H:%M", tz = "UTC"),
-           date = as.Date(t_, tz = "UTC"),
+           t2 = format(t_, format = "%Y-%m-%d %H:%M", tz = "UTC"),
+           date = as.Date(t2, tz = "UTC"),
            month = as.integer(format(date, format = "%m")),
-           year_day = lubridate::yday(t_), # allows to use a numeric color palette
+           year_day = lubridate::yday(t2), # allows to use a numeric color palette
            tod_ = dplyr::case_when(tod_ == "day" ~ "day",
                             tod_ == "dusk" ~ "twilight",
                             tod_ == "night" ~ "night",
@@ -157,15 +157,6 @@ movement_visualisation <- function(trackingdata,
                                           materialSwitch(
                                             inputId = "day_night",
                                             label = "Day & Night Locations", 
-                                            value = F)
-                                   )
-                                 ),
-                                 # Switch to add slider and animation
-                                 fluidRow(
-                                   column(width = 12,
-                                          materialSwitch(
-                                            inputId = "animation",
-                                            label = "Time Animation",
                                             value = F)
                                    )
                                  ),
@@ -258,8 +249,6 @@ movement_visualisation <- function(trackingdata,
     input_id <- shiny::reactive({input$ID})
     # Should data be displayed in day-night mode
     input_day_night <- shiny::reactive({if(input$day_night == T){1} else{0}})
-    # Should temporal animation be added
-    input_animation <- shiny::reactive({if(input$animation == T){1} else{0}})
     # Defines map opacity
     input_map_opacity <- shiny::reactive({input$map_slider})
     # Defines data size
@@ -491,10 +480,10 @@ movement_visualisation <- function(trackingdata,
           fillColor = if(input$day_night == T){~pal_tod(tod_)}else{~pal(year_day)},
           fillOpacity = 0.7,
           group = "Locations",
-          popup = ~paste0(t_)
+          popup = ~paste0(t2)
         ) %>%
         # Animation
-        clearMarkers() %>%
+        #clearMarkers() %>%
         leaflet.extras2::addPlayback(data = milvus_track_subset(),
                                      time = "t_",
                                      icon=makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
@@ -543,24 +532,6 @@ movement_visualisation <- function(trackingdata,
                           position = "bottomright",
                           group = "Nest")
       }
-    #})
-    
-    # Adds temporal animation if selected
-    if (input$animation == T) {
-      leafletProxy("map", data = milvus_track_subset()) %>%
-        leaflet.extras2::addPlayback(data = milvus_track_subset(),
-                                     time = "t_",
-                                     icon=makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
-                                                   iconWidth=30,
-                                                   iconHeight=18,
-                                                   iconAnchorX=15,
-                                                   iconAnchorY=9),
-                                     options = leaflet.extras2::playbackOptions(tracksLayer = FALSE,
-                                                                                speed = 10000000,
-                                                                                tickLen=1000*60*60,  ## hourly tick lengths stated in milliseconds
-                                                                                maxInterpolationTime=1000*60*60*5 ## 5 hrs interpolation time
-                                     ))
-    }
   })
     
     # Creates a warning when no data is available in the selected period
