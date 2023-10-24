@@ -266,10 +266,11 @@ move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
                                      startseason=70,endseason=175)
 
 #### STEP 6: use ShinyApp to inspect all questionable individuals
-#source("NestTool2//R//movement_visualisation.r")
+source("NestTool2//R//movement_visualisation.r")
 library(shiny)
 library(shinythemes)
 library(shinyWidgets)
+library(htmlwidgets)
 movement_visualisation(trackingdata=nest_data_input$movementtrack,
                        nest_locs=nest_data_input$pot_nests, 
                        inddata=pred_succ,

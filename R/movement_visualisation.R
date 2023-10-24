@@ -73,7 +73,7 @@ movement_visualisation <- function(trackingdata,
   milvus_track <- trackingdata %>%
     dplyr::filter(id %in% milvus_metrics$ID) %>%
     dplyr::mutate(t_ = as.POSIXct(t_, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
-           t_ = format(t_, format = "%Y-%m-%d %H:%M", tz = "UTC"),
+           #t_ = format(t_, format = "%Y-%m-%d %H:%M", tz = "UTC"),
            date = as.Date(t_, tz = "UTC"),
            month = as.integer(format(date, format = "%m")),
            year_day = lubridate::yday(t_), # allows to use a numeric color palette
@@ -493,6 +493,20 @@ movement_visualisation <- function(trackingdata,
           group = "Locations",
           popup = ~paste0(t_)
         ) %>%
+        # Animation
+        clearMarkers() %>%
+        leaflet.extras2::addPlayback(data = milvus_track_subset(),
+                                     time = "t_",
+                                     icon=makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
+                                                   iconWidth=30,
+                                                   iconHeight=18,
+                                                   iconAnchorX=15,
+                                                   iconAnchorY=9),
+                                     options = leaflet.extras2::playbackOptions(tracksLayer = FALSE,
+                                                                                speed = 10000000,
+                                                                                tickLen=1000*60*60,  ## hourly tick lengths stated in milliseconds
+                                                                                maxInterpolationTime=1000*60*60*5 ## 5 hrs interpolation time
+                                     )) %>%
         # Adds legend
         removeControl(layerId = 1) %>% # removes legend
         removeControl(layerId = 2) # removes legend
@@ -534,16 +548,14 @@ movement_visualisation <- function(trackingdata,
     # Adds temporal animation if selected
     if (input$animation == T) {
       leafletProxy("map", data = milvus_track_subset()) %>%
-        leaflet.extras2::addPlayback(data = milvus_track,
+        leaflet.extras2::addPlayback(data = milvus_track_subset(),
                                      time = "t_",
                                      icon=makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
                                                    iconWidth=30,
                                                    iconHeight=18,
                                                    iconAnchorX=15,
                                                    iconAnchorY=9),
-                                     options = leaflet.extras2::playbackOptions(color = "firebrick",
-                                                                                fill = "firebrick",
-                                                                                radius = 1,
+                                     options = leaflet.extras2::playbackOptions(tracksLayer = FALSE,
                                                                                 speed = 10000000,
                                                                                 tickLen=1000*60*60,  ## hourly tick lengths stated in milliseconds
                                                                                 maxInterpolationTime=1000*60*60*5 ## 5 hrs interpolation time
