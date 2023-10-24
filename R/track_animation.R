@@ -216,9 +216,7 @@ leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom
                                              iconHeight=18,
                                              iconAnchorX=15,
                                              iconAnchorY=9),
-                               options = leaflet.extras2::playbackOptions(color = "firebrick",
-                                                                          fill = "firebrick",
-                                                                          radius = 1,
+                               options = leaflet.extras2::playbackOptions(tracksLayer = FALSE,
                                                                           speed = 10000000,
                                                                           tickLen=1000*60*60,  ## hourly tick lengths stated in milliseconds
                                                                           maxInterpolationTime=1000*60*60*5 ## 5 hrs interpolation time

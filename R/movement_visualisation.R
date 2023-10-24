@@ -25,6 +25,7 @@
 #' @importFrom dplyr filter mutate select arrange case_when
 #' @importFrom data.table fwrite fread
 #' @importFrom here here
+#' @importFrom leaflet.extras2 addPlayback makeIcon playbackOptions
 #' @importFrom lubridate yday
 #' @importFrom sf st_as_sf st_transform st_coordinates
 #' @importFrom shiny actionButton column fluidPage fluidRow htmlOutput mainPanel observe observeEvent reactive reactiveValues renderText selectInput shinyApp sidebarLayout sidebarPanel sliderInput titlePanel updateSelectInput
@@ -103,7 +104,7 @@ movement_visualisation <- function(trackingdata,
   
   
   # USER INTERFACE -------------------------------------------------------------
-  ui <- shiny::fluidPage(theme = shinytheme("flatly"),
+  ui <- shiny::fluidPage(theme = shinythemes::shinytheme("flatly"),
                   # layout of the action buttons
                   htmltools::tags$style(
                     HTML('#save_decision, #zoom{
