@@ -25,7 +25,7 @@ setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
 
 
 ### LOAD THE TRACKING DATA AND INDIVIDUAL SEASON SUMMARIES 
-load("NestTool_SUI_all.RData")
+load("data/NestTool_SUI_all.RData")
 ls()
 
 
@@ -49,7 +49,7 @@ SUCCEX<-pred_succ %>% filter(success_observed=="yes") %>%
 
 UNCERTSUCCEX<-pred_succ %>% filter(succ_prob>0.4) %>%
   filter(succ_prob<0.6) %>% ungroup() %>%
-  slice_min(abs(succ_prob-0.5),n = 3)
+  slice_min(abs(succ_prob-0.5),n = 5)
 
 UNCERTNESTEX<-pred_succ %>% filter(nest_prob>0.4) %>%
   filter(nest_prob<0.6) %>% ungroup() %>%
@@ -230,7 +230,7 @@ absence_times <- lapply(nest_revisits, function(x)
 
 
 ### plot only home range size and median daily travel distance
-fig2inds<-bind_rows(UNSUCCEX,SUCCEX,UNCERTEX) %>%
+fig2inds<-bind_rows(UNSUCCEX,SUCCEX,UNCERTSUCCEX) %>%
   select(year_id,age_cy,sex,success_observed,succ_prob) %>%
   mutate(label=if_else(succ_prob<0.1,"failed",if_else(succ_prob>0.9,"successful","uncertain")))
 
@@ -311,7 +311,7 @@ fig2_move_metrics <- fig2_move_metrics %>% rename(year_id=id) %>%
 
 plot_df<-fig2_move_metrics %>%
   select(-success_observed, -succ_prob) %>%
-  dplyr::filter(year_id %in% c("2019_337","2020_270","2021_342")) %>%  ## select three animals at a time
+  dplyr::filter(year_id %in% c("2019_337","2020_270","2020_493")) %>%  ## select three animals at a time
   dplyr::rename(`distance from nest (m)`= median_nestdist,
        `daily time at nest (hrs)`= median_time_at_nest,
        `time away from nest (hrs)`= max_time_away_from_nest,
