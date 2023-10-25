@@ -25,6 +25,7 @@
 #' @importFrom dplyr filter mutate select arrange case_when
 #' @importFrom data.table fwrite fread
 #' @importFrom here here
+#' @importFrom leaflet.extras2 addPlayback makeIcon playbackOptions
 #' @importFrom lubridate yday
 #' @importFrom sf st_as_sf st_transform st_coordinates
 #' @importFrom shiny actionButton column fluidPage fluidRow htmlOutput mainPanel observe observeEvent reactive reactiveValues renderText selectInput shinyApp sidebarLayout sidebarPanel sliderInput titlePanel updateSelectInput
@@ -72,10 +73,10 @@ movement_visualisation <- function(trackingdata,
   milvus_track <- trackingdata %>%
     dplyr::filter(id %in% milvus_metrics$ID) %>%
     dplyr::mutate(t_ = as.POSIXct(t_, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
-           t_ = format(t_, format = "%Y-%m-%d %H:%M", tz = "UTC"),
-           date = as.Date(t_, tz = "UTC"),
+           t2 = format(t_, format = "%Y-%m-%d %H:%M", tz = "UTC"),
+           date = as.Date(t2, tz = "UTC"),
            month = as.integer(format(date, format = "%m")),
-           year_day = lubridate::yday(t_), # allows to use a numeric color palette
+           year_day = lubridate::yday(t2), # allows to use a numeric color palette
            tod_ = dplyr::case_when(tod_ == "day" ~ "day",
                             tod_ == "dusk" ~ "twilight",
                             tod_ == "night" ~ "night",
@@ -103,7 +104,7 @@ movement_visualisation <- function(trackingdata,
   
   
   # USER INTERFACE -------------------------------------------------------------
-  ui <- shiny::fluidPage(theme = shinytheme("flatly"),
+  ui <- shiny::fluidPage(theme = shinythemes::shinytheme("flatly"),
                   # layout of the action buttons
                   htmltools::tags$style(
                     HTML('#save_decision, #zoom{
@@ -401,8 +402,8 @@ movement_visualisation <- function(trackingdata,
       # Creates a palette for time of day (tod)
       pal_tod <- colorFactor(palette = c("#FFFFFF", "#000000", "#777777"), levels = c("day", "night", "twilight"))
       
-      # Costum legend (Function)
-      # Inputs for costum legend function
+      # Custom legend (Function)
+      # Inputs for custom legend function
       if (input$day_night == T) {
         colors <- c("#740000", "#FFFFFF","#000000", "#777777") # fill colour inside borders of circles
         labels <- c("Nest", "Day", "Night", "Twilight")
@@ -479,8 +480,22 @@ movement_visualisation <- function(trackingdata,
           fillColor = if(input$day_night == T){~pal_tod(tod_)}else{~pal(year_day)},
           fillOpacity = 0.7,
           group = "Locations",
-          popup = ~paste0(t_)
+          popup = ~paste0(t2)
         ) %>%
+        # Animation
+        #clearMarkers() %>%
+        leaflet.extras2::addPlayback(data = milvus_track_subset(),
+                                     time = "t_",
+                                     icon=makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
+                                                   iconWidth=30,
+                                                   iconHeight=18,
+                                                   iconAnchorX=15,
+                                                   iconAnchorY=9),
+                                     options = leaflet.extras2::playbackOptions(tracksLayer = FALSE,
+                                                                                speed = 10000000,
+                                                                                tickLen=1000*60*60,  ## hourly tick lengths stated in milliseconds
+                                                                                maxInterpolationTime=1000*60*60*5 ## 5 hrs interpolation time
+                                     )) %>%
         # Adds legend
         removeControl(layerId = 1) %>% # removes legend
         removeControl(layerId = 2) # removes legend
@@ -517,7 +532,7 @@ movement_visualisation <- function(trackingdata,
                           position = "bottomright",
                           group = "Nest")
       }
-    })
+  })
     
     # Creates a warning when no data is available in the selected period
     output$warning <- renderText({
@@ -532,10 +547,10 @@ movement_visualisation <- function(trackingdata,
         datatable(values$milvus_metrics, options = list(dom = "ftip", pageLength = 20), rownames = F,
                   selection = "none", class = "compact hover row-border") %>%
           # Color codes the decisions made on nest and brood
-          formatStyle(c("Nest", "Success"), target = "cell",
+          DT::formatStyle(c("Nest", "Success"), target = "cell",
                       backgroundColor = styleEqual(c("No", "Yes", NA), c("#996622", "#66AAAA", "transparent"))) %>%
           # Highlights the row of the selected bird
-          formatStyle("ID", target = "row",
+          DT::formatStyle("ID", target = "row",
                       fontWeight = styleEqual(c(input_id()), c("bold")),
                       backgroundColor = styleEqual(c(input_id()), c("#999999")))
       )
