@@ -25,13 +25,13 @@
 #' @importFrom dplyr filter mutate select arrange case_when
 #' @importFrom data.table fwrite fread
 #' @importFrom here here
-#' @importFrom leaflet.extras2 addPlayback makeIcon playbackOptions
+#' @importFrom leaflet.extras2 addPlayback playbackOptions
 #' @importFrom lubridate yday
 #' @importFrom sf st_as_sf st_transform st_coordinates
 #' @importFrom shiny actionButton column fluidPage fluidRow htmlOutput mainPanel observe observeEvent reactive reactiveValues renderText selectInput shinyApp sidebarLayout sidebarPanel sliderInput titlePanel updateSelectInput
 #' @importFrom shinyWidgets chooseSliderSkin materialSwitch prettyRadioButtons
 #' @importFrom shinythemes shinytheme
-#' @importFrom leaflet addCircleMarkers addLayersControl addLegend addMeasure addPolylines addProviderTiles addScaleBar clearMarkers clearShapes clearTiles colorFactor colorNumeric fitBounds hideGroup labelFormat layersControlOptions leaflet leafletOutput leafletProxy providerTileOptions providers removeControl renderLeaflet scaleBarOptions
+#' @importFrom leaflet addCircleMarkers addLayersControl addLegend addMeasure addPolylines addProviderTiles addScaleBar clearMarkers clearShapes clearTiles colorFactor colorNumeric fitBounds hideGroup labelFormat layersControlOptions leaflet leafletOutput leafletProxy providerTileOptions providers removeControl renderLeaflet scaleBarOptions makeIcon
 #' @importFrom htmltools HTML div h3 tags
 #' @importFrom DT dataTableOutput renderDataTable datatable dataTableProxy formatStyle selectPage styleEqual
 #' @importFrom plotly plotlyOutput renderPlotly style
@@ -486,7 +486,7 @@ movement_visualisation <- function(trackingdata,
         #clearMarkers() %>%
         leaflet.extras2::addPlayback(data = milvus_track_subset(),
                                      time = "t_",
-                                     icon=makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
+                                     icon=leaflet::makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
                                                    iconWidth=30,
                                                    iconHeight=18,
                                                    iconAnchorX=15,
