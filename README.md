@@ -209,7 +209,10 @@ The Shiny App opened by the function `movement_visualisation` consists of four p
 
 - In the panel at the top left, a unique identifier can be selected to analyse an individual season. The data can be displayed for the entire breeding period or for individual months. In addition, the data can be displayed in a way that daytime locations, night-time locations and twilight locations are visualised differently.
 
-- In the top right panel, the movement data are displayed on an interactive map. The locations are colour-coded by date and, if required, the movement trajectory can also be displayed. The potential nest location (as determined by the function`data_prep`) is also shown on the map. In addition to the topographic map, a satellite image can be selected as a background map in order to better identify forest areas or individual potential nest trees. The measurement tool allows distances and areas to be measured.A black bird icon can be moved dynamically by either pressing the 'Play' button in the bottom left corner or by using the manual time slider in the bottom-right corner. This dynamic animation helps to visualise the movements of the bird over time. Note that the date format in the box above the time slider is MM/DD/YYYY (American format).
+- In the top right panel, the movement data are displayed on an interactive map. The locations are colour-coded by date and, if required, the movement trajectory can also be displayed. The potential nest location (as determined by the function`data_prep`) is also shown on the map. In addition to the topographic map, a satellite image can be selected as a background map in order to better identify forest areas or individual potential nest trees. The measurement tool allows distances and areas to be measured. A black bird icon can be moved dynamically by either pressing the 'Play' button in the bottom right corner or by using the manual time slider in the bottom left corner. This dynamic animation helps to visualise the movements of the bird over time. Note that the date format in the box above the time slider is MM/DD/YYYY (American format).
+
+
+![Example of top panel of the Shiny App that dynamically displays the movements of the focal bird](plots/animated_visualisation.gif)
 
 - The panel at the bottom right implements the function `plot_move_metrics` and shows a graph of 5 movement metrics for the selected individual and season. The temporal variation of the 5 movement metrics during the breeding period facilitates the decision on nesting and breeding success.
 
@@ -219,8 +222,8 @@ With the help of the different movement visualisations, a decision can be made i
 
 
 <div class="figure" style="text-align: center">
-<img src="plots/shiny_app.png" alt="Example of the Shiny App to assist with manual classification of individual seasons" width="80%" height="80%" />
-<p class="caption">Example of the Shiny App to assist with manual classification of individual seasons</p>
+<img src="plots/shiny_app.png" alt="Example of the entire Shiny App window to assist with manual classification of individual seasons" width="80%" height="80%" />
+<p class="caption">Example of the entire Shiny App window to assist with manual classification of individual seasons</p>
 </div>
 
 
