@@ -5,11 +5,12 @@ This R package is an informal collection of R functions created by the [Swiss Or
 ## Installation
 
 
-This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/Vogelwarte/NestTool) with the following command:
+This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/Vogelwarte/NestTool) with the following command. . Note that depending on the R version and operating system you are working on, you may need to specify the download options. See [here](https://cran.r-project.org/web/packages/remotes/readme/README.html) for options for other operating systems (only Windows OS option shown in code below):
 
 ``` {r, eval = FALSE}
-library(devtools)
-devtools::install_github("steffenoppel/NestTool", dependencies=TRUE) 
+library(remotes)
+options(download.file.method="wininet")  ### for Windows OS 
+remotes::install_github("Vogelwarte/NestTool", dependencies=TRUE)
 library(NestTool)
 ```
 
@@ -201,7 +202,7 @@ The Shiny App opened by the function `movement_visualisation` consists of four p
 
 - In the panel at the top left, a unique identifier can be selected to analyse an individual season. The data can be displayed for the entire breeding period or for individual months. In addition, the data can be displayed in a way that daytime locations, night-time locations and twilight locations are visualised differently.
 
-- In the top right panel, the movement data is displayed on an interactive map. The locations are colour-coded by date and, if required, the movement trajectory can also be displayed. The potential nest location (as determined by the function`data_prep`) is also shown on the map. In addition to the topographic map, a satellite image can be selected as a background map in order to better identify forest areas or individual potential nest trees. The measurement tool allows distances and areas to be measured.
+- In the top right panel, the movement data are displayed on an interactive map. The locations are colour-coded by date and, if required, the movement trajectory can also be displayed. The potential nest location (as determined by the function`data_prep`) is also shown on the map. In addition to the topographic map, a satellite image can be selected as a background map in order to better identify forest areas or individual potential nest trees. The measurement tool allows distances and areas to be measured.A black bird icon can be moved dynamically by either pressing the 'Play' button in the bottom left corner or by using the manual time slider in the bottom-right corner. This dynamic animation helps to visualise the movements of the bird over time. Note that the date format in the box above the time slider is MM/DD/YYYY (American format).
 
 - The panel at the bottom right implements the function `plot_move_metrics` and shows a graph of 5 movement metrics for the selected individual and season. The temporal variation of the 5 movement metrics during the breeding period facilitates the decision on nesting and breeding success.
 
