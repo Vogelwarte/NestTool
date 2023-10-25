@@ -9,8 +9,8 @@ library(dplyr)
 library(lubridate)
 library(data.table)
 library(NestTool)
-library(moveVis)
-library(move)
+#library(moveVis)
+#library(move)
 require(maps)
 library(plotly)
 library(magrittr)
@@ -109,31 +109,31 @@ indseasondata <- NestTool::kite.nesting
 
 
 
-### THIS EXAMPLE WORKS PERFECTLY BUT ONLY OVER 1 HOUR
-## FALLS APART WHEN TRIED TO DO IT OVER 1 MONTH
-# how many test data points to create
-num_points <- 100
-
-# set up an sf object with a datetime column matching each point to a date/time
-# make the GPS tracks interesting
-df <- tibble::tibble(temp = (1:num_points),
-                     lat = seq(from = 45, to = 46, length.out = num_points) + .1*sin(temp),
-                     lon = seq(from = -75, to = -75.5, length.out = num_points) + .1*cos(temp),
-                     datetime = seq(from = lubridate::ymd_hms("2021-09-01 8:00:00"),
-                                    to = lubridate::ymd_hms("2021-09-01 9:00:00"),
-                                    length.out = num_points)) %>%
-  sf::st_as_sf(coords = c("lon", "lat"), crs = "WGS84", remove = FALSE)
-
-# create a leaflet map and add an animated marker
-leaflet() %>%
-  addTiles() %>%
-  leaflet.extras2::addPlayback(data = df,
-                               time = "datetime",
-                               options = leaflet.extras2::playbackOptions(speed = 100000,
-                                                                          tickLen=1000*60*60*5,  ## hourly tick lengths stated in milliseconds
-                                                                          maxInterpolationTime=1000*60*60*5, ## 5 hrs interpolation time
-                                                                          staleTime=1000*60*60*96))  ### 3 days before being faded out
-
+# ### THIS EXAMPLE WORKS PERFECTLY BUT ONLY OVER 1 HOUR
+# ## FALLS APART WHEN TRIED TO DO IT OVER 1 MONTH
+# # how many test data points to create
+# num_points <- 100
+# 
+# # set up an sf object with a datetime column matching each point to a date/time
+# # make the GPS tracks interesting
+# df <- tibble::tibble(temp = (1:num_points),
+#                      lat = seq(from = 45, to = 46, length.out = num_points) + .1*sin(temp),
+#                      lon = seq(from = -75, to = -75.5, length.out = num_points) + .1*cos(temp),
+#                      datetime = seq(from = lubridate::ymd_hms("2021-09-01 8:00:00"),
+#                                     to = lubridate::ymd_hms("2021-09-01 9:00:00"),
+#                                     length.out = num_points)) %>%
+#   sf::st_as_sf(coords = c("lon", "lat"), crs = "WGS84", remove = FALSE)
+# 
+# # create a leaflet map and add an animated marker
+# leaflet() %>%
+#   addTiles() %>%
+#   leaflet.extras2::addPlayback(data = df,
+#                                time = "datetime",
+#                                options = leaflet.extras2::playbackOptions(speed = 100000,
+#                                                                           tickLen=1000*60*60*5,  ## hourly tick lengths stated in milliseconds
+#                                                                           maxInterpolationTime=1000*60*60*5, ## 5 hrs interpolation time
+#                                                                           staleTime=1000*60*60*96))  ### 3 days before being faded out
+# 
 
 # EXTRACT DATA PREPARATION FROM movement_visualisation
 unique(trackingdata$year_id)
@@ -271,6 +271,7 @@ library(shiny)
 library(shinythemes)
 library(shinyWidgets)
 library(htmlwidgets)
+library(DT)
 movement_visualisation(trackingdata=nest_data_input$movementtrack,
                        nest_locs=nest_data_input$pot_nests, 
                        inddata=pred_succ,

@@ -547,10 +547,10 @@ movement_visualisation <- function(trackingdata,
         datatable(values$milvus_metrics, options = list(dom = "ftip", pageLength = 20), rownames = F,
                   selection = "none", class = "compact hover row-border") %>%
           # Color codes the decisions made on nest and brood
-          formatStyle(c("Nest", "Success"), target = "cell",
+          DT::formatStyle(c("Nest", "Success"), target = "cell",
                       backgroundColor = styleEqual(c("No", "Yes", NA), c("#996622", "#66AAAA", "transparent"))) %>%
           # Highlights the row of the selected bird
-          formatStyle("ID", target = "row",
+          DT::formatStyle("ID", target = "row",
                       fontWeight = styleEqual(c(input_id()), c("bold")),
                       backgroundColor = styleEqual(c(input_id()), c("#999999")))
       )
