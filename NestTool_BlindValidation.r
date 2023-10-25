@@ -24,7 +24,7 @@ library(RANN)
 
 # LOAD AND COMPILE TRACKING DATA
 setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU")
-setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU")
+#setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/valdat/BlindValidationTHU")
 alldat<-list.files(pattern=".txt")
 
 trackingdata<-data.frame()

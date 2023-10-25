@@ -20,6 +20,14 @@ README.rmd
 # Raw external data
 data/valdat/*.csv
 data/valdat/BlindValidationTHU/*.txt
+data/ANITRA_validation_tracks.rds
+data/REKI_validation_tracks.rds
+data/REKI_NestTool_ValidationDataTemplate_RMZ.xlsx
+data/NestTool_VALIDATION_Saxony_nest_success_output.csv
+data/REKI_NestTool_ValidationDataTemplate.xlsx
+data/valdat/BlindValidationTHU/THU_nest_validation_predictions.xlsx
+data/valdat/BlindValidationTHU/THU_nest_coordinates.xlsx
+data/valdat/BlindValidationTHU/GER_validation_accuracy_assessment_loop.csv
 
 # Output files from R CMD check
 /*.Rcheck/

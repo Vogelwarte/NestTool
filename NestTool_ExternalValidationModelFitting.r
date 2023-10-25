@@ -69,8 +69,8 @@ dim(trackingdata)
 
 
 # ADD BIRDS FROM THURINGEN
-#try(THUdata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/04_milvus_thuringia.csv"),silent=T)
-try(THUdata<-fread("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/04_milvus_thuringia.csv"),silent=T)
+try(THUdata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/04_milvus_thuringia.csv"),silent=T)
+#try(THUdata<-fread("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/04_milvus_thuringia.csv"),silent=T)
 ##make up indseasondata as input is now mandatory
 indseasondata <- THUdata %>% group_by(year_id) %>%
   summarise(sex=first(sex), bird_id=first(bird_id)) %>%
