@@ -25,7 +25,7 @@ data_prep(
 }
 \arguments{
 \item{trackingdata}{data.frame with tracking data set with information on individual season and id as unique identifier ('year_id').
-Must contain a timestamp, and coordinates in both geographic ('lat_wgs', 'long_wgs') and projected coordinate systems ('lat_eea', 'long_eea').}
+Must contain a timestamp, an individual animal id ('bird_id'), and coordinates in both geographic ('lat_wgs', 'long_wgs') and projected coordinate systems ('lat_eea', 'long_eea').}
 
 \item{indseasondata}{data.frame with nesting information per individual and season, which links to \code{trackingdata} by the unique identifier ('year_id').
 Must contain columns for the age ('age_cy' as integer in calender years) and sex ('sex': either 'm' or 'f') of individuals in that season.
