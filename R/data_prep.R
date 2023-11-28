@@ -120,6 +120,11 @@ data_prep <- function(trackingdata,
       indseasondata<- indseasondata %>% dplyr::mutate(sex="m") ### assign random value (males) to non-existing column
       indseasondata$sex<-factor(indseasondata$sex, levels=c('m','f'))
     }
+
+    if('sex' %in% names(milvus)){
+      milvus<- milvus %>% dplyr::mutate(sex=dplyr::if_else(is.na(milvus$sex),"m",milvus$sex)) ### assign random value (males) to missing values in data
+      milvus$sex<-factor(milvus$sex, levels=c('m','f'))
+    }
     
   ### joining of data must consider whether column names are already present in tracking data
   
