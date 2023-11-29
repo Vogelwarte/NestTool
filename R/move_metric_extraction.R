@@ -125,6 +125,7 @@ milvus_5d_move_metrics<-data.frame()
    ind_track<-milvus_track %>% dplyr::filter(id==i)
    ind_times<-absence_times %>% dplyr::filter(id==i)
    ind_track_amt<-milvus_track_amt %>% dplyr::filter(id==i)
+   ind_year<-min(year(ind_track$t_))
    
    for (w in wincentres) {
      window<-seq(w-2,w+2,1)  ## create a 5 day moving window
@@ -162,7 +163,8 @@ milvus_5d_move_metrics<-data.frame()
       
       ## summarise the output and write into data.frame
       milvus_5d_move_metrics<- day_sum %>% dplyr::mutate(week=format(parse_date_time(x = w, orders = "j"), format="%d %b")) %>%
-        dplyr::select(id,week,MCP,median_daydist,median_nestdist,median_time_at_nest,max_time_away_from_nest) %>%
+        dplyr::mutate(year=ind_year) %>%
+        dplyr::select(id,week,year,MCP,median_daydist,median_nestdist,median_time_at_nest,max_time_away_from_nest) %>%
         dplyr::bind_rows(milvus_5d_move_metrics)
 
      }else{print(sprintf("no data for %s in week %s",i,format(lubridate::parse_date_time(x = w, orders = "j"), format="%d %b")))}

@@ -59,9 +59,9 @@ plot_df<-movemetrics %>%
          `Median daily time at nest (hrs)`= median_time_at_nest,
          `Max time away from nest (hrs)`= max_time_away_from_nest
   ) %>%
-  tidyr::gather(key="MoveMetric",value="Value",-id,-week,-age_cy,-sex) %>%
+  tidyr::gather(key="MoveMetric",value="Value",-id,-week,-year,-age_cy,-sex) %>%
   dplyr::filter(!is.na(Value)) %>%
-  dplyr::mutate(Date=lubridate::dmy(paste0(week, substr(id,1,4)))) %>%
+  dplyr::mutate(Date=lubridate::dmy(paste0(week, year))) %>%           #### NEEDS TO BE FIXED IF YEAR IS NOT IN ID
   dplyr::ungroup()
   
   
@@ -88,7 +88,7 @@ plot<-ggplot2::ggplot(plot_df) +
         #                      r = 5,  # Right margin
         #                      b = 20,  # Bottom margin
         #                      l = 20), # Left margin
-        panel.grid.major = ggplot2::element_line(colour = "gray70", size = .05),
+        panel.grid.major = ggplot2::element_line(colour = "gray70", linewidth = .05),
         panel.grid.minor = ggplot2::element_line(colour = "gray70"),
         axis.text=ggplot2::element_text(size=10, color="black"),
         # axis.title.y=element_text(margin=margin(0,12,0,0)),
