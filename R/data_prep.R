@@ -423,7 +423,7 @@ data_prep <- function(trackingdata,
     
     ### calculate nearest neighbour distances
     # identify nearest neighbours and calculate the mean distance to fixed number of nearest neighbours
-    nearest <- RANN::nn2(workdat[,1:2],workdat[,1:2],k=minlocs/10)$nn.dists
+    nearest <- RANN::nn2(workdat[,1:2],workdat[,1:2],k=max(1,(minlocs/10)))$nn.dists
     workdat$NN50dist<-apply(nearest,1,median)
     
     ### apply sequential filters of residence time and revisits and nearest neighbour distance
@@ -435,6 +435,12 @@ data_prep <- function(trackingdata,
       dplyr::arrange(NN50dist) %>% 
       dplyr::filter(NN50dist <= quantile(NN50dist, 0.25))
     dim(potnests)
+    
+    ### build in failsafe for when number is very low
+    if(dim(potnests)[1]==0){
+      potnests <- workdat %>% dplyr::arrange(desc(residence_time)) %>%
+        dplyr::slice_max(n=1, order_by=residence_time)
+    }
     
     ### compare point counts for 3 alternatives
     radnests2 <- RANN::nn2(workdat[,1:2],
