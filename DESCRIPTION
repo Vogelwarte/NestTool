@@ -14,7 +14,7 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Imports: 
-    amt,
+    amt (>= 0.2.0),
     caret,
     cli,
     data.table,
@@ -36,6 +36,6 @@ Imports:
     stats,
     withr
 Depends: 
-    R (>= 2.10),
+    R (>= 3.5.0),
     tidyverse
 LazyData: true
