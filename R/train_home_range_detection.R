@@ -9,6 +9,7 @@
 #'
 #' @param trackingsummary data.frame created by \code{\link{data_prep}} with information on individual identity, age, sex, and seasonal movement metrics.
 #' Must contain a column 'HR' with two possible values, 'yes' or 'no' (or 1 or 0) to be able to train the model (at least 5 of each are required). If no such data are available, use \code{\link{predict_ranging}} instead.
+#' @param train_frac numeric. A fractional value (>0 and <1) that specifies what fraction of the data are used to train models. The remainder is used for model assessment. Default is 0.7.
 #' @param plot logical. If TRUE, a variable importance plot is produced.
 #' @return Returns a list with four elements: \code{model} is the random forest model to predict ranging;
 #' \code{summary} is the output data.frame with predicted probabilities of a home range;
@@ -25,7 +26,7 @@
 #' @importFrom ggplot2 ggplot aes geom_bar coord_flip ylab xlab scale_y_continuous annotate theme element_rect element_text element_blank
 #'
 
-train_home_range_detection <- function(trackingsummary, plot=TRUE) {
+train_home_range_detection <- function(trackingsummary, train_frac=0.7,plot=TRUE) {
   
 ###### IDENTIFYING HOME RANGES OF RED KITES BASED ON GPS TRACKING DATA ################
 # original script and data prepared by Ursin Beeli 6 May 2023
@@ -41,6 +42,16 @@ if(!("HR" %in% names(trackingsummary))){
         Either add the column, rename a column that contains relevant information, or use the function 'predict_ranging' if you want to predict from an existing model.")
   break
 }  
+  
+if(train_frac>1){
+    print("The training data fraction is poorly specified. Please specify a value <1 or omit 'train_frac' to accept the default value of 0.7")
+    break
+}
+  
+  if(train_frac<0){
+    print("The training data fraction is poorly specified. Please specify a value >0 or omit 'train_frac' to accept the default value of 0.7")
+    break
+  } 
 
 # DATA PREPARATION -------------------------------------------------------------
 # cast dependent variable and sex to factor
@@ -55,7 +66,7 @@ trackingsummary$sex <- factor(trackingsummary$sex, levels = c("m","f"))
 
 # SPLIT DATA FRAME RANDOMLY INTO TWO--------------------------------------------
 milvus_id <- unique(trackingsummary$year_id)
-milvus_id_train <- sample(milvus_id, round(length(milvus_id)*.7))
+milvus_id_train <- sample(milvus_id, round(length(milvus_id)*train_frac))
 
 milvus_train <- trackingsummary %>%
   dplyr::filter(year_id %in% milvus_id_train)

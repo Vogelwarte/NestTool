@@ -11,6 +11,7 @@
 #' @param nestingsummary data.frame created by \code{\link{predict_nesting}} with information on individual identity, age, sex, seasonal movement metrics, and the probability that nesting occurred in that season.
 #' Must contain a column 'success' with two possible values, 'yes' or 'no' (or 1 or 0) to be able to train the model (at least 5 of each are required) - these data will be read in by \code{\link{data_prep}} and should be present in the input data.frame \code{indseasondata}.
 #' If no such data are available, use \code{\link{predict_success}} instead.
+#' @param train_frac numeric. A fractional value (>0 and <1) that specifies what fraction of the data are used to train models. The remainder is used for model assessment. Default is 0.7.
 #' @param plot logical. If TRUE, a variable importance plot is produced.
 #' @return Returns a list with five elements: \code{model} is the random forest model to predict nesting;
 #' \code{summary} is the output data.frame with predicted probabilities of nesting success;
@@ -28,7 +29,7 @@
 #' 
 
 
-train_nest_success <- function(nestingsummary, plot=TRUE) {
+train_nest_success <- function(nestingsummary, train_frac=0.7, plot=TRUE) {
   
 ###### PREDICTING NEST OUTCOME OF RED KITES BASED ON GPS TRACKING DATA ################
 # original script and data prepared by Ursin Beeli 6 May 2023
@@ -43,6 +44,16 @@ if(!("success" %in% names(nestingsummary))){
   break
 }  
 
+  if(train_frac>1){
+    print("The training data fraction is poorly specified. Please specify a value <1 or omit 'train_frac' to accept the default value of 0.7")
+    break
+  }
+  
+  if(train_frac<0){
+    print("The training data fraction is poorly specified. Please specify a value >0 or omit 'train_frac' to accept the default value of 0.7")
+    break
+  } 
+  
 
 
 # DATA PREPARATION -------------------------------------------------------------
@@ -81,7 +92,7 @@ nestingsummary <- nestingsummary %>%
 # SPLIT DATA FRAME RANDOMLY INTO TWO--------------------------------------------
 
 milvus_id <- unique(nestingsummary$year_id)
-training_ids <- sample(milvus_id, round(length(milvus_id)*.7))
+training_ids <- sample(milvus_id, round(length(milvus_id)*train_frac))
 
 nestingsummary_train <- nestingsummary %>%
   dplyr::filter(year_id %in% training_ids)
