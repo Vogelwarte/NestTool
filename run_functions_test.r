@@ -46,8 +46,8 @@ source("R/train_nest_success.r")
 
 
 ### LOAD THE TRACKING DATA AND INDIVIDUAL SEASON SUMMARIES 
-trackingdata<-fread("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/03_milvus_combined.csv")
-indseasondata<-fread("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/01_validation/03_validation_combined.csv") %>%
+trackingdata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/03_milvus_combined.csv")
+indseasondata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/01_validation/03_validation_combined.csv") %>%
   mutate(nest = case_when(nest_id > 0 ~ "nest",
                         nest_id == 0 ~ "no nest")) %>%
   mutate(HR = case_when(home_range_id > 0 ~ "yes",
