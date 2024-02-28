@@ -22,7 +22,7 @@
 #' @importFrom ranger ranger
 #' @importFrom stats predict
 #' @importFrom caret confusionMatrix
-#' @importFrom ggplot2 ggplot aes geom_bar coord_flip ylab xlab scale_y_continuous scale_x_discrete annotate theme element_rect element_text element_blank
+#' @importFrom ggplot2 ggplot aes geom_bar geom_text coord_flip ylab xlab scale_y_continuous scale_x_discrete annotate theme element_rect element_text element_blank
 #' 
 
 train_nest_detection <- function(trackingsummary, train_frac=0.7, plot=TRUE) {
@@ -79,8 +79,6 @@ milvus_train_F <- trackingsummary %>%
   dplyr::filter(year_id %in% milvus_id_train_F)
 milvus_test_F <- trackingsummary %>%
   dplyr::filter(!year_id %in% milvus_id_train_F)
-names(milvus_train)
-
 
 
 # CREATE INFORMATIVE ERROR MESSAGE WHEN THERE ARE INSUFFICIENT DATA ---------------
@@ -255,6 +253,6 @@ if(plot==T){
 }
 
 
-return(list(model=RF2,eval_train=trainmat,eval_test=testmat, summary=OUT))
+return(list(model_M=RF2M,model_F=RF2F,eval_train_M=trainmat_M,eval_test_M=testmat_M, eval_train_F=trainmat_F,eval_test_F=testmat_F, summary=OUT))
 
 }
