@@ -111,7 +111,7 @@ nest_model<-train_nest_detection(trackingsummary=trackingsummary[!is.na(tracking
 #### STEP 5: identify nests
 
 ## if prediction includes both training and test data, then remove column "nest_prob" first
-pred_nest<-predict_nesting(model=nest_model$model,trackingsummary=pred_hr) # if a model has been trained
+#pred_nest<-predict_nesting(model=nest_model$model,trackingsummary=pred_hr) # if a model has been trained
 pred_nest_M<-predict_nesting(model=nest_model$model_M,trackingsummary=pred_hr[pred_hr$sex=="m",]) # if a model has been trained
 pred_nest_F<-predict_nesting(model=nest_model$model_F,trackingsummary=pred_hr[pred_hr$sex=="f",]) # if a model has been trained
 
@@ -125,6 +125,24 @@ pred_nest_F<-pred_nest_F %>%
   dplyr::mutate(nest_predicted = as.factor(dplyr::case_when(nest_prob > no_nest_prob ~ "nest",
                                                             nest_prob < no_nest_prob ~ "no nest")))
 caret::confusionMatrix(data = as.factor(pred_nest_F$nest_observed), reference = pred_nest_F$nest_predicted)
+
+### test whether M nests can be predicted with F model and vice versa
+## relatively poor performance for males, but similar performance for females
+pred_nest_M<-predict_nesting(model=nest_model$model_F,trackingsummary=pred_hr[pred_hr$sex=="m",]) # if a model has been trained
+pred_nest_F<-predict_nesting(model=nest_model$model_M,trackingsummary=pred_hr[pred_hr$sex=="f",]) # if a model has been trained
+
+
+pred_nest_M<-pred_nest_M %>%
+  dplyr::mutate(nest_predicted = as.factor(dplyr::case_when(nest_prob > no_nest_prob ~ "nest",
+                                                            nest_prob < no_nest_prob ~ "no nest")))
+caret::confusionMatrix(data = as.factor(pred_nest_M$nest_observed), reference = pred_nest_M$nest_predicted)
+
+pred_nest_F<-pred_nest_F %>%
+  dplyr::mutate(nest_predicted = as.factor(dplyr::case_when(nest_prob > no_nest_prob ~ "nest",
+                                                            nest_prob < no_nest_prob ~ "no nest")))
+caret::confusionMatrix(data = as.factor(pred_nest_F$nest_observed), reference = pred_nest_F$nest_predicted)
+
+
 
 
 #pred_nest<-predict_nesting(trackingsummary=trackingsummary) # uses the model trained with our data (automatically loaded in the function)
