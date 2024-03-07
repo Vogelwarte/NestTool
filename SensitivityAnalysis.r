@@ -42,7 +42,7 @@ sens.ana<-expand.grid(minlocs=nsamp,nestradius=nrad,homeradius=rhr) %>%
 
 
 ### SET UP PARALLEL LOOP 
-n.cores <- 8  ## this is to be run on the server
+n.cores <- 6  ## this is to be run on the server
 registerDoParallel(n.cores)
 
 sens.ana.out <- 
@@ -67,6 +67,8 @@ sens.ana.out <-
                              Chick1End = 152, # end of the first chick phase in yday
                              age =10)         # age of individuals for which no age is provided with data 
   
+  
+  output$n<-length(unique(nest_data_input$summary$year_id))
   
   #### STEP 2: train home range model (if training data available)
   trackingsummary<-nest_data_input$summary
