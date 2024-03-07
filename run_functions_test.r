@@ -24,6 +24,7 @@ library(shiny)
 library(leaflet)
 library(htmltools)
 library(NestTool)
+library(janitor)
 
 ## set root folder for project
 try(setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2"),silent=T)
@@ -52,6 +53,8 @@ indseasondata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/
                         nest_id == 0 ~ "no nest")) %>%
   mutate(HR = case_when(home_range_id > 0 ~ "yes",
                         home_range_id == 0 ~ "no"))
+
+
 
 # THURINGIAN BIRDS
 # trackingdata<-fread(here("REKI/Analysis/NestTool/REKI/output/02_preprocessing/04_milvus_thuringia.csv"))
@@ -84,6 +87,16 @@ saveRDS(nest_data_input, "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestT
 nest_data_input <- readRDS("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/05_full_run_CH/nest_data_input_CH.rds")
 
 
+## sex and age ratio
+sampsize<-indseasondata %>% 
+  filter(year_id %in% unique(nest_data_input$summary$year_id)) %>%
+  mutate(age_cy=ifelse(age_cy>9,10,age_cy)) %>%
+  group_by(sex,age_cy) %>%
+  summarise(n=length(unique(year_id))) %>%
+  spread(key=sex, value=n) %>%
+  ungroup() %>%
+  adorn_totals()
+write.table(sampsize,"clipboard", sep="\t")
 
 #### STEP 2: train home range model (if training data available)
 trackingsummary<-nest_data_input$summary
