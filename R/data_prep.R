@@ -131,11 +131,18 @@ data_prep <- function(trackingdata,
   join.cols <- purrr::reduce(list(names(indseasondata), names(milvus), c("year_id","sex","age_cy","nest","fledged","HR","year","bird_id")), dplyr::intersect)
   
   ## insert error message when people try to join numeric and factors
+  if(length(join.cols)>1){
   checkTypes<- data.frame(Column = join.cols,
                df1 = sapply(as.data.frame(milvus)[,join.cols], class),
                df2 = sapply(as.data.frame(indseasondata)[,join.cols], class)) %>%
     dplyr::mutate(Diff=dplyr::if_else(df1== df2, "Same", "Different")) %>%
-    dplyr::filter(Diff=="Different")
+    dplyr::filter(Diff=="Different")}else{
+      checkTypes<- data.frame(Column = join.cols,
+                              df1 = sapply(as.data.frame(milvus)[,join.cols], class)[1],
+                              df2 = sapply(as.data.frame(indseasondata)[,join.cols], class)[1]) %>%
+        dplyr::mutate(Diff=dplyr::if_else(df1== df2, "Same", "Different")) %>%
+        dplyr::filter(Diff=="Different")
+    }
                     
   if(dim(checkTypes)[1]>0){
     print(sprintf("Stopped because columns %s are not of the same type in trackingdata and indseasondata. This will cause a problem when data are joined.", paste(checkTypes$Column,sep=", ")))
