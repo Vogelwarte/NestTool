@@ -49,7 +49,7 @@
 #'
 #' @export 
 #' @importFrom lubridate yday ymd
-#' @importFrom dplyr arrange mutate filter intersect left_join group_by summarise n select first rename bind_rows ungroup if_else slice_min slice_max
+#' @importFrom dplyr arrange mutate filter intersect left_join group_by summarise n select first rename bind_rows ungroup if_else slice_min slice_max ungroup
 #' @importFrom purrr reduce pluck
 #' @importFrom amt mk_track time_of_day arrange hr_mcp hr_area
 #' @importFrom recurse getRecursions getRecursionsAtLocations
@@ -108,16 +108,16 @@ data_prep <- function(trackingdata,
   # the conditional formulation does not work, so indseasondata must always be provided, but it may not have all columns
   
     if('age_cy' %in% names(indseasondata)){
-      indseasondata<- indseasondata %>% dplyr::mutate(age_cy=dplyr::if_else(is.na(indseasondata$age_cy),age,indseasondata$age_cy)) ### assign user-specified value to missing values in data
+      indseasondata<- indseasondata %>% dplyr::ungroup() %>% dplyr::mutate(age_cy=dplyr::if_else(is.na(indseasondata$age_cy),age,indseasondata$age_cy)) ### assign user-specified value to missing values in data
     }else{
-      indseasondata<- indseasondata %>% dplyr::mutate(age_cy=age) ### assign user-specified value to non-existing column
+      indseasondata<- indseasondata %>% dplyr::ungroup() %>% dplyr::mutate(age_cy=age) ### assign user-specified value to non-existing column
     }
     
     if('sex' %in% names(indseasondata)){
-      indseasondata<- indseasondata %>% dplyr::mutate(sex=dplyr::if_else(is.na(indseasondata$sex),"m",indseasondata$sex)) ### assign random value (males) to missing values in data
+      indseasondata<- indseasondata %>% dplyr::ungroup() %>% dplyr::mutate(sex=dplyr::if_else(is.na(indseasondata$sex),"m",indseasondata$sex)) ### assign random value (males) to missing values in data
       indseasondata$sex<-factor(indseasondata$sex, levels=c('m','f'))
     }else{
-      indseasondata<- indseasondata %>% dplyr::mutate(sex="m") ### assign random value (males) to non-existing column
+      indseasondata<- indseasondata %>% dplyr::ungroup() %>% dplyr::mutate(sex="m") ### assign random value (males) to non-existing column
       indseasondata$sex<-factor(indseasondata$sex, levels=c('m','f'))
     }
 
