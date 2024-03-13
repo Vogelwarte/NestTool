@@ -3,6 +3,7 @@
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~###########
 
 ## requested by reviewer
+## abandoned parallel approach because it failed - set up sequential loop over weekend instead
 
 library(data.table)
 library(tidyverse)
@@ -12,8 +13,8 @@ select<-dplyr::select
 filter<-dplyr::filter
 library(randomForest)
 library(ranger)
-library(parallel)
-library(doParallel)
+# library(parallel)
+# library(doParallel)
 library(NestTool)
 
 ## set root folder for project
@@ -31,7 +32,7 @@ indseasondata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/
 
 
 ### set up sensitivity analysis
-nsamp<-c(500,800,1000)
+nsamp<-c(600,800,1000)
 nrad<-c(30,40,50,60,70)
 rhr<-c(1000,1500,2000,2500,3000)
 
@@ -42,12 +43,17 @@ sens.ana<-expand.grid(minlocs=nsamp,nestradius=nrad,homeradius=rhr) %>%
 
 
 ### SET UP PARALLEL LOOP 
-n.cores <- 6  ## this is to be run on the server
-registerDoParallel(n.cores)
+# n.cores <- 2  ## this is to be run on the server
+# cl <- makeCluster(n.cores)
+# registerDoParallel(cl)
 
-sens.ana.out <- 
-  foreach(s = 1:max(sens.ana$SIM),.combine=rbind, .packages=c('NestTool','caret','tidyverse'),.inorder=FALSE,.errorhandling="remove",.verbose=FALSE) %dopar% {
-
+sens.ana.out <- data.frame()
+#   foreach(s = 1:10,
+#           .combine='rbind',
+#           .packages=c('NestTool','caret','tidyverse','dplyr'),
+#           .inorder=FALSE,
+#           .verbose=TRUE) %dopar% {
+for(s in sens.ana$SIM) {
   output<-sens.ana[sens.ana$SIM==s,]
   #### STEP 1: prepare data - this takes approximately 15 minutes
   nest_data_input<-data_prep(trackingdata=trackingdata,
@@ -89,10 +95,12 @@ sens.ana.out <-
   #### STEP 6: train outcome model (if training data available)
   succ_model<-train_nest_success(nestingsummary=pred_nest[pred_nest$success %in% c("yes","no"),],plot=T)
   output$acc.succ<-paste(round(succ_model$eval_test$overall[1],3)," (",round(succ_model$eval_test$overall[3],3)," - ",round(succ_model$eval_test$overall[4],3),")", sep="")
-  
-  return(output)
-  
+  fwrite(output,"C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/output/SensitivityAnalysisOutput.csv",append=T)
+  #return(output)
+  sens.ana.out <- bind_rows(sens.ana.out,output)
+  rm(nest_data_input,succ_model,nest_model,hr_model,pred_hr,pred_nest,trackingsummary,output)
+  gc()
 }
-
+# stopCluster(cl)
 
 
