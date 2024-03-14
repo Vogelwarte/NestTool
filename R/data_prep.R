@@ -14,7 +14,8 @@
 #' @param indseasondata data.frame with nesting information per individual and season, which links to \code{trackingdata} by the unique identifier ('year_id').
 #' Must contain columns for the age ('age_cy' as integer in calender years) and sex ('sex': either 'm' or 'f') of individuals in that season.
 #' Will optionally contain three columns of binary training data, namely 'HR' (whether a home range existed or not), 'nest' (whether a nesting attempt took place) and 'success' (whether the nest was successful)
-#' If no nesting information is available, \code{indseasondata} can be created from \code{trackingdata} by grouping and summarising \code{trackingdata} to yield one line per individual and season. 
+#' If no nesting information is available, \code{indseasondata} can be created from \code{trackingdata} by grouping and summarising \code{trackingdata} to yield one line per individual and season.
+#' @param crs_epsg numeric. EPSG code for the Coordinate Reference System of the projected coordinates in \code{trackingdata$lat_eea} and \code{trackingdata$long_eea}. Find EPSG code at https://epsg.io/. Default is 3035 (Lamberth Azimuthal Equal Area for Europe)
 #' @param latboundary numeric. Value for the southern latitudinal boundary, i.e. locations will only be retained if \code{trackingdata$lat_wgs} is >\code{latboundary}
 #' @param longboundary  numeric. Value for the western longitudinal boundary, i.e. locations will only be retained if \code{trackingdata$long_wgs}  is >\code{longboundary}
 #' @param minlocs integer. Minimum number of GPS locations that an individual must have recorded between \code{startseason} and \code{endseason} to be considered for analysis. The remaining individuals will be removed.
@@ -60,6 +61,7 @@
 
 data_prep <- function(trackingdata,
                       indseasondata,
+                      crs_epsg=3035,
                       latboundary=45,
                       longboundary=4,
                       minlocs=800,
@@ -179,7 +181,7 @@ data_prep <- function(trackingdata,
       id = year_id,
       date_id,
       event_id,
-      crs = 3035
+      crs = crs_epsg
     ) %>%
     amt::time_of_day(include.crepuscule = T) %>% # if F, crepuscule is considered as night
     amt::arrange(id, t_)
@@ -307,9 +309,9 @@ data_prep <- function(trackingdata,
   
   # creating sf objects for distance calculation
   milvus_night_max_sf <- milvus_night_max %>%
-    sf::st_as_sf(coords = c("long_night", "lat_night"), crs = 3035)
+    sf::st_as_sf(coords = c("long_night", "lat_night"), crs = crs_epsg)
   milvus_day_max_sf <- milvus_day_max %>%
-    sf::st_as_sf(coords = c("long_day", "lat_day"), crs = 3035)
+    sf::st_as_sf(coords = c("long_day", "lat_day"), crs = crs_epsg)
   
   # calculating the distance from the day location to the night location
   milvus_max_res_time <- milvus_day_max_sf %>%
@@ -379,7 +381,7 @@ data_prep <- function(trackingdata,
   # milvus_pot_nest_sf <- milvus_pot_nests %>%
   #   dplyr::rename(year_id=id) %>%
   #   mutate(Type="MaxTime") %>%
-  #   sf::st_as_sf(coords = c("x", "y"), crs = 3035)
+  #   sf::st_as_sf(coords = c("x", "y"), crs = crs_epsg)
   # 
   # 
   # 
@@ -392,7 +394,7 @@ data_prep <- function(trackingdata,
   # # milvus_pot_nest_sf_alt2 <- milvus_track %>% 
   # #   dplyr::rename(year_id=id) %>%
   # #   slice_min(order_by=NN50dist, n=50, by=year_id) %>%
-  # #   sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
+  # #   sf::st_as_sf(coords = c("x_", "y_"), crs = crs_epsg) %>%
   # #   group_by(year_id) %>%
   # #   summarize(geometry = st_union(geometry)) %>%
   # #   st_centroid()
@@ -481,7 +483,7 @@ data_prep <- function(trackingdata,
     
   milvus_pot_nest_sf <- milvus_pot_nests %>%
     dplyr::rename(year_id=id) %>%
-    sf::st_as_sf(coords = c("x", "y"), crs = 3035)
+    sf::st_as_sf(coords = c("x", "y"), crs = crs_epsg)
   print(sprintf("Identified potential nest locations for %i individuals",dim(milvus_pot_nest_sf)[1]))
   
   
@@ -678,11 +680,11 @@ data_prep <- function(trackingdata,
     ### if no locations exist inside nest 2km radius then set time away to 720, otherwise to 0
     if(milvus_max_res_time$maxtimeawayBrood2km[i]<0){
       focal_nest<-milvus_pot_nest_sf %>% dplyr::filter(year_id==milvus_max_res_time$year_id[i]) %>%
-        sf::st_transform(crs = 3035) %>%
+        sf::st_transform(crs = crs_epsg) %>%
         sf::st_buffer(dist=homeradius)
       locs_brood<-milvus_track_amt %>% dplyr::filter(id==names(nest_revisits)[i]) %>% dplyr::mutate(yday=lubridate::yday(t_)) %>%
         dplyr::filter(yday >= broodstart  & yday <= broodend) %>% 
-        sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
+        sf::st_as_sf(coords = c("x_", "y_"), crs = crs_epsg) %>%
         sf::st_within(focal_nest)
       
       milvus_max_res_time$maxtimeawayBrood2km[i] <- dplyr::if_else(dim(locs_brood)[2]==1,0,720) ### if there are no locations in the 2km circle around the nest then set max time away to 720, otherwise 0
@@ -732,9 +734,9 @@ data_prep <- function(trackingdata,
                                     dplyr::if_else(yday<Incu2End,"Incu2",
                                            dplyr::if_else(yday<Chick1End,"Chick1","Chick2"))))) %>%
     dplyr::select(id,t_, broodphase,x_,y_) %>%
-    sf::st_as_sf(coords = c("x_", "y_"), crs = 3035)
+    sf::st_as_sf(coords = c("x_", "y_"), crs = crs_epsg)
   milvus_nest_sf <- milvus_pot_nests %>%
-    sf::st_as_sf(coords = c("x", "y"), crs = 3035)
+    sf::st_as_sf(coords = c("x", "y"), crs = crs_epsg)
   
   # calculating the distance from each location to the potential nest location
   # and taking the 95% quantile per broodphase
@@ -773,11 +775,11 @@ data_prep <- function(trackingdata,
   milvus_night_max_sf_dist <- milvus_day %>%
     dplyr::select(event_id, year_id) %>%
     dplyr::left_join(milvus_night_max_sf, by = "year_id") %>%
-    sf::st_as_sf(crs = 3035)
+    sf::st_as_sf(crs = crs_epsg)
   
   # sf object of all day locations
   milvus_day_sf <- milvus_day %>%
-    sf::st_as_sf(coords = c("long_eea", "lat_eea"), crs = 3035)
+    sf::st_as_sf(coords = c("long_eea", "lat_eea"), crs = crs_epsg)
   
   # calculating the distances
   milvus_day_sf$dist_to_max_night <- as.numeric(sf::st_distance(milvus_day_sf,
