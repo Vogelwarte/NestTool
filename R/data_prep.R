@@ -15,7 +15,7 @@
 #' Must contain columns for the age ('age_cy' as integer in calender years) and sex ('sex': either 'm' or 'f') of individuals in that season.
 #' Will optionally contain three columns of binary training data, namely 'HR' (whether a home range existed or not), 'nest' (whether a nesting attempt took place) and 'success' (whether the nest was successful)
 #' If no nesting information is available, \code{indseasondata} can be created from \code{trackingdata} by grouping and summarising \code{trackingdata} to yield one line per individual and season.
-#' @param crs_epsg numeric. EPSG code for the Coordinate Reference System of the projected coordinates in \code{trackingdata$lat_eea} and \code{trackingdata$long_eea}. Find EPSG code at https://epsg.io/. Default is 3035 (Lamberth Azimuthal Equal Area for Europe)
+#' @param crs_epsg numeric. EPSG code for the Coordinate Reference System of the projected coordinates in \code{trackingdata$lat_eea} and \code{trackingdata$long_eea}. \link[=https://epsg.io/]{Find EPSG code here}. Default is 3035 (Lamberth Azimuthal Equal Area for Europe)
 #' @param latboundary numeric. Value for the southern latitudinal boundary, i.e. locations will only be retained if \code{trackingdata$lat_wgs} is >\code{latboundary}
 #' @param longboundary  numeric. Value for the western longitudinal boundary, i.e. locations will only be retained if \code{trackingdata$long_wgs}  is >\code{longboundary}
 #' @param minlocs integer. Minimum number of GPS locations that an individual must have recorded between \code{startseason} and \code{endseason} to be considered for analysis. The remaining individuals will be removed.
