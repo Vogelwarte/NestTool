@@ -111,14 +111,14 @@ movement_visualisation <- function(trackingdata,
                        height:65px; width:110px; margin-top:50px;}')
                   ),
                   # layout of the shiny app
-                  titlePanel(title = "Red Kite Movement Trajectory"),
+                  titlePanel(title = "Individual Bird Movement Trajectory"),
                   sidebarLayout(
                     sidebarPanel(width = 3, style = "height: 675px; position:relative;",
                                  h3("Data selection"),
                                  fluidRow(
                                    # Build selection tool for changing the individual to be displayed
                                    column(width = 12,
-                                          selectInput(inputId = "ID", label = "Red Kite",
+                                          selectInput(inputId = "ID", label = "Select Individual",
                                                       choices = sort(as.character(unique(milvus_metrics$ID))), multiple = F)
                                    )
                                  ),
@@ -128,10 +128,12 @@ movement_visualisation <- function(trackingdata,
                                           prettyRadioButtons(inputId = "data_period",
                                                              label = "Data Period",
                                                              choices = list("Whole Period" = 1,
+                                                                            "February" = 2,
                                                                             "March" = 3,
                                                                             "April" = 4,
                                                                             "May" = 5,
-                                                                            "June" = 6),
+                                                                            "June" = 6,
+                                                                            "July" = 7),
                                                              selected = 1,
                                                              shape = "curve",
                                                              outline = F,
@@ -302,7 +304,7 @@ movement_visualisation <- function(trackingdata,
       if (length(unique(values$milvus_metrics[!is.na(values$milvus_metrics$Nest) &
                                               !is.na(values$milvus_metrics$Success),]$ID)) == 1) {
         # covers the case when there is only one item in the "Complete" group
-        shiny::updateSelectInput(inputId = "ID", label = "Red Kite",
+        shiny::updateSelectInput(inputId = "ID", label = "Select Individual",
                           choices = list(
                             Incomplete = sort(as.character(unique(values$milvus_metrics[is.na(values$milvus_metrics$Nest) |
                                                                                           is.na(values$milvus_metrics$Success),]$ID))),
@@ -313,7 +315,7 @@ movement_visualisation <- function(trackingdata,
       } else if (length(unique(values$milvus_metrics[is.na(values$milvus_metrics$Nest) |
                                                      is.na(values$milvus_metrics$Success),]$ID)) == 1) {
         # covers the case when there is only one item in the "Incomplete" group
-        shiny::updateSelectInput(inputId = "ID", label = "Red Kite",
+        shiny::updateSelectInput(inputId = "ID", label = "Select Individual",
                           choices = list(
                             Incomplete = list(sort(as.character(unique(values$milvus_metrics[is.na(values$milvus_metrics$Nest) |
                                                                                                is.na(values$milvus_metrics$Success),]$ID)))),
@@ -322,7 +324,7 @@ movement_visualisation <- function(trackingdata,
                           )
         )
       } else {
-        shiny::updateSelectInput(inputId = "ID", label = "Red Kite",
+        shiny::updateSelectInput(inputId = "ID", label = "Select Individual",
                           choices = list(
                             Incomplete = sort(as.character(unique(values$milvus_metrics[is.na(values$milvus_metrics$Nest) |
                                                                                           is.na(values$milvus_metrics$Success),]$ID))),
