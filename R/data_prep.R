@@ -42,10 +42,11 @@
 #' @param age integer. For birds that have no age information, or for datasets where no 'age_cy' (age in calender years) exists, a value will be filled in to facilitate the prediction of nest success.
 #' Defaults to 10, but should be informed by a sensible value for the species in question, so that \code{age} reflects the age in calendar years of birds for which no age information exists.
 #'
-#' @return Returns a list with 4 data.frames. \code{summary} contains one row per individual season and 45 variables, which each characterise movement metrics for a different period of the breeding season. Output data.frame includes age and sex information.
+#' @return Returns a list with 5 data.frames. \code{summary} contains one row per individual season and 45 variables, which each characterise movement metrics for a different period of the breeding season. Output data.frame includes age and sex information.
 #' \code{pot_nests} contains one row per individual season and two variables (x and y), representing the longitude and latitude of potential nest sites (in projected coordinate system).
 #' \code{nightlocs} contains all nocturnal locations for all individuals, including the number of revisits to within \code{nestradius} and the residence time within \code{nestradius} at that location.
 #' \code{daylocs} contains all diurnal locations for all individuals, including the number of revisits to within \code{nestradius} and the residence time within \code{nestradius} at that location.
+#' \code{nest_visits} contains all revisits to within \code{nestradius} of the potential nest location for all individuals.
 #'
 #'
 #' @export 
@@ -816,7 +817,7 @@ data_prep <- function(trackingdata,
   
   ## saving files
   #data.table::fwrite(milvus_dist_summary, "output/04_nest/03_distance_RF.csv")
-  return(list(summary=milvus_dist_summary, pot_nests=milvus_pot_nests, movementtrack=milvus_track_amt, nightlocs=milvus_track_night, daylocs=milvus_track_day))
-  print(sprintf("Data preparation completed for %i individuals. Summary output in slot 'summary', nest locations in slot 'pot_nests'.",length(unique(milvus_track_sf$id))))
+  return(list(summary=milvus_dist_summary, pot_nests=milvus_pot_nests, movementtrack=milvus_track_amt, nightlocs=milvus_track_night, daylocs=milvus_track_day, nest_visits=nest_revisits))
+  print(sprintf("Data preparation completed for %i individuals. Summary output in slot 'summary', nest locations in slot 'pot_nests', nest locations in slot 'nest_visits'.",length(unique(milvus_track_sf$id))))
   
 }
