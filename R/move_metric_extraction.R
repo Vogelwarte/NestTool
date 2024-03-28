@@ -13,7 +13,7 @@
 #' Created by \code{\link{data_prep}} and returned as \code{movementtrack}. Must contain id, timestamp, and coordinates in projected coordinate system.
 #' @param nest_locs data.frame with potential nest coordinates for each individual season and id.
 #' Created by \code{\link{data_prep}} and returned as \code{pot_nests}. Must contain id, and nest coordinates in projected coordinate system.
-#' @param ind.data data.frame with unique identifier for individual seasons.
+#' @param inddata data.frame with unique identifier for individual seasons.
 #' Must contain columns for the age and sex of individuals in that season. Format of id must match that of \code{trackingdata}
 #' @param uncertainty numeric value between 0 and 0.5. Individuals for which the nest success classification resulted in a probability <\code{uncertainty}
 #' are retained for data extraction. A value close to 0 will result in many individuals falling below the uncertainty threshold, resulting in longer runtime of the function as more individuals will be processed.
