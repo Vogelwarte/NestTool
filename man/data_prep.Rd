@@ -7,6 +7,7 @@
 data_prep(
   trackingdata,
   indseasondata,
+  crs_epsg = 3035,
   latboundary = 45,
   longboundary = 4,
   minlocs = 800,
@@ -31,6 +32,8 @@ Must contain a timestamp, an individual animal id ('bird_id'), and coordinates i
 Must contain columns for the age ('age_cy' as integer in calender years) and sex ('sex': either 'm' or 'f') of individuals in that season.
 Will optionally contain three columns of binary training data, namely 'HR' (whether a home range existed or not), 'nest' (whether a nesting attempt took place) and 'success' (whether the nest was successful)
 If no nesting information is available, \code{indseasondata} can be created from \code{trackingdata} by grouping and summarising \code{trackingdata} to yield one line per individual and season.}
+
+\item{crs_epsg}{numeric. EPSG code for the Coordinate Reference System of the projected coordinates in \code{trackingdata$lat_eea} and \code{trackingdata$long_eea}. \link[=https://epsg.io/]{Find EPSG code here}. Default is 3035 (Lamberth Azimuthal Equal Area for Europe)}
 
 \item{latboundary}{numeric. Value for the southern latitudinal boundary, i.e. locations will only be retained if \code{trackingdata$lat_wgs} is >\code{latboundary}}
 
@@ -72,10 +75,11 @@ This day will facilitate that different movement behaviours are quantified durin
 Defaults to 10, but should be informed by a sensible value for the species in question, so that \code{age} reflects the age in calendar years of birds for which no age information exists.}
 }
 \value{
-Returns a list with 4 data.frames. \code{summary} contains one row per individual season and 45 variables, which each characterise movement metrics for a different period of the breeding season. Output data.frame includes age and sex information.
+Returns a list with 5 data.frames. \code{summary} contains one row per individual season and 45 variables, which each characterise movement metrics for a different period of the breeding season. Output data.frame includes age and sex information.
 \code{pot_nests} contains one row per individual season and two variables (x and y), representing the longitude and latitude of potential nest sites (in projected coordinate system).
 \code{nightlocs} contains all nocturnal locations for all individuals, including the number of revisits to within \code{nestradius} and the residence time within \code{nestradius} at that location.
 \code{daylocs} contains all diurnal locations for all individuals, including the number of revisits to within \code{nestradius} and the residence time within \code{nestradius} at that location.
+\code{nest_visits} contains all revisits to within \code{nestradius} of the potential nest location for all individuals.
 }
 \description{
 \code{data_prep} extracts temporally varying summary information from tracking data of individuals

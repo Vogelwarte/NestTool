@@ -21,6 +21,9 @@ Created by \code{\link{data_prep}} and returned as \code{movementtrack}. Must co
 \item{nest_locs}{data.frame with potential nest coordinates for each individual season and id.
 Created by \code{\link{data_prep}} and returned as \code{pot_nests}. Must contain id, and nest coordinates in projected coordinate system.}
 
+\item{inddata}{data.frame with unique identifier for individual seasons.
+Must contain columns for the age and sex of individuals in that season. Format of id must match that of \code{trackingdata}}
+
 \item{nestradius}{numeric. Radius around potential nest site in metres.
 This radius will determine in which radius times will be calculated, i.e. how long an animal remained within that radius or how long it spent outside this radius.
 Please consider device accuracy and general movement behaviour of the species when specifying the radius.}
@@ -34,9 +37,6 @@ This day should be the earliest recorded fledging date for the species. Defaults
 \item{uncertainty}{numeric value between 0 and 0.5. Individuals for which the nest success classification resulted in a probability <\code{uncertainty}
 are retained for data extraction. A value close to 0 will result in many individuals falling below the uncertainty threshold, resulting in longer runtime of the function as more individuals will be processed.
 A value close to 0.5 will result in very few individuals that will be processed and for which movement metrics will be returned.}
-
-\item{ind.data}{data.frame with unique identifier for individual seasons.
-Must contain columns for the age and sex of individuals in that season. Format of id must match that of \code{trackingdata}}
 }
 \value{
 Returns a data.frame with movement metrics for each individual season and 5-day window, including age and sex information.

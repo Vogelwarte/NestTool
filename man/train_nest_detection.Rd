@@ -4,11 +4,13 @@
 \alias{train_nest_detection}
 \title{Train a model that predicts whether nesting occurred based on movement summary metrics.}
 \usage{
-train_nest_detection(trackingsummary, plot = TRUE)
+train_nest_detection(trackingsummary, train_frac = 0.7, plot = TRUE)
 }
 \arguments{
 \item{trackingsummary}{data.frame created by \code{\link{data_prep}} with information on individual identity, age, sex, and seasonal movement metrics.
 Must contain a column 'nest' with two possible values, 'no nest' or 'nest' (or 0 or 1) to be able to train the model (at least 5 of each are required). If no such data are available, use \code{\link{predict_nesting}} instead.}
+
+\item{train_frac}{numeric. A fractional value (>0 and <1) that specifies what fraction of the data are used to train models. The remainder is used for model assessment. Default is 0.7.}
 
 \item{plot}{logical. If TRUE, a variable importance plot is produced.}
 }

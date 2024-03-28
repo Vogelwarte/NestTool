@@ -4,12 +4,14 @@
 \alias{train_nest_success}
 \title{Train a model that predicts whether nesting was successful based on movement summary metrics.}
 \usage{
-train_nest_success(nestingsummary, plot = TRUE)
+train_nest_success(nestingsummary, train_frac = 0.7, plot = TRUE)
 }
 \arguments{
 \item{nestingsummary}{data.frame created by \code{\link{predict_nesting}} with information on individual identity, age, sex, seasonal movement metrics, and the probability that nesting occurred in that season.
 Must contain a column 'success' with two possible values, 'yes' or 'no' (or 1 or 0) to be able to train the model (at least 5 of each are required) - these data will be read in by \code{\link{data_prep}} and should be present in the input data.frame \code{indseasondata}.
 If no such data are available, use \code{\link{predict_success}} instead.}
+
+\item{train_frac}{numeric. A fractional value (>0 and <1) that specifies what fraction of the data are used to train models. The remainder is used for model assessment. Default is 0.7.}
 
 \item{plot}{logical. If TRUE, a variable importance plot is produced.}
 }
