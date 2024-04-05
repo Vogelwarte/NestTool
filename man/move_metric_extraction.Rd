@@ -21,8 +21,8 @@ Created by \code{\link{data_prep}} and returned as \code{movementtrack}. Must co
 \item{nest_locs}{data.frame with potential nest coordinates for each individual season and id.
 Created by \code{\link{data_prep}} and returned as \code{pot_nests}. Must contain id, and nest coordinates in projected coordinate system.}
 
-\item{inddata}{data.frame with unique identifier for individual seasons.
-Must contain columns for the age and sex of individuals in that season. Format of id must match that of \code{trackingdata}}
+\item{inddata}{data.frame with unique identifier for individual seasons and predicted probability of nest success provided function \code{\link{predict_success}}.
+Must contain columns for the age and sex of individuals in that season, and a column of \code{succ_prob} as provided by the function \code{\link{predict_success}}. Format of id must match that of \code{trackingdata}}
 
 \item{nestradius}{numeric. Radius around potential nest site in metres.
 This radius will determine in which radius times will be calculated, i.e. how long an animal remained within that radius or how long it spent outside this radius.
