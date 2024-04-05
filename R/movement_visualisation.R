@@ -271,26 +271,42 @@ movement_visualisation <- function(trackingdata,
         values$milvus_metrics <- values$milvus_metrics %>%
           dplyr::mutate(Nest = dplyr::case_when(ID == input_id() ~ "Yes",
                                   Nest == "Yes" ~ "Yes",
+                                  Nest == "Uncertain" ~ "Uncertain",
                                   Nest == "No" ~ "No"))
         # if "no" is chosen, "no" is assigned to the selected bird for Nest
       } else if (input$nest_decision == 0) {
         values$milvus_metrics <- values$milvus_metrics %>%
           dplyr::mutate(Nest = dplyr::case_when(ID == input_id() ~ "No",
                                   Nest == "Yes" ~ "Yes",
+                                  Nest == "Uncertain" ~ "Uncertain",
                                   Nest == "No" ~ "No"))
+      } else if (input$nest_decision == 0.5) {
+        values$milvus_metrics <- values$milvus_metrics %>%
+          dplyr::mutate(Nest = dplyr::case_when(ID == input_id() ~ "Uncertain",
+                                                Nest == "Yes" ~ "Yes",
+                                                Nest == "Uncertain" ~ "Uncertain",
+                                                Nest == "No" ~ "No"))
       }
       # if "yes" is chosen, "yes" is assigned to the selected bird for Success
       if (input$brood_decision == 1) {
         values$milvus_metrics <- values$milvus_metrics %>%
           dplyr::mutate(Success = dplyr::case_when(ID == input_id() ~ "Yes",
                                      Success == "Yes" ~ "Yes",
+                                     Success == "Uncertain" ~ "Uncertain",
                                      Success == "No" ~ "No"))
         # if "no" is chosen, "no" is assigned to the selected bird for Success
       } else if (input$brood_decision == 0) {
         values$milvus_metrics <- values$milvus_metrics %>%
           dplyr::mutate(Success = dplyr::case_when(ID == input_id() ~ "No",
                                      Success == "Yes" ~ "Yes",
+                                     Success == "Uncertain" ~ "Uncertain",
                                      Success == "No" ~ "No"))
+      } else if (input$brood_decision == 0.5) {
+        values$milvus_metrics <- values$milvus_metrics %>%
+          dplyr::mutate(Success = dplyr::case_when(ID == input_id() ~ "Uncertain",
+                                                   Success == "Yes" ~ "Yes",
+                                                   Success == "Uncertain" ~ "Uncertain",
+                                                   Success == "No" ~ "No"))
       }
       # saves the data frame with the information if bird has a nest
       data.table::fwrite(values$milvus_metrics, here::here(output_path), row.names = F)
