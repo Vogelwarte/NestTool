@@ -36,7 +36,7 @@ setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
 # Authors@R: 
 #   person("Steffen", "Oppel", , "steffen.oppel@vogelwarte.ch", role = c("aut", "cre"),
 #          comment = c(ORCID = "0000-0002-8220-3789"))
-# person("Ursin", "Beeli", , "ursin@asdfg.ch", role = c("aut", "cre"))
+# person("Ursin", "Beeli", , "ursin@asdfg.ch", role = c("ctb"))
 # Description: The NestTool package is an informal collection of R functions created by the Swiss Ornithological Institute
 # to extract demographic information from the tracking data of birds. The functions prepare movement metrics,
 # and predict whether a nesting attempt occurred and whether the attempt was successful.

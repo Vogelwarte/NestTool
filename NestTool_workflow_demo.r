@@ -1,13 +1,14 @@
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~###########
 ###### TEST WORKFLOW OF NESTTOOL PACKAGE ################
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~###########
-install.packages("devtools", dependencies = TRUE) 
+#install.packages("devtools", dependencies = TRUE) 
 library(devtools)
 library(data.table)
 library(tidyverse)
 devtools::install_github("Vogelwarte/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
 
 library(NestTool)
+
 
 
 ## check that the help files load - this does not work in RStudio!!
@@ -23,6 +24,7 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
                       indseasondata=indseasondata,
                       latboundary=45,
                       longboundary=4,
+			                crs_epsg=3035,
                       broodstart= yday(ymd("2023-05-01")),
                       broodend<- yday(ymd("2023-06-01")),
                       minlocs=800,
@@ -54,6 +56,7 @@ succ_model<-NestTool::succ_model
 pred_succ<-predict_success(model=succ_model$model,nestingsummary=pred_nest, nest_cutoff=succ_model$nest_cutoff) # uses the model trained with our data (automatically loaded in the function)
 
 #### STEP 5: extract weekly movement metrics for manual classification
+?move_metric_extraction
 move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
                                      nest_locs=nest_data_input$pot_nests, 
                                      inddata=pred_succ,
