@@ -22,7 +22,7 @@ movement_visualisation(
 
 \item{move_metrics}{data.frame with seasonal movement metrics during breeding season derived from \code{\link{move_metric_extraction}}. This data.frame is used to plot the move metrics.}
 
-\item{uncertainty}{numeric value between 0 and 0.5. Individuals for which the nest success classification resulted in a probability <\code{uncertainty}. This value should match the value of \code{uncertainty} used in \code{\link{move_metric_extraction}} to ensure that data is available for all visualised individuals.}
+\item{uncertainty}{numeric value between 0 and 0.5. Individuals for which the nest success classification resulted in a probability >\code{uncertainty} and <(1-\code{uncertainty}). This value should match the value of \code{uncertainty} used in \code{\link{move_metric_extraction}} to ensure that data is available for all visualised individuals.}
 
 \item{output_path}{path for the data.frame with the stored decisions about the examined individuals, whether they have had a nest and a successful brood.}
 }

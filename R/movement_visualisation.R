@@ -16,7 +16,7 @@
 #' @param nest_locs data.frame with coordinates of potential nest locations for every individual derived from \code{\link{data_prep}} as \code{nest_data_input$pot_nests}. This data.frame is used to visualise the potential nest location on the map.
 #' @param inddata data.frame with predictions for breeding success derived from \code{\link{predict_success}} as \code{pred_succ}. This data.frame is used to visualise brood relevant metrics as table.
 #' @param move_metrics data.frame with seasonal movement metrics during breeding season derived from \code{\link{move_metric_extraction}}. This data.frame is used to plot the move metrics.
-#' @param uncertainty numeric value between 0 and 0.5. Individuals for which the nest success classification resulted in a probability <\code{uncertainty}. This value should match the value of \code{uncertainty} used in \code{\link{move_metric_extraction}} to ensure that data is available for all visualised individuals.
+#' @param uncertainty numeric value between 0 and 0.5. Individuals for which the nest success classification resulted in a probability >\code{uncertainty} and <(1-\code{uncertainty}). This value should match the value of \code{uncertainty} used in \code{\link{move_metric_extraction}} to ensure that data is available for all visualised individuals.
 #' @param output_path path for the data.frame with the stored decisions about the examined individuals, whether they have had a nest and a successful brood.
 #'
 #' @return Returns an interactive shiny app that shows a map, a table and a plot for every individual that falls above the absolute value of \code{uncertainty}. The user can then manually assign whether individuals initiated nesting and bred successfully. When the shiny app is closed, the manually annotated values will be saved in a csv file stored at \code{output_path}
@@ -179,7 +179,7 @@ movement_visualisation <- function(trackingdata,
                                                              label = "Did this bird nest?",
                                                              choices = list("Yes" = 1,
                                                                             "No" = 0,
-                                                                            "Uncertain" = NA),
+                                                                            "Uncertain" = 0.5),
                                                              selected = 1,
                                                              status = "danger",
                                                              shape = "curve",
@@ -199,7 +199,7 @@ movement_visualisation <- function(trackingdata,
                                                              label = HTML("Was the brood<br>successful?"),
                                                              choices = list("Yes" = 1,
                                                                             "No" = 0,
-                                                                            "Uncertain" = NA),
+                                                                            "Uncertain" = 0.5),
                                                              selected = 1,
                                                              status = "danger",
                                                              shape = "curve",
@@ -552,7 +552,7 @@ movement_visualisation <- function(trackingdata,
                   selection = "none", class = "compact hover row-border") %>%
           # Color codes the decisions made on nest and brood
           DT::formatStyle(c("Nest", "Success"), target = "cell",
-                      backgroundColor = styleEqual(c("No", "Yes", NA), c("#996622", "#66AAAA", "transparent"))) %>%
+                      backgroundColor = styleEqual(c("No", "Yes", "Uncertain"), c("#996622", "#66AAAA", "#999988"))) %>%
           # Highlights the row of the selected bird
           DT::formatStyle("ID", target = "row",
                       fontWeight = styleEqual(c(input_id()), c("bold")),

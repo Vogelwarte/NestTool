@@ -34,8 +34,8 @@ This day should be the earliest recorded egg laying date for the species. Defaul
 \item{endseason}{integer. Day of the year (obtained by \code{yday(SomeOtherDate)}) that marks the end of the breeding season. Tracking data after this date will be removed.
 This day should be the earliest recorded fledging date for the species. Defaults to 175 (24 Jun).}
 
-\item{uncertainty}{numeric value between 0 and 0.5. Individuals for which the nest success classification resulted in a probability <\code{uncertainty}
-are retained for data extraction. A value close to 0 will result in many individuals falling below the uncertainty threshold, resulting in longer runtime of the function as more individuals will be processed.
+\item{uncertainty}{numeric value between 0 and 0.5. Individuals for which the nest success classification resulted in a probability >\code{uncertainty} and <(1-\code{uncertainty})
+are retained for data extraction. A value close to 0 will result in many individuals exceeding the uncertainty threshold, resulting in longer runtime of the function as more individuals will be processed.
 A value close to 0.5 will result in very few individuals that will be processed and for which movement metrics will be returned.}
 }
 \value{
