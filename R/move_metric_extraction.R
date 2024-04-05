@@ -3,10 +3,10 @@
 #' Extract seasonal movement metrics of tracked individuals during breeding season
 #'
 #' \code{move_metric_extraction} extracts temporally varying summary information from tracking data of individuals
-#' to help diagnose whether a breeding attempt was successful or not. The following metrics are calculate: 95% MCP home range area,
+#' to help visually diagnose whether a breeding attempt was successful or not. The following metrics are calculated for rolling 5-day windows with centers spaced 3-days apart: 95% MCP home range area,
 #' maximum time away from nest radius, median daily time spent at nest, median daily travel distance, and median daily maximum distance from nest.
-#' The function first identifies the most plausible location of a potential nest by calculating time spent and revisits to all locations within a buffer of 
-#' \code{nestradius}, and then uses this location of a nest to calculate distances and times spent within or outwith that radius.
+#' The function uses the most plausible location of a potential nest from \code{\link{data_prep}} to calculate distances and times spent within or outwith \code{nestradius}.
+#' Because these metrics are calculated for 5-day windows, this function is computationally more intensive than \code{\link{data_prep}}, and is only run for selected individuals determined by \code{uncertainty}.
 #'
 #'
 #' @param trackingdata tibble with tracking data set with information on individual season and id.
