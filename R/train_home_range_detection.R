@@ -11,10 +11,11 @@
 #' Must contain a column 'HR' with two possible values, 'yes' or 'no' (or 1 or 0) to be able to train the model (at least 5 of each are required). If no such data are available, use \code{\link{predict_ranging}} instead.
 #' @param train_frac numeric. A fractional value (>0 and <1) that specifies what fraction of the data are used to train models. The remainder is used for model assessment. Default is 0.7.
 #' @param plot logical. If TRUE, a variable importance plot is produced.
-#' @return Returns a list with four elements: \code{model} is the random forest model to predict ranging;
+#' @return Returns a list with five elements: \code{model} is the random forest model to predict ranging;
 #' \code{summary} is the output data.frame with predicted probabilities of a home range;
 #' \code{eval_train} is a confusion matrix and accuracy assessment of the predictive accuracy of the model on training data.
 #' \code{eval_test} is a confusion matrix and accuracy assessment of the predictive accuracy of the model on internally cross-validated test data.
+#' \code{plot} if \code{plot==TRUE} then a variable importance plot is included showing the 10 most important variables for classification based on a permutation procedure.
 #'
 #'
 #' @export 
@@ -177,8 +178,9 @@ if(plot==T){
           panel.grid.minor = ggplot2::element_blank(), 
           panel.border = ggplot2::element_blank())
   print(impplot)
+  return(list(model=RF2,eval_train=trainmat,eval_test=testmat, summary=OUT, plot=impplot))
+} else {
+  return(list(model=RF2,eval_train=trainmat,eval_test=testmat, summary=OUT))
 }
-
-return(list(model=RF2,eval_train=trainmat,eval_test=testmat, summary=OUT))
 
 }

@@ -13,10 +13,11 @@
 #' If no such data are available, use \code{\link{predict_success}} instead.
 #' @param train_frac numeric. A fractional value (>0 and <1) that specifies what fraction of the data are used to train models. The remainder is used for model assessment. Default is 0.7.
 #' @param plot logical. If TRUE, a variable importance plot is produced.
-#' @return Returns a list with five elements: \code{model} is the random forest model to predict nesting;
+#' @return Returns a list with six elements: \code{model} is the random forest model to predict nesting;
 #' \code{summary} is the output data.frame with predicted probabilities of nesting success;
 #' \code{eval_train} is a confusion matrix and accuracy assessment of the predictive accuracy of the model on training data.
 #' \code{eval_test} is a confusion matrix and accuracy assessment of the predictive accuracy of the model on internally cross-validated test data.
+#' \code{plot} if \code{plot==TRUE} then a variable importance plot is included showing the 10 most important variables for classification based on a permutation procedure.
 #' \code{nest_cutoff} numeric value indicating the minimum of 'nest_prob' that the training data contained. This can be used as cutoff in \code{\link{predict_success}} to set success predictions to "no" for those seasons where a nesting attempt was very unlikely.
 #'
 #' @export
@@ -210,9 +211,11 @@ impplot<-IMP[10:1,] %>%
         panel.grid.minor = ggplot2::element_blank(), 
         panel.border = ggplot2::element_blank())
 print(impplot)
-}
+return(list(model=RF4, summary=OUT, eval_train=eval_train, eval_test=eval_test, plot=impplot, nest_cutoff=min(nestingsummary_train$nest_prob, na.rm=T)))
 
-return(list(model=RF4, summary=OUT, eval_train=eval_train, eval_test=eval_test, nest_cutoff=min(nestingsummary_train$nest_prob, na.rm=T)))
+}else{
+  return(list(model=RF4, summary=OUT, eval_train=eval_train, eval_test=eval_test, nest_cutoff=min(nestingsummary_train$nest_prob, na.rm=T)))
+}
 
 }  # end function
 
