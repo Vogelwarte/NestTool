@@ -16,10 +16,11 @@ If no such data are available, use \code{\link{predict_success}} instead.}
 \item{plot}{logical. If TRUE, a variable importance plot is produced.}
 }
 \value{
-Returns a list with five elements: \code{model} is the random forest model to predict nesting;
+Returns a list with six elements: \code{model} is the random forest model to predict nesting;
 \code{summary} is the output data.frame with predicted probabilities of nesting success;
 \code{eval_train} is a confusion matrix and accuracy assessment of the predictive accuracy of the model on training data.
 \code{eval_test} is a confusion matrix and accuracy assessment of the predictive accuracy of the model on internally cross-validated test data.
+\code{plot} if \code{plot==TRUE} then a variable importance plot is included showing the 10 most important variables for classification based on a permutation procedure.
 \code{nest_cutoff} numeric value indicating the minimum of 'nest_prob' that the training data contained. This can be used as cutoff in \code{\link{predict_success}} to set success predictions to "no" for those seasons where a nesting attempt was very unlikely.
 }
 \description{

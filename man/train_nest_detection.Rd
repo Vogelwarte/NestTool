@@ -15,10 +15,11 @@ Must contain a column 'nest' with two possible values, 'no nest' or 'nest' (or 0
 \item{plot}{logical. If TRUE, a variable importance plot is produced.}
 }
 \value{
-Returns a list with four elements: \code{model} is the random forest model to predict nesting;
+Returns a list with five elements: \code{model} is the random forest model to predict nesting;
 \code{summary} is the output data.frame with predicted probabilities of a nest, including all input data for further use in \code{\link{predict_success}};
 \code{eval_train} is a confusion matrix and accuracy assessment of the predictive accuracy of the model on training data.
 \code{eval_test} is a confusion matrix and accuracy assessment of the predictive accuracy of the model on internally cross-validated test data.
+\code{plot} if \code{plot==TRUE} then a variable importance plot is included showing the 10 most important variables for classification based on a permutation procedure.
 }
 \description{
 \code{train_nest_detection} uses temporally varying summary information from tracking data of individuals
