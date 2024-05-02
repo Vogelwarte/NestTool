@@ -60,6 +60,7 @@ for(s in sens.ana$SIM) {
                              indseasondata=indseasondata,
                              latboundary=45,
                              longboundary=4,
+                             crs_epsg=3035,
                              broodstart= yday(ymd("2023-05-01")),
                              broodend<- yday(ymd("2023-06-01")),
                              minlocs=output$minlocs,
