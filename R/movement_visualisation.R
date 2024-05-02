@@ -113,7 +113,7 @@ movement_visualisation <- function(trackingdata,
                   # layout of the shiny app
                   titlePanel(title = "Individual Bird Movement Trajectory"),
                   sidebarLayout(
-                    sidebarPanel(width = 3, style = "height: 675px; position:relative;",
+                    sidebarPanel(width = 4, style = "height: 675px; position:relative;",
                                  h3("Data selection"),
                                  fluidRow(
                                    # Build selection tool for changing the individual to be displayed
@@ -185,7 +185,7 @@ movement_visualisation <- function(trackingdata,
                                                              shape = "curve",
                                                              outline = F,
                                                              fill = T,
-                                                             plain = T)
+                                                             plain = T,inline=T)
                                    ),
                                    # Action button to save the nest decision input
                                    column(width = 6, align = "center",
@@ -205,11 +205,11 @@ movement_visualisation <- function(trackingdata,
                                                              shape = "curve",
                                                              outline = F,
                                                              fill = T,
-                                                             plain = T)
+                                                             plain = T,inline=T)
                                    )
                                  ),
                     ),
-                    mainPanel(width = 9,
+                    mainPanel(width = 8,
                               # For selected individual: Plotting movement track on a map
                               fluidRow(style = "padding-right:15px;",
                                        column(width = 12, class = "well", style = "height: 675px; position:relative;",
