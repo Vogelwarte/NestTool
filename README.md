@@ -5,7 +5,7 @@ This R package is an informal collection of R functions created by the [Swiss Or
 ## Installation
 
 
-This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/Vogelwarte/NestTool) with the following command. . Note that depending on the R version and operating system you are working on, you may need to specify the download options. See [here](https://cran.r-project.org/web/packages/remotes/readme/README.html) for options for other operating systems (only Windows OS option shown in code below):
+This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/Vogelwarte/NestTool) with the following command. Note that depending on the R version and operating system you are working on, you may need to specify the download options. See [here](https://cran.r-project.org/web/packages/remotes/readme/README.html) for options for other operating systems (only Windows OS option shown in code below):
 
 
 ```r
@@ -48,11 +48,13 @@ The next set of parameters concern the radius around locations over which recurs
 
 `age` is a parameter in calendar years that will be ignored if either the tracking data or the `indseasondata` already contain a column (`age_cy`) that specifies the age in calendar years. If no data are submitted then the value entered here will be used. Note that because the prediction of nesting behaviour and success from movement depends on the age of the bird, filling in missing data with a generic value will lead to lower accuracy in predictions.
 
+Depending on the coordinate system you are working in, it may be helpful to turn off spherical geometry (which is not needed for nest detection, but may cause bizarre errors). The command `sf::sf_use_s2(FALSE)`will do that.
 
 
 ```r
 #### this takes approximately 15 minutes for ~500 individuals
 #### note that inputs to time parameters are the respective day of the year, but you can get this from the function lubridate::yday as we demonstrate for the brood phase
+sf::sf_use_s2(FALSE)
 nest_data_input <- data_prep(trackingdata = trackingdata,
                       indseasondata = indseasondata,
                       latboundary = 45,
