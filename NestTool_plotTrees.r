@@ -2,7 +2,7 @@
 ###### PLOT RF TREES FOR MODELS IN NESTTOOL PACKAGE ################
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~###########
 
-### requested by a reviewer who does not understand random forests
+### requested by a Reviewer 1 to visualise and 'grasp' how each datapoint is classified
 
 # ### install reprtree package ###
 # options(repos='http://cran.rstudio.org')
