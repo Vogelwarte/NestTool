@@ -673,7 +673,7 @@ data_prep <- function(trackingdata,
                                              dplyr::if_else(yday<Chick1End,"Chick1","Chick2")))))
     for(s in unique(mcpin$broodphase)){
       mcp_area <- amt::hr_mcp(mcpin %>% dplyr::filter(broodphase==s), levels = c(0.95,0.99)) %>% amt::hr_area()
-      mcp_area$area <- mcp_area$area/milvus_MCP[[i]]$area   #### sets the MCP area in proportion to the individuals 
+      #mcp_area$area <- mcp_area$area/milvus_MCP[[i]]$area   #### sets the MCP area in proportion to the individuals - REMOVED BECAUSE REVIEWER DEMANDED UNSCALED APPROACH
       mcp_out<-mcp_area %>% dplyr::select(level,area) %>% dplyr::mutate(id=names(nest_revisits)[i], broodphase=s) %>%
         dplyr::bind_rows(mcp_out)
     }
@@ -750,7 +750,7 @@ data_prep <- function(trackingdata,
     dist_out<-milvus_track_sf[milvus_track_sf$id==i,] %>%
       dplyr::mutate(dist=sf::st_distance(milvus_track_sf[milvus_track_sf$id==i,], milvus_nest_sf[milvus_nest_sf$id==i,]))%>%
       dplyr::group_by(id,broodphase) %>%
-      dplyr::summarise(`Dist95`=stats::quantile(dist,0.95)/refdist[1],Dist99=stats::quantile(dist,0.99)/refdist[2]) %>%   ### converted to relative distances
+      dplyr::summarise(`Dist95`=stats::quantile(dist,0.95),Dist99=stats::quantile(dist,0.99)) %>%   ### REMOVED conversion to relative distances because reviewer demanded unscaled approach
       sf::st_drop_geometry() %>%
       dplyr::bind_rows(dist_out)
   }
