@@ -122,7 +122,7 @@ RF1 <- randomForest::randomForest(as.factor(HR) ~ sex + revisits_day + residence
                                     timeIncu1+timeIncu2+timeChick1+ timeChick2+meandayrevisitsBrood+lastvisitDay+maxtimeawayBrood2km+maxtimeawayBrood+tottime_nest+
                                     Dist99Chick2+Dist99Settle+Dist99Incu1+Dist99Incu2+Dist99Chick1+
                                     MCP95Chick2+MCP95Chick1+MCP95Incu1+MCP95Settle+MCP95Incu2,
-                                  data=trackingsummary, mtry=3, ntree=1500, replace=T, maxnodes=16)
+                                  data=trackingsummary, mtry=3, ntree=2500, replace=T, maxnodes=16)
 
 ### manually plot the tree
 gTree <- getTree(RF1, k = 50, labelVar = TRUE)
@@ -143,7 +143,7 @@ RF2 <- randomForest::randomForest(as.factor(nest) ~ sex + revisits_day + residen
                         timeIncu1+timeIncu2+timeChick1+ timeChick2+meandayrevisitsBrood+lastvisitDay+maxtimeawayBrood2km+maxtimeawayBrood+tottime_nest+
                         Dist99Chick2+Dist99Settle+Dist99Incu1+Dist99Incu2+Dist99Chick1+
                         MCP95Chick2+MCP95Chick1+MCP95Incu1+MCP95Settle+MCP95Incu2,
-                      data=trackingsummary, mtry=3, ntree=1500, replace=T, maxnodes=16)
+                      data=trackingsummary, mtry=3, ntree=2500, replace=T, maxnodes=16)
 ### manually plot the tree
 gTree <- getTree(RF2, k = 50, labelVar = TRUE)
 x <- as.tree(gTree, RF2)
@@ -165,7 +165,7 @@ RF3 <- randomForest::randomForest(as.factor(success) ~ sex + revisits_day + resi
                                     timeIncu1+timeIncu2+timeChick1+ timeChick2+meandayrevisitsBrood+lastvisitDay+maxtimeawayBrood2km+maxtimeawayBrood+tottime_nest+
                                     Dist99Chick2+Dist99Settle+Dist99Incu1+Dist99Incu2+Dist99Chick1+
                                     MCP95Chick2+MCP95Chick1+MCP95Incu1+MCP95Settle+MCP95Incu2,
-                                  data=trackingsummary[trackingsummary$success %in% c("yes","no"),], mtry=3, ntree=1500, replace=T, maxnodes=16)
+                                  data=trackingsummary[trackingsummary$success %in% c("yes","no"),], mtry=3, ntree=2500, replace=T, maxnodes=16)
 ### manually plot the tree
 gTree <- getTree(RF3, k = 50, labelVar = TRUE)
 x <- as.tree(gTree, RF3)
@@ -178,3 +178,46 @@ labelYN(x)
 title(main = "Example decision tree for the classification of nest success")
 #reprtree::plot.getTree(RF3, k=50, main="Example decision tree for the classification of nest success", depth=8)
 
+
+
+# RANDOM FOREST TREE PLOTTING LOOP (ALL TREES) --------------------------------------------
+pdf("HomeRange_model_trees.pdf")
+for (t in 1:2500) {
+  gTree <- getTree(RF1, k = t, labelVar = TRUE)
+  x <- as.tree(gTree, RF1)
+  plot(x, type = "uniform")
+  x$frame$splits<-substr(x$frame$splits,1,6)
+  text(x, split = FALSE)
+  labelBG(x)
+  labelYN(x)
+  title(main = sprintf("Decision tree %i for the classification of home range behaviour",t))
+}
+dev.off()
+
+pdf("NestInitiation_model_trees.pdf")
+for (t in 1:2500) {
+  gTree <- getTree(RF2, k = t, labelVar = TRUE)
+  x <- as.tree(gTree, RF2)
+  plot(x, type = "uniform")
+  x$frame$splits<-substr(x$frame$splits,1,6)
+  text(x, split = FALSE)
+  labelBG(x)
+  labelYN(x)
+  title(main = sprintf("Decision tree %i for the classification of nest occurrence",t))
+}
+dev.off()
+
+
+
+pdf("NestSucc_model_trees.pdf")
+for (t in 1:2500) {
+  gTree <- getTree(RF3, k = t, labelVar = TRUE)
+  x <- as.tree(gTree, RF3)
+  plot(x, type = "uniform")
+  x$frame$splits<-substr(x$frame$splits,1,6)
+  text(x, split = FALSE)
+  labelBG(x)
+  labelYN(x)
+  title(main = sprintf("Decision tree %i for the classification of nest success",t))
+}
+dev.off()
