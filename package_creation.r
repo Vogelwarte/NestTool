@@ -71,6 +71,12 @@ roxygen2::roxygenize(package.dir = "C:/Users/sop/OneDrive - Vogelwarte/REKI/Anal
 # usethis::use_data(kite.tracks)
 # usethis::use_data(kite.nesting)
 
+
+saveRDS(nest_model$model,'data/nest_model.rds')
+saveRDS(hr_model$model,'data/hr_model.rds')
+saveRDS(succ_model$model,'data/succ_model.rds')
+
+
 devtools::document()
 
 
