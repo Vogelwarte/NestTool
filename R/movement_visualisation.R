@@ -13,6 +13,7 @@
 #' \code{\link{predict_success}} (\code{pred_succ}) and \code{\link{move_metric_extraction}}.
 #'
 #' @param trackingdata data.frame with tracking data derived from \code{\link{data_prep}} as \code{nest_data_input$movementtrack}. This data.frame is used to visualise the GPS locations and the movement trajectory on the map.
+#' @param crs_epsg numeric. EPSG code for the Coordinate Reference System of the projected coordinates used in \code{\link{data_prep}}. \link[=https://epsg.io/]{Find EPSG code here}. Default is 3035 (Lamberth Azimuthal Equal Area for Europe)
 #' @param nest_locs data.frame with coordinates of potential nest locations for every individual derived from \code{\link{data_prep}} as \code{nest_data_input$pot_nests}. This data.frame is used to visualise the potential nest location on the map.
 #' @param inddata data.frame with predictions for breeding success derived from \code{\link{predict_success}} as \code{pred_succ}. This data.frame is used to visualise brood relevant metrics as table.
 #' @param move_metrics data.frame with seasonal movement metrics during breeding season derived from \code{\link{move_metric_extraction}}. This data.frame is used to plot the move metrics.
@@ -37,6 +38,7 @@
 #' @importFrom plotly plotlyOutput renderPlotly style
 
 movement_visualisation <- function(trackingdata,
+                                   crs_epsg=3035,
                                    nest_locs,
                                    inddata,
                                    move_metrics,
@@ -81,7 +83,7 @@ movement_visualisation <- function(trackingdata,
                             tod_ == "dusk" ~ "twilight",
                             tod_ == "night" ~ "night",
                             tod_ == "dawn" ~ "twilight")) %>% # changes dusk and dawn to night
-    sf::st_as_sf(coords = c("x_", "y_"), crs = 3035) %>%
+    sf::st_as_sf(coords = c("x_", "y_"), crs = crs_epsg) %>%
     sf::st_transform(crs = 4326) %>%
     mutate(long = sf::st_coordinates(.)[,1],
            lat = sf::st_coordinates(.)[,2])
@@ -89,7 +91,7 @@ movement_visualisation <- function(trackingdata,
   # Predicted nest locations
   milvus_nest <- nest_locs %>%
     dplyr::filter(id %in% milvus_metrics$ID) %>%
-    sf::st_as_sf(coords = c("x", "y"), crs = 3035) %>%
+    sf::st_as_sf(coords = c("x", "y"), crs = crs_epsg) %>%
     sf::st_transform(crs = 4326) %>%
     mutate(long = sf::st_coordinates(.)[,1],
            lat = sf::st_coordinates(.)[,2])
