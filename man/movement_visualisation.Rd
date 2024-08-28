@@ -6,6 +6,7 @@
 \usage{
 movement_visualisation(
   trackingdata,
+  crs_epsg = 3035,
   nest_locs,
   inddata,
   move_metrics,
@@ -15,6 +16,8 @@ movement_visualisation(
 }
 \arguments{
 \item{trackingdata}{data.frame with tracking data derived from \code{\link{data_prep}} as \code{nest_data_input$movementtrack}. This data.frame is used to visualise the GPS locations and the movement trajectory on the map.}
+
+\item{crs_epsg}{numeric. EPSG code for the Coordinate Reference System of the projected coordinates used in \code{\link{data_prep}}. \link[=https://epsg.io/]{Find EPSG code here}. Default is 3035 (Lamberth Azimuthal Equal Area for Europe)}
 
 \item{nest_locs}{data.frame with coordinates of potential nest locations for every individual derived from \code{\link{data_prep}} as \code{nest_data_input$pot_nests}. This data.frame is used to visualise the potential nest location on the map.}
 

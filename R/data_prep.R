@@ -763,13 +763,6 @@ data_prep <- function(trackingdata,
     dplyr::rename(year_id=id) %>%
     dplyr::left_join(milvus_max_res_time, by="year_id") 
   
-  
-  
-  
-  # NORMALISING DISTANCE FROM LONGEST VISITED DAY LOCATION TO LONGEST VISITED
-  # NIGHT LOCATION BY MEDIAN DISTANCE OF ALL DAY LOCATIONS TO LONGEST VISITED
-  # NIGHT LOCATION
-  
   # creating two data frames of same dimension to calculate distances
   
   # sf object of most visited night location

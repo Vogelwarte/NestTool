@@ -14,7 +14,7 @@ library(sinew)
 ### CREATING PACKAGE BACKBONE
 
 setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
-#setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI")
+#setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI")
 
 #devtools::create("NestTool")
 #cat("Package: NestTool\n", file = "DESCRIPTION")
@@ -54,7 +54,7 @@ devtools::load_all()
 makeOxygen(data_prep)
 makeOxygen(move_metric_extraction)
 makeOxygen(train_nest_detection)
-#makeOxygen(movement_visualisation)
+makeOxygen(movement_visualisation)
 makeOxygen(train_nest_success)
 makeOxygen(predict_success)
 makeOxygen(plot_move_metrics)
@@ -63,7 +63,7 @@ makeOxygen(predict_nesting)
 makeOxygen(predict_ranging)
 makeOxygen(train_home_range_detection)
 
-roxygen2::roxygenize(package.dir = "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
+roxygen2::roxygenize(package.dir = "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
 
 ### ADD DATA
 # kite.tracks <- fread(here("output/06_example_individuals/example_individuals_trackingdata.csv"))
@@ -114,6 +114,7 @@ knit(input="README.rmd", output = "README.md") #see ?knit for more options
 ## this fails in RStudio but works in base R
 ## https://github.com/rstudio/rstudio/issues/12945
 ?move_metric_extraction
+?movement_visualisation
 
 
 ### CREATING A VIGNETTE
