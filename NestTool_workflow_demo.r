@@ -25,7 +25,7 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
                       indseasondata=indseasondata,
                       latboundary=45,
                       longboundary=4,
-			                crs_epsg=3035,
+			    crs_epsg=3035,
                       broodstart= yday(ymd("2023-05-01")),
                       broodend<- yday(ymd("2023-06-01")),
                       minlocs=800,
@@ -61,6 +61,7 @@ pred_succ<-predict_success(model=succ_model$model,nestingsummary=pred_nest, nest
 move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
                                      nest_locs=nest_data_input$pot_nests, 
                                      inddata=pred_succ,
+						 crs_epsg=3035,
                                      uncertainty=0.25,
                                      nestradius=50,
                                      startseason=70,endseason=175)
@@ -68,8 +69,9 @@ move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
 #### STEP 6: use ShinyApp to inspect all questionable individuals
 ?movement_visualisation
 movement_visualisation(trackingdata=nest_data_input$movementtrack,
+				crs_epsg=3035,
                        nest_locs=nest_data_input$pot_nests, 
-                       inddata=pred_succ,
+                       inddata=pred_succ,			
                        move_metrics = move_metrics,
                        uncertainty = 0.25,
                        output_path="NestTool_example_nest_success_output.csv")
