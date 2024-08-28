@@ -8,6 +8,7 @@ move_metric_extraction(
   trackingdata,
   nest_locs,
   inddata,
+  crs_epsg = 3035,
   nestradius = 50,
   startseason = 70,
   endseason = 175,
@@ -23,6 +24,8 @@ Created by \code{\link{data_prep}} and returned as \code{pot_nests}. Must contai
 
 \item{inddata}{data.frame with unique identifier for individual seasons and predicted probability of nest success provided function \code{\link{predict_success}}.
 Must contain columns for the age and sex of individuals in that season, and a column of \code{succ_prob} as provided by the function \code{\link{predict_success}}. Format of id must match that of \code{trackingdata}}
+
+\item{crs_epsg}{numeric. EPSG code for the Coordinate Reference System of the projected coordinates used in \code{\link{data_prep}}. \link[=https://epsg.io/]{Find EPSG code here}. Default is 3035 (Lamberth Azimuthal Equal Area for Europe)}
 
 \item{nestradius}{numeric. Radius around potential nest site in metres.
 This radius will determine in which radius times will be calculated, i.e. how long an animal remained within that radius or how long it spent outside this radius.

@@ -15,6 +15,7 @@
 #' Created by \code{\link{data_prep}} and returned as \code{pot_nests}. Must contain id, and nest coordinates in projected coordinate system.
 #' @param inddata data.frame with unique identifier for individual seasons and predicted probability of nest success provided function \code{\link{predict_success}}.
 #' Must contain columns for the age and sex of individuals in that season, and a column of \code{succ_prob} as provided by the function \code{\link{predict_success}}. Format of id must match that of \code{trackingdata}
+#' @param crs_epsg numeric. EPSG code for the Coordinate Reference System of the projected coordinates used in \code{\link{data_prep}}. \link[=https://epsg.io/]{Find EPSG code here}. Default is 3035 (Lamberth Azimuthal Equal Area for Europe)
 #' @param uncertainty numeric value between 0 and 0.5. Individuals for which the nest success classification resulted in a probability >\code{uncertainty} and <(1-\code{uncertainty})
 #' are retained for data extraction. A value close to 0 will result in many individuals exceeding the uncertainty threshold, resulting in longer runtime of the function as more individuals will be processed.
 #' A value close to 0.5 will result in very few individuals that will be processed and for which movement metrics will be returned.
@@ -35,11 +36,11 @@
 #' @importFrom recurse getRecursionsAtLocations
 #' @importFrom purrr pluck
 #' @importFrom lubridate yday parse_date_time
-#'
 
 move_metric_extraction <- function(trackingdata,
                                    nest_locs,
                                    inddata,
+                                   crs_epsg=3035,
                                    nestradius=50,
                                    startseason=70,
                                    endseason=175,
@@ -69,7 +70,7 @@ milvus_track_amt <- trackingdata %>%
     date_id,
     event_id,
     tod_,
-    crs = 3035
+    crs = crs_epsg
   ) %>%
   amt::arrange(id, t_)
 milvus_track_amt$step_dist<-amt::step_lengths(milvus_track_amt)

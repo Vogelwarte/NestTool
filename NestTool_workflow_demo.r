@@ -14,6 +14,7 @@ library(NestTool)
 ## check that the help files load - this does not work in RStudio!!
 ?data_prep
 ?movement_visualisation
+?move_metric_extraction
 
 # LOAD EXAMPLE TRACKING DATA
 trackingdata<-NestTool::kite.tracks
