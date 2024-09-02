@@ -387,3 +387,64 @@ ggsave("C:/Users/sop/OneDrive - Vogelwarte/General/MANUSCRIPTS/NestTool/Fig_2.jp
 
 
 
+
+### DO-G Präsentation Figure:
+
+locale <- Sys.getlocale("LC_TIME")
+
+on.exit()
+
+Sys.setlocale("LC_TIME", "German_Germany.1252")
+fig2_move_metrics %>%
+  mutate(median_nestdist=median_nestdist/1000) %>%
+  dplyr::mutate(label=if_else(label=="successful", "erfolgreich",if_else(label=="failed", "nicht erfolgreich","unklare Klassifizierung"))) %>%
+  select(-success_observed, -succ_prob, -max_time_away_from_nest) %>%
+  dplyr::filter(year_id %in% c("2019_337","2020_270","2020_493")) %>%  ## select three animals at a time
+  dplyr::rename(`Tägliche Distanz vom Nest (km)`= median_nestdist,
+                `Zeit am Nest (Std/Tag)`= median_time_at_nest
+  ) %>%
+  tidyr::gather(key="MoveMetric",value="Value",-year_id,-week,-age_cy,-sex,-label) %>%
+  dplyr::filter(!is.na(Value)) %>%
+  dplyr::mutate(Date=lubridate::dmy(paste0(week, "2020"))) %>%
+  dplyr::ungroup() %>%
+  
+  ggplot2::ggplot() +
+  ggplot2::geom_point(ggplot2::aes(x = Date, y=Value, color=MoveMetric), size = 2) +
+  ggplot2::geom_line(ggplot2::aes(x = Date, y=Value, color=MoveMetric, group=MoveMetric), linewidth = 1) +
+  ggplot2::facet_grid(MoveMetric~label, scales="free_y") + 
+  
+  ggplot2::labs(y = "", x = "") +
+  ggplot2::scale_x_date(date_breaks="2 weeks",date_labels=format("%d %b")) +
+  ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"),
+                 plot.background=ggplot2::element_rect(fill="white"),
+                 legend.position="none",
+                 panel.grid.major = ggplot2::element_line(colour = "gray70", size = .05),
+                 panel.grid.minor = ggplot2::element_line(colour = "gray70"),
+                 axis.text=ggplot2::element_text(size=10, color="black"),
+                 axis.title=ggplot2::element_text(size=12), 
+                 strip.text=ggplot2::element_text(size=12, color="black"), 
+                 strip.background=ggplot2::element_rect(fill="white", colour="black"))
+  
+  
+  ggplot2::ggplot() +
+  ggplot2::geom_point(ggplot2::aes(x = Date, y=Value, color=label), size = 2) +
+  ggplot2::geom_line(ggplot2::aes(x = Date, y=Value, color=label, group=label), linewidth = 1) +
+  ggplot2::facet_wrap(~label) + 
+  
+  ggplot2::labs(y = "Tägliche Flugweite (km)", x = "") +
+  ggplot2::scale_x_date(date_breaks="2 weeks",date_labels=format("%d %b")) +
+  ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"),
+                 plot.background=ggplot2::element_rect(fill="white"),
+                 legend.position="none",
+                 panel.grid.major = ggplot2::element_line(colour = "gray70", size = .05),
+                 panel.grid.minor = ggplot2::element_line(colour = "gray70"),
+                 axis.text=ggplot2::element_text(size=10, color="black"),
+                 axis.title=ggplot2::element_text(size=12), 
+                 strip.text=ggplot2::element_text(size=12, color="black"), 
+                 strip.background=ggplot2::element_rect(fill="white", colour="black"))
+Sys.setlocale("LC_TIME", locale)
+
+
+
+
+
