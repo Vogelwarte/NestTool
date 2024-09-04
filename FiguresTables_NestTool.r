@@ -236,11 +236,13 @@ fig1_move_metrics %>%
   ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"),
                  plot.background=ggplot2::element_rect(fill="white"),
                  legend.position="none",
-                 panel.grid.major = ggplot2::element_line(colour = "gray70", size = .05),
+                 panel.grid.major = ggplot2::element_line(colour = "gray70", linewidth = .05),
                  panel.grid.minor = ggplot2::element_line(colour = "gray70"),
-                 axis.text=ggplot2::element_text(size=10, color="black"),
-                 axis.title=ggplot2::element_text(size=12), 
-                 strip.text=ggplot2::element_text(size=12, color="black"), 
+                 axis.text.y=ggplot2::element_text(size=18, color="black"),
+                 axis.text.x=ggplot2::element_text(size=18, color="black", angle=45, vjust=0.5), 
+                 axis.title=ggplot2::element_text(size=22), 
+                 strip.text=ggplot2::element_text(size=22, color="black"),
+                 plot.margin = margin(t=10,r = 20,b=10,l=10),
                  strip.background=ggplot2::element_rect(fill="white", colour="black"))
 Sys.setlocale("LC_TIME", locale)
 
@@ -400,8 +402,8 @@ fig2_move_metrics %>%
   dplyr::mutate(label=if_else(label=="successful", "erfolgreich",if_else(label=="failed", "nicht erfolgreich","unklare Klassifizierung"))) %>%
   select(-success_observed, -succ_prob, -max_time_away_from_nest) %>%
   dplyr::filter(year_id %in% c("2019_337","2020_270","2020_493")) %>%  ## select three animals at a time
-  dplyr::rename(`Tägliche Distanz vom Nest (km)`= median_nestdist,
-                `Zeit am Nest (Std/Tag)`= median_time_at_nest
+  dplyr::rename(`Distanz vom Nest`= median_nestdist,
+                `Zeit am Nest`= median_time_at_nest
   ) %>%
   tidyr::gather(key="MoveMetric",value="Value",-year_id,-week,-age_cy,-sex,-label) %>%
   dplyr::filter(!is.na(Value)) %>%
@@ -418,30 +420,116 @@ fig2_move_metrics %>%
   ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"),
                  plot.background=ggplot2::element_rect(fill="white"),
                  legend.position="none",
-                 panel.grid.major = ggplot2::element_line(colour = "gray70", size = .05),
+                 panel.grid.major = ggplot2::element_line(colour = "gray70", linewidth = .05),
                  panel.grid.minor = ggplot2::element_line(colour = "gray70"),
-                 axis.text=ggplot2::element_text(size=10, color="black"),
-                 axis.title=ggplot2::element_text(size=12), 
-                 strip.text=ggplot2::element_text(size=12, color="black"), 
+                 axis.text.y=ggplot2::element_text(size=18, color="black"),
+                 axis.text.x=ggplot2::element_text(size=18, color="black", angle=45, vjust=0.5), 
+                 axis.title=ggplot2::element_text(size=22), 
+                 strip.text=ggplot2::element_text(size=22, color="black"),
+                 plot.margin = margin(t=10,r = 20,b=10,l=10),
                  strip.background=ggplot2::element_rect(fill="white", colour="black"))
   
   
-  ggplot2::ggplot() +
-  ggplot2::geom_point(ggplot2::aes(x = Date, y=Value, color=label), size = 2) +
-  ggplot2::geom_line(ggplot2::aes(x = Date, y=Value, color=label, group=label), linewidth = 1) +
-  ggplot2::facet_wrap(~label) + 
+
+
+
+####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### DO-G PRESENTATION: CREATE VARIABLE IMPORTANCE PLOTS FOR BREEDING AND SUCCESS
+####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### FOR HOME RANGE
+
+RF2<-NestTool::hr_model$model
+IMP<-as.data.frame(RF2$variable.importance) %>%
+  dplyr::mutate(variable=names(RF2$variable.importance)) %>%
+  dplyr::rename(red.accuracy=`RF2$variable.importance`) %>%
+  dplyr::arrange(dplyr::desc(red.accuracy)) %>%
+  dplyr::mutate(rel.imp=(red.accuracy/max(red.accuracy))*100) %>%
+  dplyr::select(variable,red.accuracy,rel.imp)
+
+mylevels<-c("Aufenthaltsdauer (Nacht)", "Tägliche Flugweite","Aufenthaltsdauer Nest","Nestbesuche (Tag)","Aufenthaltsdauer (Tag)") #IMP$variable[5:1]
+impplot1<-IMP[5:1,] %>%
+    dplyr::mutate(variable=c("Aufenthaltsdauer (Nacht)", "Tägliche Flugweite","Aufenthaltsdauer Nest","Nestbesuche (Tag)","Aufenthaltsdauer (Tag)")) %>%
+    dplyr::mutate(variable=forcats::fct_relevel(variable,mylevels)) %>%
+    #dplyr::mutate(label=c("Aufenthaltsdauer (Nacht)", "Tägliche Flugweite","Aufenthaltsdauer Nest","Nestbesuche (Tag)","Aufenthaltsdauer (Tag)")) %>%
+    ggplot2::ggplot(ggplot2::aes(x=variable, y=rel.imp)) +
+    ggplot2::geom_bar(stat='identity', fill='lightblue') +
+    ggplot2::coord_flip()+
+    ggplot2::ylab("Relative Bedeutung (%)") +
+    ggplot2::xlab("") +
+    ggplot2::scale_y_continuous(limits=c(-5,105), breaks=seq(0,100,20), labels=seq(0,100,20))+
+    #ggplot2::annotate("text",x=1,y=70,label=paste("korrekt = ",round(NestTool::hr_model$eval_test$overall[1],3)*100,"%", sep=""),size=6) +
+    ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
+                   axis.text.x=ggplot2::element_text(size=18, color="black"),
+                   axis.text.y=ggplot2::element_text(size=16, color="black"), 
+                   axis.title=ggplot2::element_text(size=20), 
+                   panel.grid.major = ggplot2::element_blank(), 
+                   panel.grid.minor = ggplot2::element_blank(), 
+                   panel.border = ggplot2::element_blank())
+
+
+
+### FOR BROOD INITIATION
+
+RF2<-NestTool::nest_model$model
+IMP<-as.data.frame(RF2$variable.importance) %>%
+  dplyr::mutate(variable=names(RF2$variable.importance)) %>%
+  dplyr::rename(red.accuracy=`RF2$variable.importance`) %>%
+  dplyr::arrange(dplyr::desc(red.accuracy)) %>%
+  dplyr::mutate(rel.imp=(red.accuracy/max(red.accuracy))*100) %>%
+  dplyr::select(variable,red.accuracy,rel.imp)
+
+mylevels<-c("Nestbesuche (Tag)","Aufenthaltsdauer (Nacht)", "Tägliche Flugweite","Aufenthaltsdauer Nest","Aufenthaltsdauer (Tag)") #IMP$variable[5:1]
+impplot1<-IMP[5:1,] %>%
+  dplyr::mutate(variable=c("Nestbesuche (Tag)","Aufenthaltsdauer (Nacht)", "Tägliche Flugweite","Aufenthaltsdauer Nest","Aufenthaltsdauer (Tag)")) %>%
+  dplyr::mutate(variable=forcats::fct_relevel(variable,mylevels)) %>%
+  ggplot2::ggplot(ggplot2::aes(x=variable, y=rel.imp)) +
+  ggplot2::geom_bar(stat='identity', fill='lightblue') +
+  ggplot2::coord_flip()+
+  ggplot2::ylab("Relative Bedeutung (%)") +
+  ggplot2::xlab("") +
+  ggplot2::scale_y_continuous(limits=c(-5,105), breaks=seq(0,100,20), labels=seq(0,100,20))+
+  ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
+                 axis.text.x=ggplot2::element_text(size=18, color="black"),
+                 axis.text.y=ggplot2::element_text(size=16, color="black"), 
+                 axis.title=ggplot2::element_text(size=20), 
+                 panel.grid.major = ggplot2::element_blank(), 
+                 panel.grid.minor = ggplot2::element_blank(), 
+                 panel.border = ggplot2::element_blank())
+
+### FOR BREEDING SUCCESS
   
-  ggplot2::labs(y = "Tägliche Flugweite (km)", x = "") +
-  ggplot2::scale_x_date(date_breaks="2 weeks",date_labels=format("%d %b")) +
-  ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"),
-                 plot.background=ggplot2::element_rect(fill="white"),
-                 legend.position="none",
-                 panel.grid.major = ggplot2::element_line(colour = "gray70", size = .05),
-                 panel.grid.minor = ggplot2::element_line(colour = "gray70"),
-                 axis.text=ggplot2::element_text(size=10, color="black"),
-                 axis.title=ggplot2::element_text(size=12), 
-                 strip.text=ggplot2::element_text(size=12, color="black"), 
-                 strip.background=ggplot2::element_rect(fill="white", colour="black"))
+  
+RF3<-NestTool::succ_model$model
+IMP2<-as.data.frame(RF3$variable.importance) %>%
+    dplyr::mutate(variable=names(RF3$variable.importance)) %>%
+    dplyr::rename(red.accuracy=`RF3$variable.importance`) %>%
+    dplyr::arrange(dplyr::desc(red.accuracy)) %>%
+    dplyr::mutate(rel.imp=(red.accuracy/max(red.accuracy))*100) %>%
+    dplyr::select(variable,red.accuracy,rel.imp)
+  
+  mylevels<-c("Aufenthaltsdauer (Nacht)", "Nestbesuche (frühe Kükenphase)","Aufenthaltsdauer (späte Kükenphase)","letzter Nestbesuch","Nestbesuche (späte Kükenphase)") #IMP$variable[5:1]
+  impplot2<-IMP2[5:1,] %>%
+    dplyr::mutate(variable=c("Aufenthaltsdauer (Nacht)", "Nestbesuche (frühe Kükenphase)","Aufenthaltsdauer (späte Kükenphase)","letzter Nestbesuch","Nestbesuche (späte Kükenphase)")) %>%
+    dplyr::mutate(variable=forcats::fct_relevel(variable,mylevels)) %>%
+     ggplot2::ggplot(ggplot2::aes(x=variable, y=rel.imp)) +
+    ggplot2::geom_bar(stat='identity', fill='lightblue') +
+    ggplot2::coord_flip()+
+    ggplot2::ylab("Relative Bedeutung (%)") +
+    ggplot2::xlab("") +
+    ggplot2::scale_y_continuous(limits=c(-5,105), breaks=seq(0,100,20), labels=seq(0,100,20))+
+    #ggplot2::annotate("text",x=1,y=70,label=paste("korrekt = ",round(NestTool::hr_model$eval_test$overall[1],3)*100,"%", sep=""),size=6) +
+    ggplot2::theme(panel.background=ggplot2::element_rect(fill="white", colour="black"), 
+                   axis.text.x=ggplot2::element_text(size=18, color="black"),
+                   axis.text.y=ggplot2::element_text(size=16, color="black"), 
+                   axis.title=ggplot2::element_text(size=20), 
+                   panel.grid.major = ggplot2::element_blank(), 
+                   panel.grid.minor = ggplot2::element_blank(), 
+                   panel.border = ggplot2::element_blank())
+
+ggarrange(impplot1,impplot2)
+
+
 Sys.setlocale("LC_TIME", locale)
 
 
