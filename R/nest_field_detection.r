@@ -59,83 +59,72 @@ library(shinythemes)
 library(htmltools)
 library(plotly)
 library(viridis)
+select<-dplyr::select
+filter<-dplyr::filter
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # USER INPUT (needs to be added to the shiny app) --------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MovebankID<-15869951 #230545451  #1356790386
+MovebankID<-1356790386 #15869951 #230545451  #1356790386
 MovebankUser<-"Steffen"
-n.weeks<-3
+n.weeks<-6
 nestradius<-50
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# LOG IN TO MOVEBANK --------
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-movebank_store_credentials(username=MovebankUser, key_name = getOption("move2_movebank_key_name"), force = TRUE)
-#movebank_download_study_info(study_id=MovebankID)$sensor_type_ids
-
-#### https://shiny.posit.co/r/reference/shiny/1.6.0/passwordinput
-#### https://www.listendata.com/2019/06/how-to-add-login-page-in-shiny-r.html was too complicated and required a list of passwords
-
-library(shiny)
-library(move)
-# retrieve 1 month worth of data
-timestamp_end <- paste0(format(Sys.time(), format="%Y%m%d%H%M%S"), "000")
-timestamp_start <- paste0(format(as.Date(Sys.time())  %m+%  days(-as.numeric(31)) , format="%Y%m%d%H%M%S"), "000")
-
-## Only run examples in interactive R sessions
-if (interactive()) {
-  
-  ui <- fluidPage(
-    textInput("username", "Your Movebank username:"),
-    passwordInput("password", "Your Movebank password:"),
-    textInput("studyID", "Your Movebank study name:"),
-    actionButton("go", "Sign in to retrieve data from Movebank"),
-    verbatimTextOutput("value"),
-    tableOutput("five.points.e")
-  )
-  server <- function(input, output) {
-    
-    
-    
-    
-    
-    
-    ########### 0 - Download data Egyptian Vulture ############
-    # output$myDF <- reactive({
-    #   req(input$go)
-    #   
-    # 
-    #   
-    #   })
-    
-    output$value <- renderText({
-      req(input$go)
-      curl <- movebankLogin(username=isolate(input$username),
-                            password=isolate(input$password))
-      
-      data<-getMovebankLocationData(study=as.character(isolate(input$studyID)), sensorID="GPS", login=curl,
-                                    timestamp_start=timestamp_start, timestamp_end=timestamp_end)
-      #isolate(input$password)
-      sprintf("In the last month there were %i locations from %s animals",dim(data)[1], length(unique(data$tag.local.identifier)))
-    })
-    
-    # Display information of the last 5 points
-    output$five.points.e <- renderTable({
-      req(input$go)
-      myDF %>%
-        utils::tail(n = 5) %>%
-        dplyr::select(timestamp, tag.local.identifier, individual.local.identifier, tag.voltage, location.long, location.lat)
-    }, spacing = "xs", align = "lrrrrr")
-    
-    
-    
-  }
-  shinyApp(ui, server)
-}
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# # SHINY LOG IN TO MOVEBANK needs to be added to app below --------
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+# movebank_store_credentials(username=MovebankUser, key_name = getOption("move2_movebank_key_name"), force = TRUE)
+# #movebank_download_study_info(study_id=MovebankID)$sensor_type_ids
+# 
+# #### https://shiny.posit.co/r/reference/shiny/1.6.0/passwordinput
+# #### https://www.listendata.com/2019/06/how-to-add-login-page-in-shiny-r.html was too complicated and required a list of passwords
+# 
+# library(shiny)
+# library(move)
+# # retrieve 1 month worth of data
+# timestamp_end <- paste0(format(Sys.time(), format="%Y%m%d%H%M%S"), "000")
+# timestamp_start <- paste0(format(as.Date(Sys.time())  %m+%  days(-as.numeric(31)) , format="%Y%m%d%H%M%S"), "000")
+# 
+# ## Only run examples in interactive R sessions
+# if (interactive()) {
+#   
+#   ui <- fluidPage(
+#     textInput("username", "Your Movebank username:"),
+#     passwordInput("password", "Your Movebank password:"),
+#     textInput("studyID", "Your Movebank study name:"),
+#     actionButton("go", "Sign in to retrieve data from Movebank"),
+#     verbatimTextOutput("value"),
+#     tableOutput("five.points.e")
+#   )
+#   server <- function(input, output) {
+#     
+#     output$value <- renderText({
+#       req(input$go)
+#       curl <- movebankLogin(username=isolate(input$username),
+#                             password=isolate(input$password))
+#       
+#       data<-getMovebankLocationData(study=as.character(isolate(input$studyID)), sensorID="GPS", login=curl,
+#                                     timestamp_start=timestamp_start, timestamp_end=timestamp_end)
+#       #isolate(input$password)
+#       sprintf("In the last month there were %i locations from %s animals",dim(data)[1], length(unique(data$tag.local.identifier)))
+#     })
+#     
+#     # Display information of the last 5 points
+#     output$five.points.e <- renderTable({
+#       req(input$go)
+#       myDF %>%
+#         utils::tail(n = 5) %>%
+#         dplyr::select(timestamp, tag.local.identifier, individual.local.identifier, tag.voltage, location.long, location.lat)
+#     }, spacing = "xs", align = "lrrrrr")
+#     
+#     
+#     
+#   }
+#   shinyApp(ui, server)
+# }
 
 
 
@@ -148,14 +137,10 @@ if (interactive()) {
 
 birds<-move2::movebank_retrieve(study_id=MovebankID, entity_type="individual") %>%
   dplyr::rename(individual_id=id,bird_id=local_identifier)  %>%
-  #dplyr::mutate(bird_id=as.numeric(as.character(bird_id))) %>%
   dplyr::select(individual_id, bird_id,ring_id,sex) 
-
-
 
 locs<-move2::movebank_retrieve(study_id=MovebankID,
                          entity_type="event",
-                         #sensor_type_id=if_else("GPS" %in% movebank_download_study_info(study_id=MovebankID)$sensor_type_ids,"gps",),   ## may need to define sensor if there are multiple?
                          timestamp_start=Sys.time()-weeks(n.weeks),
                          timestamp_end=Sys.time(),
                          progress=T) %>%
@@ -191,7 +176,6 @@ trackingdata<- locs %>%
   st_transform(EPSG) %>%
   dplyr::mutate(long_eea = sf::st_coordinates(.)[,1],
                 lat_eea = sf::st_coordinates(.)[,2]) %>%
-  # st_drop_geometry() %>%
   select(bird_id,timestamp,long_wgs,lat_wgs,long_eea,lat_eea) %>%
   arrange(bird_id,timestamp) %>%
   dplyr::mutate(timestamp = as.POSIXct(timestamp, format ="%Y-%m-%d %H:%M:%S", tz = "UTC"),
@@ -206,9 +190,6 @@ trackingdata<- locs %>%
 # DETECT NESTS  ---------------------------------------------------
 ################~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##########################
 
-
-# LOADING DATA -----------------------------------------------------------------
- 
 # Creating a track
 # 3 mins
 avidat_track_amt <- trackingdata %>% sf::st_drop_geometry() %>%
@@ -381,12 +362,6 @@ for (i in 1:length(avidat_recurse)) {
 ########## IDENTIFY PLAUSIBLE NESTS BY SEQUENTIAL FILTERING AND COUNTING LOCS AROUND EACH POT NEST #################################
 ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#####################################################################
 
-## NEW APPROACH OF SEQUENTIAL HIERARCHY INTRODUCED ON 4 OCT 2023
-# 1. select top 1% of locs with highest residence time
-# 2. select top 25% of remaining locs with highest revisits
-# 3. select top 75% of remaining locs with smallest median nearest neighbour distance to minlocs/10 locations
-# 4. Of those select the location with the greatest number of neighbours in nestradius
-
 ## LOOP OVER EACH INDIVIDUAL YEAR
 avidat_pot_nests<-data.frame()
 for (i in unique(avidat_track$id)) {
@@ -461,42 +436,42 @@ trackingdata <- trackingdata %>%
   mutate(num_time = as.numeric(timestamp, origin=as.POSIXct("2015-01-01", tz="GMT"))) #as workaround for color legend
 
 # REMOVE the rest
-rm(avidat_night,avidat_day_recurse,avidat_night_recurse, avidat_track_night_list, avidat_track_day_list)
+rm(list=setdiff(ls(), c("trackingdata","avidat_nest")))
 
 
-############ PLOT NEST AND TRACKING LOCATION ON LEAFLET MAP LEAFLET MAP------------------------
-
-m2 <- leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
-  setView(lng = median(st_coordinates(avidat_nest)[,1]), lat = median(st_coordinates(avidat_nest)[,2]), zoom = 11) %>%
-  htmlwidgets::onRender("function(el, x) {L.control.zoom({ 
-                           position: 'bottomright' }).addTo(this)}"
-  ) %>% #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
-  addProviderTiles("Esri.WorldImagery", group = "Satellite",
-                   options = providerTileOptions(opacity = 0.6, attribution = F,minZoom = 5, maxZoom = 20)) %>%
-  addProviderTiles("OpenTopoMap", group = "Roadmap", options = providerTileOptions(attribution = F,minZoom = 5, maxZoom = 15)) %>%  
-  addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>%  
-  
-  addCircleMarkers(
-    data=avidat_nest,
-    radius = 10,
-    stroke = TRUE, color = "white", weight = 0.8,
-    fillColor = "red",fillOpacity = 0.9,
-    popup = ~ paste0("bird ID: ", avidat_nest$bird_id)
-  ) %>%
-
-  addCircleMarkers(
-    data=trackingdata,
-    radius = 2,
-    stroke = TRUE, color = "white", weight = 0.3,
-    fillColor = "firebrick", fillOpacity = 0.5,
-    popup = ~ paste0("bird ID: ", trackingdata$bird_id)
-  ) %>%
-  
-  addScaleBar(position = "bottomright", options = scaleBarOptions(imperial = F))
-
-m2
-
-
+# ############ PLOT NEST AND TRACKING LOCATION ON LEAFLET MAP to check that it works ------------------------
+# 
+# m2 <- leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
+#   setView(lng = median(st_coordinates(avidat_nest)[,1]), lat = median(st_coordinates(avidat_nest)[,2]), zoom = 11) %>%
+#   htmlwidgets::onRender("function(el, x) {L.control.zoom({ 
+#                            position: 'bottomright' }).addTo(this)}"
+#   ) %>% #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
+#   addProviderTiles("Esri.WorldImagery", group = "Satellite",
+#                    options = providerTileOptions(opacity = 0.6, attribution = F,minZoom = 5, maxZoom = 20)) %>%
+#   addProviderTiles("OpenTopoMap", group = "Roadmap", options = providerTileOptions(attribution = F,minZoom = 5, maxZoom = 15)) %>%  
+#   addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>%  
+#   
+#   addCircleMarkers(
+#     data=avidat_nest,
+#     radius = 10,
+#     stroke = TRUE, color = "white", weight = 0.8,
+#     fillColor = "red",fillOpacity = 0.9,
+#     popup = ~ paste0("bird ID: ", avidat_nest$bird_id)
+#   ) %>%
+# 
+#   addCircleMarkers(
+#     data=trackingdata,
+#     radius = 2,
+#     stroke = TRUE, color = "white", weight = 0.3,
+#     fillColor = "firebrick", fillOpacity = 0.5,
+#     popup = ~ paste0("bird ID: ", trackingdata$bird_id)
+#   ) %>%
+#   
+#   addScaleBar(position = "bottomright", options = scaleBarOptions(imperial = F))
+# 
+# m2
+# 
+# 
 
 
 
@@ -596,16 +571,6 @@ server <- function(input, output, session){
     else if(input$PointsToDisplay.e == 6) {dataPerID.e()} #all data
   })
   
-  # # Display information of the last 5 points
-  # output$five.points.e <- renderTable({
-  #   utils::tail(dataPerID.e(), n = 6) %>% 
-  #     mutate(dist_m = round(distHaversine(cbind(long_wgs, lat_wgs),
-  #                                         cbind(lag(long_wgs), lag(lat_wgs))),0)) %>% 
-  #     dplyr::slice_tail(n = 5) %>% 
-  #     dplyr::mutate(time=as.character(timestamp)) %>% 
-  #     dplyr::select(time, bird_id, dist_m)
-  # }, spacing = "xs", align = "lrr")
-  
   # Plot GPS points on map
   output$zoomplot.e <- renderLeaflet({
     
@@ -669,261 +634,3 @@ server <- function(input, output, session){
 shinyApp(ui = ui, server = server)
 
 
-
-
-# 
-# # DISCARDED USER INTERFACE -------------------------------------------------------------
-# ui <- shiny::fluidPage(theme = shinythemes::shinytheme("flatly"),
-#                        # layout of the action buttons
-#                        htmltools::tags$style(
-#                          HTML('#save_decision, #zoom{
-#                        height:65px; width:110px; margin-top:50px;}')
-#                        ),
-#                        # layout of the shiny app
-#                        titlePanel(title = "Individual Bird Potential Nest Location"),
-#                        sidebarLayout(
-#                          sidebarPanel(width = 4, style = "height: 675px; position:relative;",
-#                                       h3("Data selection"),
-#                                       fluidRow(
-#                                         # Build selection tool for changing the individual to be displayed
-#                                         column(width = 12,
-#                                                selectInput(inputId = "ID", label = "Select Individual",
-#                                                            choices = sort(as.character(unique(avidat_nest$bird_id))), multiple = F)
-#                                         )
-#                                       ),
-# 
-#                                       # Slider to select opacity of background map
-#                                       fluidRow(
-#                                         column(width = 12,
-#                                                chooseSliderSkin("Flat", "#5489C5"),
-#                                                sliderInput(inputId = "map_slider",
-#                                                            label = "Background Map Transparency",
-#                                                            min = 0, max = 1, value = 0.7, step = 0.1)
-#                                         )
-#                                       ),
-#                          ),
-#                          mainPanel(width = 8,
-#                                    # For selected individual: Plotting movement track on a map
-#                                    fluidRow(style = "padding-right:15px;",
-#                                             column(width = 12, class = "well", style = "height: 675px; position:relative;",
-#                                                    h3("Map of recent locations on potential nest site"),
-#                                                    leafletOutput("map", height = "575px")
-#                                             )
-#                                    )
-#                          )
-#                        ),
-# 
-# )
-# 
-# 
-# 
-# # SERVER ---------------------------------------------------------------------
-# server <- function(input, output, session){
-#   # ID of the bird/year
-#   input_id <- shiny::reactive({input$ID})
-#   # Defines map opacity
-#   input_map_opacity <- shiny::reactive({input$map_slider})
-# 
-#   
-#   
-#   # Updates input selection (ID): SELECT BIRDS THAT ARE AVAILABLE FOR DISPLAY
-#   shiny::observe({
-#       # covers the case when there is only one item in the "Complete" group
-#       shiny::updateSelectInput(inputId = "ID", label = "Select Individual",
-#                                choices = list(Available = sort(as.character(unique(avidat_nest$bird_id))))
-#       )
-#   })
-#   
-#   # Creates subset of locations by chosen ID and period
-#   avidat_track_subset <- shiny::reactive({
-#     trackingdata %>%
-#       sf::st_transform(4326) %>%
-#       #dplyr::filter(bird_id == input$ID)
-#       dplyr::filter(bird_id == input_id())
-#   })
-#   
-#   # Creates subset of nest by chosen ID
-#   avidat_nest_subset <- shiny::reactive({
-#     avidat_nest %>%
-#       #dplyr::filter(id == input$ID)})
-#       dplyr::filter(id == input_id())})
-#   
-#   # Creates map of locations and trajectories
-#   output$map <- renderLeaflet({
-#     leaflet() %>%
-#       addLayersControl(
-#         baseGroups = c("Topo", "Satellite"),
-#         overlayGroups = c("Locations", "Nest", "Trajectory"),
-#         options = layersControlOptions(collapsed = T)) %>%
-#       hideGroup("Trajectory") %>%
-#       # Adds a scale bar
-#       addScaleBar(position = "bottomright",
-#                   options = scaleBarOptions(imperial = F)) %>%
-#       # Adds a tool to measure distances and areas
-#       addMeasure(
-#         position = "bottomleft",
-#         primaryLengthUnit = "kilometers",
-#         secondaryLengthUnit = F,
-#         primaryAreaUnit = "hectares",
-#         activeColor = "#00CCCC",
-#         completedColor = "#006666"
-#       )
-#   })
-#   
-#   # Changes zoom extent to chosen bird
-#   shiny::observe({
-#     leafletProxy("map") %>%
-#       fitBounds(min(avidat_track_subset()$long_wgs), min(avidat_track_subset()$lat_wgs),
-#                 max(avidat_track_subset()$long_wgs), max(avidat_track_subset()$lat_wgs))
-#   })
-#   
-#   # Changes zoom extent when zoom button is clicked
-#   shiny::observeEvent(input$zoom, {
-#     leafletProxy("map") %>%
-#       fitBounds(min(avidat_track_subset()$long_wgs), min(avidat_track_subset()$lat_wgs),
-#                 max(avidat_track_subset()$long_wgs), max(avidat_track_subset()$lat_wgs))
-#   })
-#   
-#   # Changes base map according to selection
-#   shiny::observe({
-#     leafletProxy("map") %>%
-#       clearTiles() %>%
-#       addProviderTiles(leaflet::providers$OpenTopoMap, group = "Topo",
-#                        options = providerTileOptions(opacity = input_map_opacity())
-#       ) %>%
-#       addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Satellite",
-#                        options = providerTileOptions(opacity = input_map_opacity())
-#       )
-#   })
-#   
-#   # Changes Palette, Labels, Points, Lines & Legend according to input
-#   shiny::observe({
-#     # Creates a palette that adapts to the range of dates
-#     pal <- colorNumeric(palette = "BrBG", domain = avidat_track_subset()$year_day)
-#     # Function that creates a custom legend
-#     # addLegendCustom <- function(map, layerId = NULL, group = NULL, labels, sizes, shapes, borders, opacity = 1, 
-#     #                             position = c("topright", "bottomright", "bottomleft", "topleft")){
-#     #   position <- match.arg(position)
-#     #   make_shapes <- function(sizes, borders, shapes) {
-#     #     shapes <- gsub("circle", "100%", shapes)
-#     #     paste0(colors, "; width:", sizes, "px; margin-top:5px; margin-left:",
-#     #            margin_left, "px; height:", sizes, "px; border:1.5px solid ",
-#     #            borders, "; border-radius:", shapes)
-#     #   }
-#     #   make_labels <- function(sizes, labels) {
-#     #     paste0("<div style='display: inline-block; font-size:14px ;height: ", 
-#     #            sizes, "px; margin-top:5px; margin-right:", margin_right,
-#     #            "px; margin-left:", margin_left, "px; line-height: ",
-#     #            sizes, "px;'>", labels, "</div>")
-#     #   }
-#     #   legend_colors <- make_shapes(sizes, borders, shapes)
-#     #   legend_labels <- make_labels(sizes, labels)
-#     #   
-#     #   return(addLegend(map, layerId = layerId, colors = legend_colors, labels = legend_labels, opacity = opacity, position))
-#     # }
-#     
-#     # Function that creates labels for date legend (from year_day back to desired format)
-#     myLabelFormat = function(...,date=FALSE){ 
-#       if(date){ 
-#         function(type = "numeric", cuts){
-#           as <- as.Date(cuts, origin="2020-01-01")
-#           format(as,"%d.%m.")
-#         } 
-#       }else{
-#         labelFormat(...)
-#       }
-#     }
-#     # Adds Data
-#     leafletProxy("map") %>%
-#       # Trajectories
-#       clearShapes() %>%
-#       addPolylines(
-#         data = avidat_track_subset(),
-#         lat = avidat_track_subset()$lat_wgs,
-#         lng = avidat_track_subset()$long_wgs,
-#         weight = 1,
-#         color = "#444444",
-#         opacity = 0.7,
-#         group = "Trajectory"
-#       ) %>%
-#       # Locations
-#       clearMarkers() %>%
-#       addCircleMarkers(
-#         data = avidat_track_subset(),
-#         radius = 4,
-#         color = ~pal(year_day),
-#         stroke = input$day_night,
-#         weight = 0.5,
-#         opacity = 0.7,
-#         fillColor = ~pal(year_day),
-#         fillOpacity = 0.7,
-#         group = "Locations",
-#         popup = ~paste0(timestamp)
-#       ) %>%
-#       # Animation
-#       #clearMarkers() %>%
-#       leaflet.extras2::addPlayback(data = avidat_track_subset(),
-#                                    time = "timestamp",
-#                                    icon=leaflet::makeIcon(iconUrl="https://images.phylopic.org/images/aec14bd0-7666-45e2-8a30-17fdd0c79578/vector.svg",
-#                                                           iconWidth=30,
-#                                                           iconHeight=18,
-#                                                           iconAnchorX=15,
-#                                                           iconAnchorY=9),
-#                                    options = leaflet.extras2::playbackOptions(tracksLayer = FALSE,
-#                                                                               speed = 10000000,
-#                                                                               tickLen=1000*60*60,  ## hourly tick lengths stated in milliseconds
-#                                                                               maxInterpolationTime=1000*60*60*5 ## 5 hrs interpolation time
-#                                    )) %>%
-#       # Adds legend
-#       removeControl(layerId = 1) %>% # removes legend
-#       removeControl(layerId = 2) # removes legend
-#     # Adds nest location and legends if data is available
-#     if (nrow(avidat_track_subset()) != 0) {
-#       leafletProxy("map", data = avidat_track_subset()) %>%
-#         # Nest location
-#         addCircleMarkers(
-#           data = avidat_nest_subset(),
-#           radius = 7,
-#           stroke = F,
-#           opacity = 0.7,
-#           fillColor = "#740000",
-#           fillOpacity = 0.7,
-#           group = "Nest",
-#           popup = ~paste0("Predicted nest location:<br>", round(lat, 2), "°N", round(long, 2), "°E ")
-#         ) %>%
-#         # Legend with date coloring
-#         addLegend(layerId = 1,
-#                   position = "bottomright",
-#                   pal = pal,
-#                   values = ~year_day,
-#                   opacity = 1,
-#                   #bins = 5,
-#                   labFormat = myLabelFormat(date=T),
-#                   title = NULL
-#         ) #%>%
-#         # # Legend with Nest, Day & Night
-#         # addLegendCustom(layerId = 2,
-#         #                 labels,
-#         #                 sizes,
-#         #                 shapes,
-#         #                 borders,
-#         #                 position = "bottomright",
-#         #                 group = "Nest")
-#     }
-#   })
-#   
-#   # Creates a warning when no data is available in the selected period
-#   output$warning <- renderText({
-#     if (nrow(avidat_track_subset()) == 0) {
-#       return(paste("<span style=\"color:red\">No data in this period &#128559<br>&nbsp</span>"))
-#     }})
-#   
-# }
-# 
-# 
-# 
-# # START SHINY APP ------------------------------------------------------------
-# shiny::shinyApp(ui = ui, server = server)
-# }
-# 
-# 
