@@ -63,7 +63,7 @@ makeOxygen(predict_nesting)
 makeOxygen(predict_ranging)
 makeOxygen(train_home_range_detection)
 
-roxygen2::roxygenize(package.dir = "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
+roxygen2::roxygenize(package.dir = "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
 
 ### ADD DATA
 # kite.tracks <- fread(here("output/06_example_individuals/example_individuals_trackingdata.csv"))

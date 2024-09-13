@@ -5,10 +5,10 @@ This R package is an informal collection of R functions created by the [Swiss Or
 ## Installation
 
 
-This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/Vogelwarte/NestTool) with the following command. Note that depending on the R version and operating system you are working on, you may need to specify the download options. See [here](https://cran.r-project.org/web/packages/remotes/readme/README.html) for options for other operating systems (only Windows OS option shown in code below):
+This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/Vogelwarte/NestTool) with the following command. . Note that depending on the R version and operating system you are working on, you may need to specify the download options. See [here](https://cran.r-project.org/web/packages/remotes/readme/README.html) for options for other operating systems (only Windows OS option shown in code below):
 
 
-```r
+``` r
 library(remotes)
 options(download.file.method="wininet")  ### for Windows OS 
 remotes::install_github("Vogelwarte/NestTool", dependencies=TRUE)
@@ -28,7 +28,7 @@ First, you will need to prepare the tracking data. This step is not included in 
 This is how you could read in your data:
 
 
-```r
+``` r
 ### LOAD THE TRACKING DATA AND INDIVIDUAL SEASON SUMMARIES 
 trackingdata <- fread("MyTrackingData.csv")
 indseasondata <- fread("MyTrackingMetaData.csv") %>%
@@ -48,13 +48,11 @@ The next set of parameters concern the radius around locations over which recurs
 
 `age` is a parameter in calendar years that will be ignored if either the tracking data or the `indseasondata` already contain a column (`age_cy`) that specifies the age in calendar years. If no data are submitted then the value entered here will be used. Note that because the prediction of nesting behaviour and success from movement depends on the age of the bird, filling in missing data with a generic value will lead to lower accuracy in predictions.
 
-Depending on the coordinate system you are working in, it may be helpful to turn off spherical geometry (which is not needed for nest detection, but may cause bizarre errors). The command `sf::sf_use_s2(FALSE)`will do that.
 
 
-```r
+``` r
 #### this takes approximately 15 minutes for ~500 individuals
 #### note that inputs to time parameters are the respective day of the year, but you can get this from the function lubridate::yday as we demonstrate for the brood phase
-sf::sf_use_s2(FALSE)
 nest_data_input <- data_prep(trackingdata = trackingdata,
                       indseasondata = indseasondata,
                       latboundary = 45,
@@ -88,7 +86,7 @@ Each of those steps is made up of two functions: one to train a model using data
 First, we use the data.frame summary created by `data_prep` to train a model for home range behaviour using the function `train_home_range_detection`, which we can then apply to predict for each individual and season whether the bird held a territory (had a home range) in that season using the function `predict_ranging`.
 
 
-```r
+``` r
 ### train a model for home range behaviour
 hr_model <- train_home_range_detection(trackingsummary = nest_data_input$summary, plot = T)
 #saveRDS(hr_model, "output/hr_model.rds")   ## optionally save the model for later use
@@ -113,7 +111,7 @@ When training a model with the function `train_home_range_detection`, a graph wi
 Next, we use the data.frame created by `predict_ranging` (or the summary from `data_prep`) to train a model for nesting behaviour using the function `train_nest_detection`. Here we need to carefully subset the data to only use individual seasons where information about a nest is available. We can then use the resulting model to predict for each individual and season whether the bird initiated a nesting attempt in that season using the function `predict_nesting`. We will do this using the data.frame created in the previous step (`pred_hr`) so that we keep the output of all models contained in this single data.frame.
 
 
-```r
+``` r
 ### train a model for nesting attempts
 nest_model <- train_nest_detection(trackingsummary = nest_data_input$summary[!is.na(nest_data_input$summary$nest),], plot = T)
 #saveRDS(nest_model, "nest_model.rds")   ## optionally save the model for later use
@@ -138,7 +136,7 @@ Similar to the home range model above, the function `train_nest_detection` will 
 Finally, we use the data.frame created by `predict_nesting` to train a model for breeding success using the function `train_nest_success`. We first filter out only those data for which success is known (either 'yes' or 'no'). We can then use the resulting model to predict for each individual and season whether they nested successfully using the function `predict_success`. This function also relies on the output of nest_prob from the function `predict_nesting`, and will automatically assign all individual seasons to 'no success' if the probability of a nesting attempt predicted by the function `predict_nesting` was below the minimum probability of the training data used to create the nest success model (based on the logic that if the probability to nest was very low, then the bird likely did not raise any chicks because it may not have nested in the first place). However, the user can manually adjust that threshold using the input parameter `nest_cutoff` in the function `predict_success`.
 
 
-```r
+``` r
 ### train a model for home range behaviour
 succ_model <- train_nest_success(nestingsummary = pred_nest[pred_nest$success %in% c("yes","no"),], plot = T)
 #saveRDS(succ_model, "succ_model.rds")
@@ -170,7 +168,7 @@ Because extracting these movement metrics for every 5 day period over the breedi
 
 
 
-```r
+``` r
 move_metrics <- move_metric_extraction(trackingdata = nest_data_input$movementtrack,
                                        nest_locs = nest_data_input$pot_nests,
                                        inddata = pred_succ,
@@ -197,7 +195,7 @@ The final function is `movement_visualisation` which will open a Shiny App that 
 
 
 
-```r
+``` r
 movement_visualisation(trackingdata = nest_data_input$movementtrack,
                        nest_locs = nest_data_input$pot_nests,
                        inddata = pred_succ,
@@ -237,7 +235,7 @@ The main goal of `NestTool`is to provide information about demographic parameter
 First, we need to combine the birds that were classified automatically and those for which we annoztated the outcomes manually. The latter will have been saved in a user-specified csv table, which we will read in and merge with the remaining predictions.
 
 
-```r
+``` r
 ## READ IN AND COMBINE DATA OF MANUALLY CLASSIFIED AND AUTOMATICALLY CLASSIFIED DATA
 MANUAL<-fread("NestTool_example_nest_success_output.csv") %>%
   rename(ManNest=Nest,ManSuccess=Success) %>%
@@ -252,7 +250,7 @@ ALL<-pred_succ %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
 We can then easily extract the breeding propensity (defined as the proportion of birds with a home range or territory that actually had a nesting attempt) and the breeding success (defined as the proportion of birds that initiated a nesting attempt and raised at least one fledgling).
 
 
-```r
+``` r
 ## breeding propensity - what proportion of birds with a homerange have a nesting attempt?
 ALL %>% filter(HR==1) %>% ungroup() %>%
   summarise(Propensity=mean(Nest))
