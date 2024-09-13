@@ -22,7 +22,6 @@
 #' Please consider device accuracy and general movement behaviour of the species when specifying the radius.
 #' @return Returns an interactive map that shows a potential nest location for the selected individual.
 #'
-#' @export
 #' @importFrom dplyr filter mutate select arrange case_when
 #' @importFrom lubridate yday ymd week
 #' @importFrom dplyr arrange mutate filter intersect left_join group_by summarise n select first rename bind_rows ungroup if_else slice_min slice_max ungroup
