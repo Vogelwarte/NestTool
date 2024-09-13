@@ -2,6 +2,7 @@
 
 export("%>%")
 export(data_prep)
+export(nest_field_detection)
 export(move_metric_extraction)
 export(movement_visualisation)
 export(plot_move_metrics)
