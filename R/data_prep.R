@@ -111,9 +111,9 @@ data_prep <- function(trackingdata,
   # the conditional formulation does not work, so indseasondata must always be provided, but it may not have all columns
   
     if('age_cy' %in% names(indseasondata)){
-      indseasondata<- indseasondata %>% dplyr::ungroup() %>% dplyr::mutate(age_cy=dplyr::if_else(is.na(indseasondata$age_cy),age,indseasondata$age_cy)) ### assign user-specified value to missing values in data
+      indseasondata<- indseasondata %>% dplyr::ungroup() %>% dplyr::mutate(age_cy=dplyr::if_else(is.na(indseasondata$age_cy),as.integer(age),as.integer(indseasondata$age_cy))) ### assign user-specified value to missing values in data
     }else{
-      indseasondata<- indseasondata %>% dplyr::ungroup() %>% dplyr::mutate(age_cy=age) ### assign user-specified value to non-existing column
+      indseasondata<- indseasondata %>% dplyr::ungroup() %>% dplyr::mutate(age_cy=as.integer(age)) ### assign user-specified value to non-existing column
     }
     
     if('sex' %in% names(indseasondata)){
@@ -128,9 +128,13 @@ data_prep <- function(trackingdata,
       milvus<- milvus %>% dplyr::mutate(sex=dplyr::if_else(is.na(milvus$sex),"m",milvus$sex)) ### assign random value (males) to missing values in data
       milvus$sex<-factor(milvus$sex, levels=c('m','f'))
     }
+  
+    if('age_cy' %in% names(milvus)){
+      milvus<- milvus %>% dplyr::ungroup() %>% dplyr::mutate(age_cy=dplyr::if_else(is.na(milvus$age_cy),as.integer(age),as.integer(milvus$age_cy))) ### assign user-specified value to missing values in data
+    }
     
   ### joining of data must consider whether column names are already present in tracking data
-  
+  if(FALSE %in% (c('age_cy', 'sex') %in% names(milvus))){   # attempt join only if necessary
   join.cols <- purrr::reduce(list(names(indseasondata), names(milvus), c("year_id","sex","age_cy","nest","fledged","HR","year","bird_id")), dplyr::intersect)
   
   ## insert error message when people try to join numeric and factors
@@ -153,6 +157,8 @@ data_prep <- function(trackingdata,
   }else{
     milvus <- dplyr::left_join(milvus, indseasondata, by = join.cols)
   }
+} # close if loop over join
+  
   
   #### ELIMINATING INDIVIDUALS WITH INSUFFICIENT DATA
 
