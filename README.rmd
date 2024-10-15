@@ -1,13 +1,13 @@
 # NestTool
-This R package is an informal collection of R functions created by the [Swiss Ornithological Institute](https://www.vogelwarte.ch) to extract demographic information from the tracking data of birds. The functions were developed in the framework of a Red Kite project, and tested and validated mainly for Red Kites. The functions read in tracking data, extract movement and nest visitation metrics, and employ RandomForest models to predict whether individuals had a territory, a nest, and bred successfully in a given season based on the tracking data.
+This R package is an informal collection of R functions created by the [Swiss Ornithological Institute](https://www.vogelwarte.ch){target="_blank"} to extract demographic information from the tracking data of birds. The functions were developed in the framework of a Red Kite project, and tested and validated mainly for Red Kites. The functions read in tracking data, extract movement and nest visitation metrics, and employ RandomForest models to predict whether individuals had a territory, a nest, and bred successfully in a given season based on the tracking data.
 
-For users who store their tracking data on [Movebank](https://www.movebank.org/cms/webapp?gwt_fragment=page%3Dsearch_map), there is now an [app that can be used in the field](https://steffenoppel.shinyapps.io/NestFindApp/) to navigate towards the most likely nest of tracked individuals. This app is based on the most recent (up to 4 weeks) tracking data of selected individuals, but is only accessible to users with a valid Movebank account and access privileges to a particular study. You can find the app here: https://steffenoppel.shinyapps.io/NestFindApp/
+For users who store their tracking data on [Movebank](https://www.movebank.org/cms/webapp?gwt_fragment=page%3Dsearch_map){target="_blank"}, there is now an [app that can be used in the field](https://steffenoppel.shinyapps.io/NestFindApp/){target="_blank"} to navigate towards the most likely nest of tracked individuals. This app is based on the most recent (up to 4 weeks) tracking data of selected individuals, but is only accessible to users with a valid Movebank account and access privileges to a particular study. You can find the app here: https://steffenoppel.shinyapps.io/NestFindApp/
 
 
 ## Installation
 
 
-This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/Vogelwarte/NestTool) with the following command. . Note that depending on the R version and operating system you are working on, you may need to specify the download options. See [here](https://cran.r-project.org/web/packages/remotes/readme/README.html) for options for other operating systems (only Windows OS option shown in code below):
+This package is not available on CRAN and must therefore be installed from [GitHub](https://github.com/Vogelwarte/NestTool){target="_blank"} with the following command. Note that depending on the R version and operating system you are working on, you may need to specify the download options. See [here](https://cran.r-project.org/web/packages/remotes/readme/README.html){target="_blank"} for options for other operating systems (only Windows OS option shown in code below):
 
 ``` {r, eval = FALSE}
 library(remotes)
