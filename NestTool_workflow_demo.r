@@ -44,17 +44,17 @@ names(nest_data_input$summary)
 
 #### STEP 2: identify home ranges
 hr_model<-NestTool::hr_model
-pred_hr<-predict_ranging(model=hr_model$model,trackingsummary=nest_data_input$summary) # uses the model trained with our data (automatically loaded in the function)
+pred_hr<-predict_ranging(model=hr_model,trackingsummary=nest_data_input$summary) # uses the model trained with our data (automatically loaded in the function)
 
 
 #### STEP 3: identify nests
 nest_model<-NestTool::nest_model
-pred_nest<-predict_nesting(model=nest_model$model,trackingsummary=pred_hr) # uses the model trained with our data (automatically loaded in the function)
+pred_nest<-predict_nesting(model=nest_model,trackingsummary=pred_hr) # uses the model trained with our data (automatically loaded in the function)
 
 
 #### STEP 4: determine outcome
 succ_model<-NestTool::succ_model
-pred_succ<-predict_success(model=succ_model$model,nestingsummary=pred_nest, nest_cutoff=succ_model$nest_cutoff) # uses the model trained with our data (automatically loaded in the function)
+pred_succ<-predict_success(model=succ_model,nestingsummary=pred_nest, nest_cutoff=0.5) # uses the model trained with our data (automatically loaded in the function)
 
 #### STEP 5: extract weekly movement metrics for manual classification
 ?move_metric_extraction

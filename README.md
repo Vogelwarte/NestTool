@@ -1,5 +1,7 @@
 # NestTool
-This R package is an informal collection of R functions created by the [Swiss Ornithological Institute](https://www.vogelwarte.ch) to extract demographic information from the tracking data of birds. The functions were developed in the framework of a Red Kite project, and tested and validated mainly for Red Kites. The functions read in tracking data, extract movement and nest visitation metrics, and emply RandomForest models to predict whether individuals had a territory, a nest, and bred successfully in a given season based on the tracking data.
+This R package is an informal collection of R functions created by the [Swiss Ornithological Institute](https://www.vogelwarte.ch) to extract demographic information from the tracking data of birds. The functions were developed in the framework of a Red Kite project, and tested and validated mainly for Red Kites. The functions read in tracking data, extract movement and nest visitation metrics, and employ RandomForest models to predict whether individuals had a territory, a nest, and bred successfully in a given season based on the tracking data.
+
+For users who store their tracking data on [Movebank](https://www.movebank.org/cms/webapp?gwt_fragment=page%3Dsearch_map), there is now an [app that can be used in the field](https://steffenoppel.shinyapps.io/NestFindApp/) to navigate towards the most likely nest of tracked individuals. This app is based on the most recent (up to 4 weeks) tracking data of selected individuals, but is only accessible to users with a valid Movebank account and access privileges to a particular study. You can find the app here: https://steffenoppel.shinyapps.io/NestFindApp/
 
 
 ## Installation
@@ -94,7 +96,7 @@ hr_model <- train_home_range_detection(trackingsummary = nest_data_input$summary
 ### predict home range behaviour for tracked birds
 ## if no model has been trained, the model statement can be omitted and the Red Kite model from Switzerland will be used
 hr_model<-NestTool::hr_model  ## loads the model from the package
-pred_hr <- predict_ranging(model = hr_model$model, trackingsummary = nest_data_input$summary) 
+pred_hr <- predict_ranging(model = hr_model, trackingsummary = nest_data_input$summary) 
 ```
 
 When training a model with the function `train_home_range_detection`, a graph will be produced that indicates the most important predictor variables and the accuracy in predicting the correct outcome for testing data that were not used to train the model (these are automatically split from the input to `train_home_range_detection`). The accuracy is the proportion of cases that were predicted correctly, and ranges between 0 (all predictions were false) to 1 (all predictions were correct). Our model for red kites in Switzerland achieves an accuracy of >95% of correct home range classification, and we see that the total time spent within the nest radius during the day, and the distance between day and night roost locations are important to distinguish between territorial and vagabonding birds.
@@ -119,7 +121,7 @@ nest_model <- train_nest_detection(trackingsummary = nest_data_input$summary[!is
 ### predict nesting attempts for tracked birds
 ## if no model has been trained, the model statement can be omitted and the Red Kite model from Switzerland will be used
 nest_model<-NestTool::nest_model  ## loads the model from the package
-pred_nest <- predict_nesting(model = nest_model$model, trackingsummary = pred_hr) # note that you can predict to all data, including those without information on whether a nest existed or not
+pred_nest <- predict_nesting(model = nest_model, trackingsummary = pred_hr) # note that you can predict to all data, including those without information on whether a nest existed or not
 ```
 
 Similar to the home range model above, the function `train_nest_detection` will return a graph that indicates the most important predictor variables and the accuracy in predicting the correct outcome for testing data that were automatically split from the input to `train_nest_detection`. Our model for red kites in Switzerland achieves an accuracy of >95% of correct nesting classification, and we see that the total time spent within the nest radius and the distance between day and night roost locations are important to distinguish between nesting and non-nesting birds.
@@ -144,7 +146,7 @@ succ_model <- train_nest_success(nestingsummary = pred_nest[pred_nest$success %i
 ### predict nesting success for tracked birds
 ## if no model has been trained, the model statement can be omitted and the Red Kite model from Switzerland will be used
 succ_model<-NestTool::succ_model  ## loads the model from the package
-pred_succ <- predict_success(model = succ_model$model, nestingsummary = pred_nest, nest_cutoff = succ_model$nest_cutoff)
+pred_succ <- predict_success(model = succ_model, nestingsummary = pred_nest, nest_cutoff = 0.5)
 ```
 
 When training a model with the function `train_nest_success`, a similar graph as above will be produced that indicates the most important predictor variables and the accuracy in predicting the correct outcome for testing data. Our model for red kites in Switzerland achieves an accuracy of >75% of correct nest success classifications - which is much less accurate than the identification of home range and nesting behaviour. The number of visits to the nest during the late chick stage, and the amount of time spent around the nest are very important to determine success, but the less impressive accuracy is due to the fact that even some birds that fail to raise fledglings remain around their nest (this was one of the main reasons why the approach used in the R package [nestR](https://github.com/picardis/nestR) did not work for our purposes).
