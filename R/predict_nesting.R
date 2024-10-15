@@ -31,7 +31,7 @@ predict_nesting <- function(model,
   
 #### classification success of training data
   if("nest_prob" %in% names(trackingsummary)){
-    OUT<-nestingsummary   ### there is no need to predict nesting  again if it is already in the data frame
+    OUT<-trackingsummary   ### there is no need to predict nesting  again if it is already in the data frame
   } else{
     
     if("nest" %in% names(trackingsummary)){
