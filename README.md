@@ -90,7 +90,7 @@ First, we use the data.frame summary created by `data_prep` to train a model for
 
 ``` r
 ### train a model for home range behaviour
-hr_model <- train_home_range_detection(trackingsummary = nest_data_input$summary, plot = T)
+hr_model <- train_home_range_detection(trackingsummary = nest_data_input$summary, plot = T)$model
 #saveRDS(hr_model, "output/hr_model.rds")   ## optionally save the model for later use
 
 ### predict home range behaviour for tracked birds
@@ -115,7 +115,7 @@ Next, we use the data.frame created by `predict_ranging` (or the summary from `d
 
 ``` r
 ### train a model for nesting attempts
-nest_model <- train_nest_detection(trackingsummary = nest_data_input$summary[!is.na(nest_data_input$summary$nest),], plot = T)
+nest_model <- train_nest_detection(trackingsummary = nest_data_input$summary[!is.na(nest_data_input$summary$nest),], plot = T)$model
 #saveRDS(nest_model, "nest_model.rds")   ## optionally save the model for later use
 
 ### predict nesting attempts for tracked birds
@@ -140,7 +140,7 @@ Finally, we use the data.frame created by `predict_nesting` to train a model for
 
 ``` r
 ### train a model for home range behaviour
-succ_model <- train_nest_success(nestingsummary = pred_nest[pred_nest$success %in% c("yes","no"),], plot = T)
+succ_model <- train_nest_success(nestingsummary = pred_nest[pred_nest$success %in% c("yes","no"),], plot = T)$model
 #saveRDS(succ_model, "succ_model.rds")
 
 ### predict nesting success for tracked birds
