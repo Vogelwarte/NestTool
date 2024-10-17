@@ -270,6 +270,8 @@ For our Swiss Red Kite data, the breeding propensity predicted from tracking dat
 ### Reference
 If you use any functions in this package for your work, please use the following citation:
 
+Oppel, S., Beeli, U.M., Grüebler, M.U., van Bergen, V.S., Kolbe, M., Pfeiffer, T. and Scherler, P. (2024). Extracting reproductive parameters from GPS tracking data for a nesting raptor in Europe. Journal of Avian Biology e03246. https://doi.org/10.1111/jav.03246
+
 Beeli, U. (2023): Determining the Breeding Success of Red Kites (*Milvus milvus*) using GPS Telemetry. Master's Thesis,Department of Geography, University of Zurich, Switzerland.
 
 Also consider an alternative package [nestR](https://github.com/picardis/nestR), which we originally tried for this work but found less accurate than our approach.
