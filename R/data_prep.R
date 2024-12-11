@@ -494,11 +494,11 @@ data_prep <- function(trackingdata,
   print(sprintf("Identified potential nest locations for %i individuals",dim(milvus_pot_nest_sf)[1]))
   
   
-  ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
-  ########## FOR CHECKING ONLY, PLOT NEST AND TRACKING LOCATION ON LEAFLET MAP   #############
-  ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
-  # ### need to make sure that 2 ways of calculating "milvus_pot_nests_sf" are labelled differently
-  # library(leaflet)
+#   ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+#   ########## FOR CHECKING ONLY, PLOT NEST AND TRACKING LOCATION ON LEAFLET MAP   #############
+#   ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
+#   # ### need to make sure that 2 ways of calculating "milvus_pot_nests_sf" are labelled differently
+# library(leaflet)
 # 
 #   m4 <- leaflet(options = leafletOptions(zoomControl = F)) %>% #changes position of zoom symbol
 #     setView(lng = mean(st_coordinates(milvus_pot_nest_sf %>%  st_transform(4326))[,1]),
@@ -513,17 +513,7 @@ data_prep <- function(trackingdata,
 #     addLayersControl(baseGroups = c("Satellite", "Roadmap")) %>%
 # 
 #     addCircleMarkers(
-#       data = milvus_night %>% filter(year_id =="2023_8164") %>%sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
-#       radius = 4,
-#       color = "grey1",
-#       weight = 0.5,
-#       opacity = 0.7,
-#       fillColor = "grey1",
-#       fillOpacity = 0.7
-#     ) %>%
-# 
-#     addCircleMarkers(
-#       data = milvus_day  %>% filter(year_id =="2023_8164") %>% sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
+#       data = milvus_day  %>% sf::st_as_sf(coords = c("long_wgs", "lat_wgs"), crs = 4326),
 #       radius = 4,
 #       color = "lightgreen",
 #       weight = 0.5,
@@ -534,7 +524,7 @@ data_prep <- function(trackingdata,
 #     ) %>%
 # 
 #     addCircleMarkers(
-#       data = milvus_pot_nest_sf %>% filter(year_id =="2023_8164") %>% st_transform(4326),   ##%>% filter(Type=="Revised") 
+#       data = milvus_pot_nest_sf %>% st_transform(4326),   ##%>% filter(Type=="Revised")
 #       radius = 6,
 #       color = "firebrick",
 #       weight = 0.5,
@@ -544,25 +534,13 @@ data_prep <- function(trackingdata,
 #       popup = ~paste0("year_id: ", year_id)
 #     ) %>%
 # 
-# 
-#     addCircleMarkers(
-#       data = nests %>% filter(year_id =="2022_8164") %>% filter(year_id %in% milvus_pot_nest_sf$year_id) %>% st_transform(4326),
-#       radius = 6,
-#       color = "orange",
-#       weight = 0.5,
-#       opacity = 0.7,
-#       fillColor = "orange",
-#       fillOpacity = 0.7,
-#       popup = ~paste0("year_id: ", year_id)
-#     ) %>%
-# 
 #     addScaleBar(position = "bottomright", options = scaleBarOptions(imperial = F))
 # 
 #   m4
-# 
-# 
-# 
-#   
+
+
+
+
   
   
   ##########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~######################################
