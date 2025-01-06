@@ -134,7 +134,7 @@ data_prep <- function(trackingdata,
     }
     
   ### joining of data must consider whether column names are already present in tracking data
-  if(FALSE %in% (c('age_cy', 'sex') %in% names(milvus))){   # attempt join only if necessary
+  if(FALSE %in% (c('age_cy', 'sex','HR','nest','success') %in% names(milvus))){   # attempt join only if necessary
   join.cols <- purrr::reduce(list(names(indseasondata), names(milvus), c("year_id","sex","age_cy","nest","fledged","HR","year","bird_id")), dplyr::intersect)
   
   ## insert error message when people try to join numeric and factors
