@@ -139,7 +139,7 @@ milvus_train <- milvus_train %>%
   dplyr::mutate(hr_predicted = as.factor(dplyr::case_when(hr_prob > no_hr_prob ~ "yes",
                                             hr_prob < no_hr_prob ~ "no")))
 
-suppressWarnings({trainmat<-caret::confusionMatrix(data = milvus_train$hr_observed, reference = milvus_train$hr_predicted)})
+suppressWarnings({trainmat<-caret::confusionMatrix(data = factor(milvus_train$hr_observed, levels=c("yes","no")), reference = factor(milvus_train$hr_predicted, levels=c("yes","no")))})
 
 #### classification success of test data
 
@@ -152,7 +152,7 @@ milvus_test <- milvus_test %>%
   dplyr::mutate(hr_predicted = as.factor(dplyr::case_when(hr_prob > no_hr_prob ~ "yes",
                                               hr_prob < no_hr_prob ~ "no")))
 
-suppressWarnings({testmat<-caret::confusionMatrix(data = milvus_test$hr_observed, reference = milvus_test$hr_predicted)})
+suppressWarnings({testmat<-caret::confusionMatrix(data = factor(milvus_test$hr_observed, levels=c("yes","no")), reference = factor(milvus_test$hr_predicted, levels=c("yes","no")))})
 
 ## export data for further use in outcome prediction
 OUT<-dplyr::bind_rows(milvus_train, milvus_test)

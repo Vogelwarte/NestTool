@@ -170,7 +170,7 @@ nestingsummary_train <- nestingsummary_train %>%
   dplyr::mutate(success_predicted = as.factor(dplyr::case_when(succ_prob > no_succ_prob ~ "yes",
                                               succ_prob < no_succ_prob ~ "no")))
 
-suppressWarnings({eval_train<-caret::confusionMatrix(data = nestingsummary_train$success_observed, reference = nestingsummary_train$success_predicted)})
+suppressWarnings({eval_train<-caret::confusionMatrix(data = factor(nestingsummary_train$success_observed, levels=c("yes","no")), reference = factor(nestingsummary_train$success_predicted, levels=c("yes","no")))})
 
 
 
@@ -185,7 +185,7 @@ nestingsummary_test <- nestingsummary_test %>%
   dplyr::mutate(success_predicted = as.factor(dplyr::case_when(succ_prob > no_succ_prob ~ "yes",
                                                  succ_prob < no_succ_prob ~ "no")))
 
-suppressWarnings({eval_test<-caret::confusionMatrix(data = nestingsummary_test$success_observed, reference = nestingsummary_test$success_predicted)})
+suppressWarnings({eval_test<-caret::confusionMatrix(data = factor(nestingsummary_test$success_observed, levels=c("yes","no")), reference = factor(nestingsummary_test$success_predicted, levels=c("yes","no")))})
 
 
 ## export data for further test and validations

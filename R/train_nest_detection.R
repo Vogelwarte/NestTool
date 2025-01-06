@@ -140,7 +140,7 @@ milvus_train <- milvus_train %>%
   dplyr::mutate(nest_predicted = as.factor(dplyr::case_when(nest_prob > no_nest_prob ~ "nest",
                                               nest_prob < no_nest_prob ~ "no nest")))
 
-suppressWarnings({trainmat<-caret::confusionMatrix(data = milvus_train$nest_observed, reference = milvus_train$nest_predicted)})
+suppressWarnings({trainmat<-caret::confusionMatrix(data = factor(milvus_train$nest_observed, levels=c("yes","no")), reference = factor(milvus_train$nest_predicted, levels=c("yes","no")))})
 
 #### classification success of test data
 
@@ -153,7 +153,7 @@ milvus_test <- milvus_test %>%
   dplyr::mutate(nest_predicted = as.factor(dplyr::case_when(nest_prob > no_nest_prob ~ "nest",
                                     nest_prob < no_nest_prob ~ "no nest")))
 
-suppressWarnings({testmat<-caret::confusionMatrix(data = milvus_test$nest_observed, reference = milvus_test$nest_predicted)})
+suppressWarnings({testmat<-caret::confusionMatrix(data = factor(milvus_test$nest_observed, levels=c("yes","no")), reference = factor(milvus_test$nest_predicted, levels=c("yes","no")))})
 
 ## export data for further use in outcome prediction
 OUT<-dplyr::bind_rows(milvus_train, milvus_test)
