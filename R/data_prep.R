@@ -101,11 +101,43 @@ data_prep <- function(trackingdata,
            year_day = lubridate::yday(timestamp)) %>%
     dplyr::filter(long_wgs>longboundary &  lat_wgs>latboundary)   ## remove all locations from Spain and southern France
  
-   
+  # SEASON DEFINITION ------------------------------------------------------------
+  ## to facilitate effective labelling even when season spans calendar years, we set up a lookup dataframe
+  seas.dur <- tibble(broodphase=c("Settle","Incu1","Incu2","Brood","Chick1","Chick2"),
+         start=c(startseason,settleEnd,Incu1End,broodstart,Incu2End,Chick1End),
+         end=c(settleEnd,Incu1End,Incu2End,broodend,Chick1End,endseason)) %>%
+    mutate(yearchange=if_else(end<start,1,0)) %>%
+    mutate(startDate=if_else(start<startseason,as.Date(start, origin = "2021-01-01"),as.Date(start, origin = "2020-01-01"))) %>%
+    mutate(endDate=if_else(end<startseason,as.Date(end, origin = "2021-01-01"),as.Date(end, origin = "2020-01-01")))
+  
+  
+  
+  if(endseason>startseason){
+    seas.lkup <- tibble(yday=seq(startseason,endseason,1),broodphase="Chick2", brood=0) %>%
+      dplyr::mutate(broodphase=dplyr::if_else(yday<settleEnd,"Settle",
+                                            dplyr::if_else(yday<Incu1End,"Incu1",
+                                                           dplyr::if_else(yday<Incu2End,"Incu2",
+                                                                          dplyr::if_else(yday<Chick1End,"Chick1","Chick2"))))) %>%
+      dplyr::mutate(brood=dplyr::if_else((yday>=broodstart & yday<=broodend),1,0))     
+    ### for southern hemisphere species with season straddling a calendar year
+  }else{
+    seas.lkup <- tibble(yday=c(seq(startseason,366,1),seq(1,endseason,1)),broodphase="Chick2", brood=0) %>%
+      mutate(date=if_else(yday<startseason,as.Date(yday, origin = "2021-01-01"),as.Date(yday, origin = "2020-01-01"))) %>%
+      mutate(date=if_else(is.na(date),dplyr::lead(date),date)) %>%
+      dplyr::mutate(brood=dplyr::if_else((date>=seas.dur$startDate[4] & date<=seas.dur$endDate[4]),1,0))     
+      
+    for (s in c(1,2,3,5,6)){
+      seas.lkup$broodphase[seas.lkup$date>=seas.dur$startDate[s] & seas.lkup$date<=seas.dur$endDate[s]] <- seas.dur$broodphase[s]
+    }
+  }
+  
+  
+  
+  
   # DATA PREPARATION -------------------------------------------------------------
   # keeping only the information of relevant dates (yday 70-175)
   milvus <- milvus %>%
-    dplyr::filter(year_day %in% c(startseason:endseason))
+    dplyr::filter(year_day %in% seas.lkup$yday)
   
   # IF VALIDATION DATA ARE PROVIDED READ THEM IN AND JOIN WITH OTHER DATA ##
   # the conditional formulation does not work, so indseasondata must always be provided, but it may not have all columns
@@ -615,10 +647,12 @@ data_prep <- function(trackingdata,
     }
     options(dplyr.summarise.inform = FALSE)
     out<-nest_revisits[[i]] $revisitStats %>% dplyr::mutate(yday=lubridate::yday(entranceTime)) %>%
-      dplyr::mutate(broodphase=dplyr::if_else(yday<settleEnd,"Settle",
-                               dplyr::if_else(yday<Incu1End,"Incu1",
-                                      dplyr::if_else(yday<Incu2End,"Incu2",
-                                             dplyr::if_else(yday<Chick1End,"Chick1","Chick2"))))) %>%
+      dplyr::mutate(broodphase=seas.lkup$broodphase[match(yday,seas.lkup$yday)]) %>%
+      dplyr::filter(!is.na(broodphase)) %>%     ## for some reason there are dates created that are outside of the season even though such data were previously removed - CANNOT FIGURE OUT HOW THAT IS POSSIBLE
+      # dplyr::mutate(broodphase=dplyr::if_else(yday<settleEnd,"Settle",
+      #                          dplyr::if_else(yday<Incu1End,"Incu1",
+      #                                 dplyr::if_else(yday<Incu2End,"Incu2",
+      #                                        dplyr::if_else(yday<Chick1End,"Chick1","Chick2"))))) %>%
       dplyr::mutate(count=1)
     suppressWarnings({summary<- out %>% dplyr::group_by(id,broodphase) %>%
       dplyr::summarise(revisits=sum(count),time=sum(timeInside), last=max(yday),maxTimeAway=max(timeSinceLastVisit,na.rm=T)) %>%
@@ -651,10 +685,12 @@ data_prep <- function(trackingdata,
     
     ### calculate MCP for each brood phase
     mcpin<-milvus_track_amt %>% dplyr::filter(id==names(nest_revisits)[i]) %>% dplyr::mutate(yday=lubridate::yday(t_)) %>%
-      dplyr::mutate(broodphase=dplyr::if_else(yday<settleEnd,"Settle",
-                               dplyr::if_else(yday<Incu1End,"Incu1",
-                                      dplyr::if_else(yday<Incu2End,"Incu2",
-                                             dplyr::if_else(yday<Chick1End,"Chick1","Chick2")))))
+      dplyr::mutate(broodphase=seas.lkup$broodphase[match(yday,seas.lkup$yday)])
+      # dplyr::mutate(broodphase=dplyr::if_else(yday<settleEnd,"Settle",
+      #                          dplyr::if_else(yday<Incu1End,"Incu1",
+      #                                 dplyr::if_else(yday<Incu2End,"Incu2",
+      #                                        dplyr::if_else(yday<Chick1End,"Chick1","Chick2")))))
+    
     for(s in unique(mcpin$broodphase)){
       mcp_area <- amt::hr_mcp(mcpin %>% dplyr::filter(broodphase==s), levels = c(0.95,0.99)) %>% amt::hr_area()
       #mcp_area$area <- mcp_area$area/milvus_MCP[[i]]$area   #### sets the MCP area in proportion to the individuals - REMOVED BECAUSE REVIEWER DEMANDED UNSCALED APPROACH
@@ -668,7 +704,8 @@ data_prep <- function(trackingdata,
         sf::st_transform(crs = crs_epsg) %>%
         sf::st_buffer(dist=homeradius)
       locs_brood<-milvus_track_amt %>% dplyr::filter(id==names(nest_revisits)[i]) %>% dplyr::mutate(yday=lubridate::yday(t_)) %>%
-        dplyr::filter(yday >= broodstart  & yday <= broodend) %>% 
+        #dplyr::filter(yday >= broodstart  & yday <= broodend) %>% 
+        dplyr::filter(yday %in% seas.lkup$yday[seas.lkup$brood==1]) %>% 
         sf::st_as_sf(coords = c("x_", "y_"), crs = crs_epsg) %>%
         sf::st_within(focal_nest)
       
@@ -714,10 +751,11 @@ data_prep <- function(trackingdata,
   
   # creating sf objects for distance calculation
   milvus_track_sf <- milvus_track %>% dplyr::mutate(yday=lubridate::yday(t_)) %>%
-    dplyr::mutate(broodphase=dplyr::if_else(yday<settleEnd,"Settle",
-                             dplyr::if_else(yday<Incu1End,"Incu1",
-                                    dplyr::if_else(yday<Incu2End,"Incu2",
-                                           dplyr::if_else(yday<Chick1End,"Chick1","Chick2"))))) %>%
+    dplyr::mutate(broodphase=seas.lkup$broodphase[match(yday,seas.lkup$yday)]) %>%
+    # dplyr::mutate(broodphase=dplyr::if_else(yday<settleEnd,"Settle",
+    #                          dplyr::if_else(yday<Incu1End,"Incu1",
+    #                                 dplyr::if_else(yday<Incu2End,"Incu2",
+    #                                        dplyr::if_else(yday<Chick1End,"Chick1","Chick2"))))) %>%
     dplyr::select(id,t_, broodphase,x_,y_) %>%
     sf::st_as_sf(coords = c("x_", "y_"), crs = crs_epsg)
   milvus_nest_sf <- milvus_pot_nests %>%
