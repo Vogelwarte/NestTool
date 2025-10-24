@@ -674,7 +674,7 @@ data_prep <- function(trackingdata,
     milvus_max_res_time$maxtimeawayBrood[i] <- dplyr::if_else(max(out %>% dplyr::filter(broodphase %in% c("Incu2","Chick1")) %>% dplyr::select(timeSinceLastVisit), na.rm=T)<0,
                                                       720,
                                                       max(out %>% dplyr::filter(broodphase %in% c("Incu2","Chick1")) %>% dplyr::select(timeSinceLastVisit), na.rm=T))
-    milvus_max_res_time$tottime_nest[i] <- sum(summary$time, na.rm=t)
+    milvus_max_res_time$tottime_nest[i] <- sum(summary$time, na.rm=T)
     milvus_max_res_time$maxtimeawayBrood2km[i] <- ifelse(length(max_absences$T[max_absences$id==milvus_max_res_time$year_id[i]])==1,   ### this does not work with dplyr::if_else because it throws an error if max_absences==NULL
                                                          max_absences$T[max_absences$id==milvus_max_res_time$year_id[i]], -10)
     
