@@ -81,7 +81,7 @@ names(nest_data_input$summary)
 #fwrite(nest_data_input$summary,here("output/05_full_run_CH/trackingsummary.csv"))
 #fwrite(nest_data_input$summary,here("output/05_full_run_THU/trackingsummary.csv"))
 saveRDS(nest_data_input, "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/05_full_run_CH/nest_data_input_CH.rds")
-nest_data_input <- readRDS("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/05_full_run_CH/nest_data_input_CH.rds")
+nest_data_input <- readRDS("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/05_full_run_CH/nest_data_input_CH.rds")
 
 
 ## sex and age ratio
@@ -115,7 +115,9 @@ trackingsummary<-nest_data_input$summary
 #trackingsummary <- fread(here("output/05_full_run_CH/trackingsummary.csv"))
 #trackingsummary <- fread(here("output/05_full_run_THU/trackingsummary.csv"))
 unique(trackingsummary$nest) # now includes NA which must be removed for training model
-nest_model<-train_nest_detection(trackingsummary=trackingsummary[!is.na(trackingsummary$nest),],plot=T)
+nest_model<-train_nest_detection(trackingsummary=nest_data_input$summary,
+                                 train_frac=0.7,
+                                 plot=T)
 # usethis::use_data(nest_model, overwrite=TRUE)
 #saveRDS(nest_model, "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/nest_model.rds")
 
@@ -136,7 +138,9 @@ dim(pred_nest)
 #   filter(fledged %in% c("yes","no"))
 #nestingsummary<-fread(here("output/05_full_run_CH/nestingsummary.csv"))
 #nestingsummary<-fread(here("output/05_full_run_THU/nestingsummary.csv"))
-succ_model<-train_nest_success(nestingsummary=pred_nest[pred_nest$success %in% c("yes","no"),],plot=T)
+succ_model<-train_nest_success(nestingsummary=pred_nest,
+                               train_frac=0.7,
+                               plot=T)
 #usethis::use_data(succ_model, overwrite=TRUE)
 #saveRDS(succ_model, "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/succ_model.rds")
 
@@ -146,7 +150,9 @@ succ_model<-train_nest_success(nestingsummary=pred_nest[pred_nest$success %in% c
 # troubleshoot error for prediction - age_cy is missing from data frame
 # names(succ_model$summary)[which(!(names(succ_model$summary) %in% names(nestingsummary)))]
 
-pred_succ<-predict_success(model=succ_model$model,nestingsummary=pred_nest,nest_cutoff =succ_model$nest_cutoff) # if a model has been trained
+pred_succ<-predict_success(model=succ_model$model,
+                           nestingsummary=pred_nest,
+                           nest_cutoff =succ_model$nest_cutoff) # if a model has been trained
 #pred_succ<-predict_success(nestingsummary=pred_nest) # uses the model trained with our data (automatically loaded in the function)
 #fwrite(pred_succ,here("output/05_full_run_CH/successsummary.csv"))
 #fwrite(pred_succ,here("output/05_full_run_THU/successsummary.csv"))
