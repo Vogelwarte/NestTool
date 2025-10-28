@@ -46,8 +46,8 @@ source("R/train_nest_success.r")
 
 
 ### LOAD THE TRACKING DATA AND INDIVIDUAL SEASON SUMMARIES 
-trackingdata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/03_milvus_combined.csv")
-indseasondata<-fread("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/01_validation/03_validation_combined.csv") %>%
+trackingdata<-fread("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/02_preprocessing/03_milvus_combined.csv")
+indseasondata<-fread("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/01_validation/03_validation_combined.csv") %>%
   mutate(nest = case_when(nest_id > 0 ~ "nest",
                         nest_id == 0 ~ "no nest")) %>%
   mutate(HR = case_when(home_range_id > 0 ~ "yes",
@@ -67,6 +67,7 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
                       broodstart= yday(ymd("2023-05-01")),
                       broodend<- yday(ymd("2023-06-01")),
                       minlocs=800,
+                      crs_epsg=3035,
                       nestradius=50,
                       homeradius=2000,
                       startseason=70,
@@ -80,8 +81,8 @@ nest_data_input<-data_prep(trackingdata=trackingdata,
 names(nest_data_input$summary)
 #fwrite(nest_data_input$summary,here("output/05_full_run_CH/trackingsummary.csv"))
 #fwrite(nest_data_input$summary,here("output/05_full_run_THU/trackingsummary.csv"))
-saveRDS(nest_data_input, "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/05_full_run_CH/nest_data_input_CH.rds")
-nest_data_input <- readRDS("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/05_full_run_CH/nest_data_input_CH.rds")
+# saveRDS(nest_data_input, "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/05_full_run_CH/nest_data_input_CH.rds")
+# nest_data_input <- readRDS("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI/output/05_full_run_CH/nest_data_input_CH.rds")
 
 
 ## sex and age ratio
@@ -101,7 +102,7 @@ write.table(sampsize,"clipboard", sep="\t")
 trackingsummary<-nest_data_input$summary
 hr_model<-train_home_range_detection(trackingsummary=trackingsummary,plot=T)
 # saveRDS(hr_model, "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/hr_model.rds")
-# usethis::use_data(hr_model, overwrite=TRUE)
+usethis::use_data(hr_model, overwrite=TRUE)
 
 
 #### STEP 3: identify home ranges
@@ -118,7 +119,7 @@ unique(trackingsummary$nest) # now includes NA which must be removed for trainin
 nest_model<-train_nest_detection(trackingsummary=nest_data_input$summary,
                                  train_frac=0.7,
                                  plot=T)
-# usethis::use_data(nest_model, overwrite=TRUE)
+usethis::use_data(nest_model, overwrite=TRUE)
 #saveRDS(nest_model, "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/nest_model.rds")
 
 
@@ -141,7 +142,7 @@ dim(pred_nest)
 succ_model<-train_nest_success(nestingsummary=pred_nest,
                                train_frac=0.7,
                                plot=T)
-#usethis::use_data(succ_model, overwrite=TRUE)
+usethis::use_data(succ_model, overwrite=TRUE)
 #saveRDS(succ_model, "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/succ_model.rds")
 
 
