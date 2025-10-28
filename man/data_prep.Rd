@@ -75,11 +75,12 @@ This day will facilitate that different movement behaviours are quantified durin
 Defaults to 10, but should be informed by a sensible value for the species in question, so that \code{age} reflects the age in calendar years of birds for which no age information exists.}
 }
 \value{
-Returns a list with 5 data.frames. \code{summary} contains one row per individual season and 45 variables, which each characterise movement metrics for a different period of the breeding season. Output data.frame includes age and sex information.
+Returns a list with 6 data.frames. \code{summary} contains one row per individual season and 45 variables, which each characterise movement metrics for a different period of the breeding season. Output data.frame includes age and sex information.
 \code{pot_nests} contains one row per individual season and two variables (x and y), representing the longitude and latitude of potential nest sites (in projected coordinate system).
 \code{nightlocs} contains all nocturnal locations for all individuals, including the number of revisits to within \code{nestradius} and the residence time within \code{nestradius} at that location.
 \code{daylocs} contains all diurnal locations for all individuals, including the number of revisits to within \code{nestradius} and the residence time within \code{nestradius} at that location.
 \code{nest_visits} contains all revisits to within \code{nestradius} of the potential nest location for all individuals.
+\code{movementtrack} contains a tibble with the raw movement data and a column 'tod_' indicating the time of day. Useful for function \code{movement_visualisation}.
 }
 \description{
 \code{data_prep} extracts temporally varying summary information from tracking data of individuals

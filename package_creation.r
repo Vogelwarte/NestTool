@@ -3,18 +3,19 @@
 ## https://www.mjandrews.org/blog/how-to-make-an-R-package/
 ## https://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/
 ## https://tinyheero.github.io/jekyll/update/2015/07/26/making-your-first-R-package.html
-  
+rm(list=ls())
 library(devtools)
 library(usethis)
 library(roxygen2)
+#library(oxygen)
 #install.packages("sinew") 
 library(sinew)
 #remotes::install_github("dreamRs/prefixer")
 
 ### CREATING PACKAGE BACKBONE
 
-setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
-#setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI")
+try(setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2"),silent=T)
+try(setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI"),silent=T)
 
 #devtools::create("NestTool")
 #cat("Package: NestTool\n", file = "DESCRIPTION")
@@ -49,12 +50,12 @@ setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
 
 ### CREATING DOCUMENTATION
 devtools::load_all()
+devtools::document()
 #prefixer()
 
 makeOxygen(data_prep)
 makeOxygen(move_metric_extraction)
 makeOxygen(train_nest_detection)
-makeOxygen(movement_visualisation)
 makeOxygen(train_nest_success)
 makeOxygen(predict_success)
 makeOxygen(plot_move_metrics)
@@ -62,8 +63,9 @@ makeOxygen(train_nest_detection)
 makeOxygen(predict_nesting)
 makeOxygen(predict_ranging)
 makeOxygen(train_home_range_detection)
+makeOxygen(movement_visualisation, add_fields = "none") ## does not work unless NestTool is installed and help file already exists because it cross-references another function
 
-roxygen2::roxygenize(package.dir = "C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
+roxygen2::roxygenize(package.dir = "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2")
 
 ### ADD DATA
 # kite.tracks <- fread(here("output/06_example_individuals/example_individuals_trackingdata.csv"))
