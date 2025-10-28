@@ -8,7 +8,6 @@
 #library(devtools)
 library(tidyverse)
 library(sf)
-library(tmap)
 library(move2)
 library(dplyr, warn.conflicts = FALSE)
 library(lubridate)
@@ -73,18 +72,6 @@ sample_tracks<-locs %>%
 dim(sample_tracks)
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# SHOW TRACKS ON MAP -------
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- 
-tmap_mode("view")
-tm_basemap(server="OpenStreetMap") +
-  tm_shape(sample_tracks)+
-  tm_symbols(col = 'bird_id', size = 0.1)
-
-
-
-
 ## COMBINE ALL data-------
 
 trackingdata<-sample_tracks %>%
@@ -104,7 +91,7 @@ unique(indseasondata$bird_id)
 
 
 ## IF MODELS ARE TO BE FITTED THEN A SEPERATE FILE IS NECESSARY THAT INCLUDES THE HR, nest and success information for year_ids
-indseasondata<-read_excel("C:/Users/sop/OneDrive - Vogelwarte/EGVU/EGVU_indseasondata_VA_EK.xlsx", sheet="Data_Balkans") %>%
+indseasondata<-read_excel("C:/STEFFEN/OneDrive - Vogelwarte/ExternalCollaborations/EGVU/EGVU_indseasondata_VA_EK.xlsx", sheet="Data_Balkans") %>%
   mutate(year_id=paste(year, bird_id, sep="_")) %>%
   mutate(sex=ifelse(sex=="male","m","f")) %>%
   full_join(indseasondata, by=c("year_id","bird_id","sex")) %>%
@@ -199,7 +186,7 @@ movement_visualisation(trackingdata=nest_data_input$movementtrack,
 
 #### STEP 7: visualise the predictions for the EGVU
 
-plotdat<-pred_succ %>%
+pred_succ %>%
   select(year_id,hr_prob,nest_prob,succ_prob) %>%
   gather(key='metric', value='prob',-year_id) %>%
   mutate(metric=ifelse(metric=="hr_prob", "HR",ifelse(metric=="nest_prob","nest","success"))) %>%

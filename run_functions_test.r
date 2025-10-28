@@ -24,6 +24,7 @@ library(shiny)
 library(leaflet)
 library(htmltools)
 library(NestTool)
+library(janitor)
 
 ## set root folder for project
 try(setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2"),silent=T)
@@ -94,7 +95,7 @@ sampsize<-indseasondata %>%
   spread(key=sex, value=n) %>%
   ungroup() %>%
   adorn_totals()
-write.table(sampsize,"clipboard", sep="\t")
+#write.table(sampsize,"clipboard", sep="\t")
 
 
 

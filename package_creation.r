@@ -73,9 +73,9 @@ roxygen2::roxygenize(package.dir = "C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analys
 # usethis::use_data(kite.tracks)
 # usethis::use_data(kite.nesting)
 
-nest_model<-readRDS("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/nest_model.rds")
-succ_model<-readRDS("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/succ_model.rds")
-hr_model<-readRDS("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/hr_model.rds")
+# nest_model<-readRDS("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/nest_model.rds")
+# succ_model<-readRDS("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/succ_model.rds")
+# hr_model<-readRDS("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2/data/hr_model.rds")
 usethis::use_data(nest_model,overwrite = TRUE)
 usethis::use_data(succ_model,overwrite = TRUE)
 usethis::use_data(hr_model,overwrite = TRUE)
