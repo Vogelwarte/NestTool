@@ -304,20 +304,20 @@ data_prep <- function(trackingdata,
     dplyr::summarise(sex = dplyr::first(sex),
               age_cy = {if("age_cy" %in% names(.)) dplyr::first(age_cy) else age},   # insert user-specified value 'age'
               residence_time_night = max(residence_time),
-              revisits_night = revisits[which(residence_time == max(residence_time))],
-              date_night = date[which(residence_time == max(residence_time))],
-              long_night = long_eea[which(residence_time == max(residence_time))],
-              lat_night = lat_eea[which(residence_time == max(residence_time))],
+              revisits_night = revisits[which(residence_time == max(residence_time))][1],
+              date_night = date[which(residence_time == max(residence_time))][1],
+              long_night = long_eea[which(residence_time == max(residence_time))][1],
+              lat_night = lat_eea[which(residence_time == max(residence_time))][1],
               nest = {if("nest" %in% names(.)) dplyr::first(nest) else NA}
               ) %>%
     dplyr::group_by(year_id) %>%   ## because there are sometimes duplicates, we need to group again and take the one with max revisits for those where time is equal
     dplyr::summarise(sex = dplyr::first(sex),
               age_cy = {if("age_cy" %in% names(.)) dplyr::first(age_cy) else age},
               revisits_night = max(revisits_night),
-              residence_time_night = residence_time_night[which(revisits_night == max(revisits_night))],
-              date_night = date_night[which(revisits_night == max(revisits_night))],
-              long_night = long_night[which(revisits_night == max(revisits_night))],
-              lat_night = lat_night[which(revisits_night == max(revisits_night))],
+              residence_time_night = residence_time_night[which(revisits_night == max(revisits_night))][1],
+              date_night = date_night[which(revisits_night == max(revisits_night))][1],
+              long_night = long_night[which(revisits_night == max(revisits_night))][1],
+              lat_night = lat_night[which(revisits_night == max(revisits_night))][1],
               nest = {if("nest" %in% names(.)) dplyr::first(nest) else NA}
     )
   })
@@ -329,20 +329,20 @@ data_prep <- function(trackingdata,
     dplyr::summarise(sex = dplyr::first(sex),
               age_cy = {if("age_cy" %in% names(.)) dplyr::first(age_cy) else age},
               residence_time_day = max(residence_time),
-              revisits_day = revisits[which(residence_time == max(residence_time))],
-              date_day = date[which(residence_time == max(residence_time))],
-              long_day = long_eea[which(residence_time == max(residence_time))],
-              lat_day = lat_eea[which(residence_time == max(residence_time))],
+              revisits_day = revisits[which(residence_time == max(residence_time))][1],
+              date_day = date[which(residence_time == max(residence_time))][1],
+              long_day = long_eea[which(residence_time == max(residence_time))][1],
+              lat_day = lat_eea[which(residence_time == max(residence_time))][1],
               nest = {if("nest" %in% names(.)) dplyr::first(nest) else NA}
     ) %>%
     dplyr::group_by(year_id) %>%
     dplyr::summarise(sex = dplyr::first(sex),
               age_cy = {if("age_cy" %in% names(.)) dplyr::first(age_cy) else age},
               revisits_day = max(revisits_day),
-              residence_time_day = residence_time_day[which(revisits_day == max(revisits_day))],
-              date_day = date_day[which(revisits_day == max(revisits_day))],
-              long_day = long_day[which(revisits_day == max(revisits_day))],
-              lat_day = lat_day[which(revisits_day == max(revisits_day))],
+              residence_time_day = residence_time_day[which(revisits_day == max(revisits_day))][1],
+              date_day = date_day[which(revisits_day == max(revisits_day))][1],
+              long_day = long_day[which(revisits_day == max(revisits_day))][1],
+              lat_day = lat_day[which(revisits_day == max(revisits_day))][1],
               nest = {if("nest" %in% names(.)) dplyr::first(nest) else NA}
     )
   })
