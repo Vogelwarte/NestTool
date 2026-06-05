@@ -6,7 +6,6 @@ library(devtools)
 library(data.table)
 library(tidyverse)
 #devtools::install_github("Vogelwarte/NestTool", dependencies=TRUE, force=TRUE) # development version - add argument 'build_vignettes = FALSE' to speed up the process
-
 library(NestTool)
 
 
@@ -55,7 +54,7 @@ str(nest_data_input)
 
 #### STEP 2: identify home ranges
 hr_model<-NestTool::hr_model
-pred_hr<-predict_ranging(model=hr_model,trackingsummary=nest_data_input$summary) # uses the model trained with our data (automatically loaded in the function)
+pred_hr<-predict_ranging(model=hr_model$model,trackingsummary=nest_data_input$summary) # uses the model trained with our data (automatically loaded in the function)
 
 
 #### STEP 3: identify nests
@@ -66,14 +65,20 @@ pred_nest<-predict_nesting(model=nest_model$model,
 
 #### STEP 4: determine outcome
 succ_model<-NestTool::succ_model
-pred_succ<-predict_success(model=succ_model,nestingsummary=pred_nest, nest_cutoff=0.5) # uses the model trained with our data (automatically loaded in the function)
+pred_succ<-predict_success(model=succ_model$model,nestingsummary=pred_nest, nest_cutoff=0.5) # uses the model trained with our data (automatically loaded in the function)
+
+ggplot(data=pred_succ, aes(x=nest_prob)) +
+  geom_histogram(size=2, col="firebrick") +
+  labs(x="Age (years)", y="Nest probability") +
+  theme_classic()
+
 
 #### STEP 5: extract weekly movement metrics for manual classification
 ?move_metric_extraction
 move_metrics<-move_metric_extraction(trackingdata=nest_data_input$movementtrack,
                                      nest_locs=nest_data_input$pot_nests, 
                                      inddata=pred_succ,
-						 crs_epsg=3035,
+						                         crs_epsg=3035,
                                      uncertainty=0.25,
                                      nestradius=50,
                                      startseason=70,endseason=175)
@@ -95,14 +100,14 @@ movement_visualisation(trackingdata=nest_data_input$movementtrack,
 MANUAL<-fread("NestTool_example_nest_success_output.csv") %>%
   rename(ManNest=Nest,ManSuccess=Success) %>%
   select(year_id,ManNest,ManSuccess)
-ALL<-pred_succ %>% select(year_id,hr_prob,nest_prob,succ_prob) %>%
+ALL<-pred_succ %>% select(year_id,nest_prob,succ_prob) %>%
   left_join(MANUAL, by='year_id') %>%
   mutate(nest_prob=ifelse((!is.na(ManNest) & ManNest=="Yes"),1,nest_prob), succ_prob=ifelse((!is.na(ManSuccess) & ManSuccess=="Yes"),1,succ_prob)) %>%
   mutate(nest_prob=ifelse((!is.na(ManNest) & ManNest=="No"),0,nest_prob), succ_prob=ifelse((!is.na(ManSuccess) & ManSuccess=="No"),0,succ_prob)) %>%
-  mutate(HR=ifelse(hr_prob>0.5,1,0),Nest=ifelse(nest_prob>0.5,1,0),Success=ifelse(succ_prob>0.5,1,0))
+  mutate(Nest=ifelse(nest_prob>0.5,1,0),Success=ifelse(succ_prob>0.5,1,0))
 
 ## breeding propensity - what proportion of birds with a homerange have a nesting attempt?
-ALL %>% filter(HR==1) %>% ungroup() %>%
+ALL %>% ungroup() %>%
   summarise(Propensity=mean(Nest))
 
 ## breeding success - what proportion of birds with a nesting attempt are successful?

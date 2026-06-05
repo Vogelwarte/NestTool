@@ -11,6 +11,11 @@ The NestTool package is an informal collection of R functions created by the Swi
 \author{
 \strong{Maintainer}: Steffen Oppel \email{steffen.oppel@vogelwarte.ch} (\href{https://orcid.org/0000-0002-8220-3789}{ORCID})
 
+Authors:
+\itemize{
+  \item Steffen Oppel \email{steffen.oppel@vogelwarte.ch} (\href{https://orcid.org/0000-0002-8220-3789}{ORCID})
+}
+
 Other contributors:
 \itemize{
   \item Ursin Beeli \email{ursin@asdfg.ch} [contributor]

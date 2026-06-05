@@ -15,7 +15,7 @@ library(sinew)
 ### CREATING PACKAGE BACKBONE
 
 try(setwd("C:/Users/sop/OneDrive - Vogelwarte/REKI/Analysis/NestTool2"),silent=T)
-try(setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI"),silent=T)
+try(setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool2"),silent=T)
 
 #devtools::create("NestTool")
 #cat("Package: NestTool\n", file = "DESCRIPTION")
@@ -48,9 +48,14 @@ try(setwd("C:/STEFFEN/OneDrive - Vogelwarte/REKI/Analysis/NestTool/REKI"),silent
 ### creates a utility function for the pipe operator
 #usethis::use_pipe()
 
+devtools::clean_dll()
+unlink("NAMESPACE")
+unlink("man", recursive = TRUE)
+
 ### CREATING DOCUMENTATION
 devtools::load_all()
 devtools::document()
+devtools::check()
 #prefixer()
 
 makeOxygen(data_prep)
@@ -116,6 +121,19 @@ knit(input="README.rmd", output = "README.md") #see ?knit for more options
 # use_package('lubridate',type = "Imports")
 # use_package('ranger',type = "Imports")
 # use_package('caret',type = "Imports")
+
+usethis::use_package("DT")
+usethis::use_package("forcats")
+usethis::use_package("htmltools")
+usethis::use_package("leaflet")
+usethis::use_package("magrittr")
+usethis::use_package("plotly")
+usethis::use_package("purrr")
+usethis::use_package("shiny")
+usethis::use_package("shinyWidgets")
+usethis::use_package("shinythemes")
+usethis::use_package("tidyr")
+
               
 
 ## this fails in RStudio but works in base R
